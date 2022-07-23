@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhihao.newretail.rbac.dao.SysRolePermissionsMapper">
+  <resultMap id="BaseResultMap" type="com.zhihao.newretail.rbac.pojo.SysRolePermissionsKey">
+    <id column="role_id" jdbcType="INTEGER" property="roleId" />
+    <id column="permissions_id" jdbcType="INTEGER" property="permissionsId" />
+  </resultMap>
+
+  <delete id="deleteByPrimaryKey" parameterType="com.zhihao.newretail.rbac.pojo.SysRolePermissionsKey">
+    delete from sys_role_permissions
+    where role_id = #{roleId,jdbcType=INTEGER}
+      and permissions_id = #{permissionsId,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.zhihao.newretail.rbac.pojo.SysRolePermissionsKey">
+    insert into sys_role_permissions (role_id, permissions_id)
+    values (#{roleId,jdbcType=INTEGER}, #{permissionsId,jdbcType=INTEGER})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.zhihao.newretail.rbac.pojo.SysRolePermissionsKey">
+    insert into sys_role_permissions
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        role_id,
+      </if>
+      <if test="permissionsId != null">
+        permissions_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="roleId != null">
+        #{roleId,jdbcType=INTEGER},
+      </if>
+      <if test="permissionsId != null">
+        #{permissionsId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+
+</mapper>

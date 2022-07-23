@@ -1,0 +1,17 @@
+server:
+  port: 4000
+  servlet:
+    context-path: /auth
+spring:
+  application:
+    name: new-retail-auth
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yml
+my:
+  name: zhangsan
+  age: 20

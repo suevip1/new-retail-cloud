@@ -156,4 +156,17 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="countByScope" parameterType="com.zhihao.newretail.user.pojo.User" resultType="int">
+    select
+    count(*)
+    from tb_user
+    where is_delete = 0
+    <if test="username != null">
+      and username = #{username,jdbcType=VARCHAR}
+    </if>
+    <if test="weChat != null">
+      and we_chat = #{weChat,jdbcType=VARCHAR}
+    </if>
+  </select>
 </mapper>

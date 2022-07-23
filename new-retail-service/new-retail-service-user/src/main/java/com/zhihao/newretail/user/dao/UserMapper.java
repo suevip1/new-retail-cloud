@@ -16,4 +16,7 @@ public interface UserMapper {
 
     int updateByPrimaryKey(User record);
 
+    /* 条件获取用户是否存在 */
+    int countByScope(User user);
+
 }

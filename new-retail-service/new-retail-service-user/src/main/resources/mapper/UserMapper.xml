@@ -169,4 +169,17 @@
       and we_chat = #{weChat,jdbcType=VARCHAR}
     </if>
   </select>
+
+  <select id="selectByScope" parameterType="com.zhihao.newretail.user.pojo.User" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_user
+    where is_delete = 0
+    <if test="username != null">
+      and username = #{username,jdbcType=VARCHAR}
+    </if>
+    <if test="weChat != null">
+      and we_chat = #{weChat,jdbcType=VARCHAR}
+    </if>
+  </select>
 </mapper>

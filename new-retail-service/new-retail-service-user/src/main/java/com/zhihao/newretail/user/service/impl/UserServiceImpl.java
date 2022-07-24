@@ -1,17 +1,23 @@
 package com.zhihao.newretail.user.service.impl;
 
+import com.zhihao.newretail.api.user.vo.UserApiVO;
+import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
+import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.pojo.User;
+import com.zhihao.newretail.user.pojo.UserInfo;
 import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -21,6 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private UserInfoMapper userInfoMapper;
 
     /* 密码md5加盐 */
     private final static String PASSWORD_SECRET = "df71e87067b84af687821199de5fc831";
@@ -53,6 +62,30 @@ public class UserServiceImpl implements UserService {
                 return insertSelectiveRow;
         } else
             throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
+    }
+
+    /*
+     * 获取用户基本信息
+     * */
+    @Override
+    public UserApiVO getUserInfo(User scope) {
+        User user = userMapper.selectByScope(scope);
+
+        if (ObjectUtils.isEmpty(user))
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+
+        Integer userId = user.getId();
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+
+        UserApiVO userApiVO = new UserApiVO();
+        UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
+        BeanUtils.copyProperties(userInfoApiVO, userInfo);
+
+        userApiVO.setId(userId);
+        userApiVO.setUuid(user.getUuid());
+        userApiVO.setUserInfoApiVO(userInfoApiVO);
+
+        return userApiVO;
     }
 
     /*

@@ -19,4 +19,7 @@ public interface UserMapper {
     /* 条件获取用户是否存在 */
     int countByScope(User user);
 
+    /* 条件查询用户 */
+    User selectByScope(User user);
+
 }

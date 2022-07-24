@@ -18,14 +18,30 @@ public class JwtUtil {
     private static final Integer EXPIRE = 1;
 
     /* 创建 token */
-    public static String createToken(String userToken) {
+    public static String createToken(Integer userId) {
         DateTime time = DateUtil.offset(new Date(), DateField.DAY_OF_YEAR, EXPIRE); // 获取日期偏移量，1天后的时间
         Algorithm algorithm = Algorithm.HMAC256(SECRET);
         JWTCreator.Builder builder = JWT.create();
-        return builder.withClaim("userToken", userToken).withExpiresAt(time).sign(algorithm);
+        return builder.withClaim("userId", userId).withExpiresAt(time).sign(algorithm);
+    }
+
+    public static String createToken(Integer userId, String userToken) {
+        DateTime time = DateUtil.offset(new Date(), DateField.DAY_OF_YEAR, EXPIRE); // 获取日期偏移量，1天后的时间
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
+        JWTCreator.Builder builder = JWT.create();
+        return builder
+                .withClaim("userId", userId)
+                .withClaim("userToken", userToken)
+                .withExpiresAt(time)
+                .sign(algorithm);
     }
 
     /* 解析获取 token 内容 */
+    public static Integer getUserId(String token) {
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getClaim("userId").asInt();
+    }
+
     public static String getUserToken(String token) {
         DecodedJWT jwt = JWT.decode(token);
         return jwt.getClaim("userToken").asString();

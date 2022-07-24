@@ -2,6 +2,8 @@ package com.zhihao.newretail.user.dao;
 
 import com.zhihao.newretail.user.pojo.UserAddress;
 
+import java.util.List;
+
 public interface UserAddressMapper {
 
     int deleteByPrimaryKey(Integer id);
@@ -15,5 +17,8 @@ public interface UserAddressMapper {
     int updateByPrimaryKeySelective(UserAddress record);
 
     int updateByPrimaryKey(UserAddress record);
+
+    /* 用户id查询 */
+    List<UserAddress> selectListByUserId(Integer userId);
 
 }

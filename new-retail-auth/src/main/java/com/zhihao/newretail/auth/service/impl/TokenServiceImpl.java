@@ -45,8 +45,6 @@ public class TokenServiceImpl implements TokenService {
             refreshCacheUserInfo(userId);
             return R.ok().put("token", token);
         } catch (TokenExpiredException e) {
-            e.printStackTrace();
-
             if (redisUtil.isExist(String.valueOf(userId))) {
                 refreshCacheUserInfo(userId);
                 String newToken = JwtUtil.createToken(userId);

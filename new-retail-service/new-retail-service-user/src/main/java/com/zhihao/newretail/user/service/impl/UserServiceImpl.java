@@ -74,15 +74,11 @@ public class UserServiceImpl implements UserService {
         if (ObjectUtils.isEmpty(user))
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
 
-        Integer userId = user.getId();
-        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
-
+        UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
         UserApiVO userApiVO = new UserApiVO();
         UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
-        BeanUtils.copyProperties(userInfoApiVO, userInfo);
-
-        userApiVO.setId(userId);
-        userApiVO.setUuid(user.getUuid());
+        BeanUtils.copyProperties(user, userApiVO);
+        BeanUtils.copyProperties(userInfo, userInfoApiVO);
         userApiVO.setUserInfoApiVO(userInfoApiVO);
 
         return userApiVO;

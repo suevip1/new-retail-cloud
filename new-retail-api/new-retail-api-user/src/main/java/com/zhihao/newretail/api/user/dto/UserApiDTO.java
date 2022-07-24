@@ -2,11 +2,23 @@ package com.zhihao.newretail.api.user.dto;
 
 public class UserApiDTO {
 
+    private Integer id;
+
     private String uuid;
 
     private String username;
 
+    private String password;
+
     private String weChat;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getUuid() {
         return uuid;
@@ -24,6 +36,14 @@ public class UserApiDTO {
         this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     public String getWeChat() {
         return weChat;
     }
@@ -35,8 +55,10 @@ public class UserApiDTO {
     @Override
     public String toString() {
         return "UserApiDTO{" +
-                "uuid='" + uuid + '\'' +
+                "id=" + id +
+                ", uuid='" + uuid + '\'' +
                 ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
                 ", weChat='" + weChat + '\'' +
                 '}';
     }

@@ -17,6 +17,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class UserServiceImpl implements UserService {
      * 基于用户名、密码注册
      * */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public int insertUser(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername();
         String password = userRegisterDTO.getPassword();
@@ -52,12 +54,22 @@ public class UserServiceImpl implements UserService {
         int countByScope = userMapper.countByScope(user);
 
         if (countByScope == 0) {
-            int insertSelectiveRow = userMapper.insertSelective(user);
+            int insertUserRow = userMapper.insertSelective(user);
 
-            if (insertSelectiveRow <= 0)
+            if (insertUserRow <= 0)
                 throw new ServiceException("注册失败");
-            else
-                return insertSelectiveRow;
+            else {
+                UserInfo userInfo = new UserInfo();
+                userInfo.setUserId(user.getId());
+                userInfo.setNickName("用户:" + uuid);
+                userInfo.setPhoto("photoURL");
+                int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
+
+                if (insertUserInfoRow <= 0)
+                    throw new ServiceException("注册失败");
+
+                return insertUserRow;
+            }
         } else
             throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
     }

@@ -41,7 +41,7 @@
       #{updateTime,jdbcType=TIMESTAMP})
   </insert>
 
-  <insert id="insertSelective" parameterType="com.zhihao.newretail.user.pojo.User">
+  <insert id="insertSelective" parameterType="com.zhihao.newretail.user.pojo.User" useGeneratedKeys="true" keyProperty="id">
     insert into tb_user
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">

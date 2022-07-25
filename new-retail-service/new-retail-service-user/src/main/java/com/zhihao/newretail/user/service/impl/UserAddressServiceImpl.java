@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.service.impl;
 
+import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
@@ -54,6 +55,21 @@ public class UserAddressServiceImpl implements UserAddressService {
 
         if (updateUserAddressRow <= 0)
             throw new ServiceException("更新收货地址失败");
+    }
+
+    @Override
+    public void deleteUserAddress(Integer userId, Integer addressId) {
+        UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
+
+        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId()))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "收货地址不存在");
+
+        /* 使用逻辑删除 */
+        userAddress.setIsDelete(DeleteEnum.DELETE.getCode());
+        int deleteUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
+
+        if (deleteUserAddressRow <= 0)
+            throw new ServiceException("删除收货地址失败");
     }
 
     @Override

@@ -28,4 +28,9 @@ public interface UserAddressService {
     * */
     void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form);
 
+    /*
+    * 删除收货地址
+    * */
+    void deleteUserAddress(Integer userId, Integer addressId);
+
 }

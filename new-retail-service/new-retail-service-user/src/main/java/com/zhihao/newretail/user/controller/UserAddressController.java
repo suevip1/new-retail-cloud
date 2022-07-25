@@ -66,4 +66,14 @@ public class UserAddressController {
         return R.ok("更新收货地址成功");
     }
 
+    @RequiresLogin
+    @DeleteMapping("/address/{addressId}")
+    public R deleteUserAddress(@PathVariable Integer addressId) {
+        Integer userId = RequiresLoginAspect.threadLocal.get();
+        userAddressService.deleteUserAddress(userId, addressId);
+        RequiresLoginAspect.threadLocal.remove();
+
+        return R.ok("删除成功");
+    }
+
 }

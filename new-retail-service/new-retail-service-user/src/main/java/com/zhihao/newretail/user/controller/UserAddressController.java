@@ -22,7 +22,7 @@ public class UserAddressController {
 
     @RequiresLogin
     @GetMapping("/listAddresses")
-    public R list() {
+    public R listUserAddressVOs() {
         Integer userId = RequiresLoginAspect.threadLocal.get();
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
         RequiresLoginAspect.threadLocal.remove();

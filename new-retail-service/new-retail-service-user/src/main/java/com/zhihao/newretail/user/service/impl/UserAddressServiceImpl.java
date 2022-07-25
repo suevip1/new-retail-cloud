@@ -3,7 +3,7 @@ package com.zhihao.newretail.user.service.impl;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.pojo.UserAddress;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
-import com.zhihao.newretail.user.service.AddressService;
+import com.zhihao.newretail.user.service.UserAddressService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AddressServiceImpl implements AddressService {
+public class UserAddressServiceImpl implements UserAddressService {
 
     @Autowired
     private UserAddressMapper userAddressMapper;

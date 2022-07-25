@@ -4,7 +4,7 @@ import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.aspect.RequiresLoginAspect;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
-import com.zhihao.newretail.user.service.AddressService;
+import com.zhihao.newretail.user.service.UserAddressService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class AddressController {
+public class UserAddressController {
 
     @Autowired
-    private AddressService addressService;
+    private UserAddressService userAddressService;
 
     @RequiresLogin
     @GetMapping("/listAddresses")
     public R list() {
         Integer userId = RequiresLoginAspect.threadLocal.get();
-        List<UserAddressVO> listUserAddressVOs = addressService.listUserAddressVOs(userId);
+        List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
         RequiresLoginAspect.threadLocal.remove();
 
         if (CollectionUtils.isEmpty(listUserAddressVOs)) {

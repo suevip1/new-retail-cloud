@@ -4,7 +4,7 @@ import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
 
 import java.util.List;
 
-public interface AddressService {
+public interface UserAddressService {
 
     /*
     * 用户收货地址列表

@@ -72,6 +72,7 @@ public class UserAddressController {
         Integer userId = UserLoginContext.getUserLoginInfo();
         userAddressService.deleteUserAddress(userId, addressId);
         UserLoginContext.clean();
+
         return R.ok("删除成功");
     }
 

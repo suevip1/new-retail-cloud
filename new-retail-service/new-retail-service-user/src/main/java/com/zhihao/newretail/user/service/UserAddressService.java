@@ -11,4 +11,9 @@ public interface UserAddressService {
     * */
     List<UserAddressVO> listUserAddressVOs(Integer userId);
 
+    /*
+    * 用户收货地址
+    * */
+    UserAddressVO getUserAddressVO(Integer userId, Integer addressId);
+
 }

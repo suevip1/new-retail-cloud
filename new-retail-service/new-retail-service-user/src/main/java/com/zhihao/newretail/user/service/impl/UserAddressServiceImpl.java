@@ -1,12 +1,15 @@
 package com.zhihao.newretail.user.service.impl;
 
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.pojo.UserAddress;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +28,18 @@ public class UserAddressServiceImpl implements UserAddressService {
             BeanUtils.copyProperties(userAddress, userAddressVO);
             return userAddressVO;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
+        UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
+
+        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId()))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "收货地址不存在");
+
+        UserAddressVO userAddressVO = new UserAddressVO();
+        BeanUtils.copyProperties(userAddress, userAddressVO);
+        return userAddressVO;
     }
 
 }

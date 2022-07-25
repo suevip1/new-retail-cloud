@@ -1,6 +1,7 @@
 package com.zhihao.newretail.security.aspect;
 
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.util.JwtUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -16,8 +17,6 @@ import javax.servlet.http.HttpServletRequest;
 @Aspect
 @Component
 public class RequiresLoginAspect {
-
-    public static final ThreadLocal<Integer> threadLocal = new ThreadLocal<>();
 
     public RequiresLoginAspect() {
 
@@ -39,7 +38,7 @@ public class RequiresLoginAspect {
             throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "请登录后再操作");
 
         Integer userId = JwtUtil.getUserId(token);
-        threadLocal.set(userId);
+        UserLoginContext.setUserLoginInfo(userId);
     }
 
 }

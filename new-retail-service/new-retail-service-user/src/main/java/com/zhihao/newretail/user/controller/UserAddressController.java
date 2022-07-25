@@ -1,8 +1,8 @@
 package com.zhihao.newretail.user.controller;
 
 import com.zhihao.newretail.core.util.R;
+import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
-import com.zhihao.newretail.security.aspect.RequiresLoginAspect;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
@@ -24,9 +24,9 @@ public class UserAddressController {
     @RequiresLogin
     @GetMapping("/listAddresses")
     public R listUserAddressVOs() {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
-        RequiresLoginAspect.threadLocal.remove();
+        UserLoginContext.clean();
 
         if (CollectionUtils.isEmpty(listUserAddressVOs)) {
             return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据")
@@ -38,9 +38,9 @@ public class UserAddressController {
     @RequiresLogin
     @GetMapping("/address/{addressId}")
     public R getUserAddressVO(@PathVariable Integer addressId) {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         UserAddressVO userAddressVO = userAddressService.getUserAddressVO(userId, addressId);
-        RequiresLoginAspect.threadLocal.remove();
+        UserLoginContext.clean();
 
         return R.ok().put("data", userAddressVO);
     }
@@ -48,9 +48,9 @@ public class UserAddressController {
     @RequiresLogin
     @PostMapping("/address")
     public R insertUserAddress(@Valid @RequestBody UserAddressAddForm form) {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         userAddressService.insertUserAddress(userId, form);
-        RequiresLoginAspect.threadLocal.remove();
+        UserLoginContext.clean();
 
         return R.ok("新增成功");
     }
@@ -59,9 +59,9 @@ public class UserAddressController {
     @PutMapping("/address/{addressId}")
     public R updateUserAddress(@PathVariable Integer addressId,
                                @Valid @RequestBody UserAddressUpdateForm form) {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         userAddressService.updateUserAddress(userId, addressId, form);
-        RequiresLoginAspect.threadLocal.remove();
+        UserLoginContext.clean();
 
         return R.ok("更新成功");
     }
@@ -69,10 +69,9 @@ public class UserAddressController {
     @RequiresLogin
     @DeleteMapping("/address/{addressId}")
     public R deleteUserAddress(@PathVariable Integer addressId) {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         userAddressService.deleteUserAddress(userId, addressId);
-        RequiresLoginAspect.threadLocal.remove();
-
+        UserLoginContext.clean();
         return R.ok("删除成功");
     }
 

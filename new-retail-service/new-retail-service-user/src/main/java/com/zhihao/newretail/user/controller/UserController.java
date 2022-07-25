@@ -2,8 +2,8 @@ package com.zhihao.newretail.user.controller;
 
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
+import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
-import com.zhihao.newretail.security.aspect.RequiresLoginAspect;
 import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
@@ -32,9 +32,9 @@ public class UserController {
     @RequiresLogin
     @GetMapping("/userInfo")
     public R getUserInfoVO() {
-        Integer userId = RequiresLoginAspect.threadLocal.get();
+        Integer userId = UserLoginContext.getUserLoginInfo();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
-        RequiresLoginAspect.threadLocal.remove();
+        UserLoginContext.clean();
 
         return R.ok().put("data", userInfoVO);
     }

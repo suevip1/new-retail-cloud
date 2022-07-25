@@ -33,7 +33,7 @@ public class UserFeignController implements UserFeignService {
         user.setUuid(uuid);
         user.setUsername(username);
         user.setWeChat(weChat);
-        UserApiVO userInfo = userService.getUserInfo(user);
+        UserApiVO userInfo = userService.getUserApiVO(user);
 
         if (ObjectUtils.isEmpty(userInfo))
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");

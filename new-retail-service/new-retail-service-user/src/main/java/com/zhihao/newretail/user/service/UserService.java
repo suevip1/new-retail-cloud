@@ -16,7 +16,7 @@ public interface UserService {
     /*
     * 获取用户基本信息
     * */
-    UserApiVO getUserInfo(User scope);
+    UserApiVO getUserApiVO(User scope);
 
     /*
     * 用户基本信息

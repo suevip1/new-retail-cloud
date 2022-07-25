@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
      * 获取用户基本信息
      * */
     @Override
-    public UserApiVO getUserInfo(User scope) {
+    public UserApiVO getUserApiVO(User scope) {
         User user = userMapper.selectByScope(scope);
 
         if (ObjectUtils.isEmpty(user))

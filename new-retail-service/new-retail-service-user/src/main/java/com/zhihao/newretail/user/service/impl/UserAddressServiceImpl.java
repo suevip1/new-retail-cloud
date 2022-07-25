@@ -26,18 +26,22 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public List<UserAddressVO> listUserAddressVOs(Integer userId) {
         List<UserAddress> userAddresses = userAddressMapper.selectListByUserId(userId);
-        return userAddresses.stream().map(userAddress -> {
-            UserAddressVO userAddressVO = new UserAddressVO();
-            BeanUtils.copyProperties(userAddress, userAddressVO);
-            return userAddressVO;
-        }).collect(Collectors.toList());
+        return userAddresses.stream()
+                .filter(userAddress -> DeleteEnum.NOT_DELETE.getCode().equals(userAddress.getIsDelete()))
+                .map(userAddress -> {
+                    UserAddressVO userAddressVO = new UserAddressVO();
+                    BeanUtils.copyProperties(userAddress, userAddressVO);
+                    return userAddressVO;
+                }).collect(Collectors.toList());
     }
 
     @Override
     public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
 
-        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId()))
+        if (ObjectUtils.isEmpty(userAddress)
+                || !userId.equals(userAddress.getUserId())
+                || DeleteEnum.DELETE.getCode().equals(userAddress.getIsDelete()))
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "收货地址不存在");
 
         UserAddressVO userAddressVO = new UserAddressVO();
@@ -54,7 +58,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         int updateUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
 
         if (updateUserAddressRow <= 0)
-            throw new ServiceException("更新收货地址失败");
+            throw new ServiceException("更新失败");
     }
 
     @Override
@@ -69,7 +73,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         int deleteUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
 
         if (deleteUserAddressRow <= 0)
-            throw new ServiceException("删除收货地址失败");
+            throw new ServiceException("删除失败");
     }
 
     @Override
@@ -80,7 +84,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         int insertUserAddressRow = userAddressMapper.insertSelective(userAddress);
 
         if (insertUserAddressRow <= 0)
-            throw new ServiceException("新增收货地址失败");
+            throw new ServiceException("新增失败");
     }
 
 }

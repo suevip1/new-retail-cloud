@@ -52,7 +52,7 @@ public class UserAddressController {
         userAddressService.insertUserAddress(userId, form);
         RequiresLoginAspect.threadLocal.remove();
 
-        return R.ok("新增收货地址成功");
+        return R.ok("新增成功");
     }
 
     @RequiresLogin
@@ -63,7 +63,7 @@ public class UserAddressController {
         userAddressService.updateUserAddress(userId, addressId, form);
         RequiresLoginAspect.threadLocal.remove();
 
-        return R.ok("更新收货地址成功");
+        return R.ok("更新成功");
     }
 
     @RequiresLogin

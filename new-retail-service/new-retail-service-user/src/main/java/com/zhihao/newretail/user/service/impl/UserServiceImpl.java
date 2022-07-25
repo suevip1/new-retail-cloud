@@ -10,6 +10,7 @@ import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.pojo.UserInfo;
 import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
+import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -96,6 +97,18 @@ public class UserServiceImpl implements UserService {
         userApiVO.setUserInfoApiVO(userInfoApiVO);
 
         return userApiVO;
+    }
+
+    @Override
+    public UserInfoVO getUserInfoVO(Integer userId) {
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+
+        if (ObjectUtils.isEmpty(userInfo))
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtils.copyProperties(userInfo, userInfoVO);
+        return userInfoVO;
     }
 
     /*

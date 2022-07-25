@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertUser(UserRegisterDTO userRegisterDTO) {
+    public void insertUser(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername();
         String password = userRegisterDTO.getPassword();
 
@@ -61,15 +61,13 @@ public class UserServiceImpl implements UserService {
                 throw new ServiceException("注册失败");
             else {
                 UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(user.getId());
-                userInfo.setNickName("用户:" + uuid);
-                userInfo.setPhoto("photoURL");
+                userInfo.setUserId(user.getId());   // 获取返回主键值
+                userInfo.setNickName("用户:" + uuid); // 用户uid
+                userInfo.setPhoto("photoURL");      // TODO 用户头像URL
                 int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
 
                 if (insertUserInfoRow <= 0)
                     throw new ServiceException("注册失败");
-
-                return insertUserRow;
             }
         } else
             throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");

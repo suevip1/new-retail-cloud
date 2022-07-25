@@ -21,12 +21,8 @@ public class UserController {
 
     @PostMapping("/register")
     public R register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        int insertUserRow = userService.insertUser(userRegisterDTO);
-
-        if (insertUserRow <= 0)
-            throw new ServiceException("注册失败");
-        else
-            return R.ok("注册成功");
+        userService.insertUser(userRegisterDTO);
+        return R.ok("注册成功");
     }
 
     @RequiresLogin

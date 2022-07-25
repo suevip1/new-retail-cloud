@@ -11,7 +11,7 @@ public interface UserService {
     * 新增用户
     * 基于用户名、密码注册
     * */
-    int insertUser(UserRegisterDTO userRegisterDTO);
+    void insertUser(UserRegisterDTO userRegisterDTO);
 
     /*
     * 获取用户基本信息

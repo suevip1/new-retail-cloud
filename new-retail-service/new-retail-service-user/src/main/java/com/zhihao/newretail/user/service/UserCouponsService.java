@@ -11,4 +11,9 @@ public interface UserCouponsService {
     * */
     List<CouponsApiVO> listUserCouponsVOs(Integer userId);
 
+    /*
+    * 获取优惠券信息
+    * */
+    CouponsApiVO getUserCouponsVO(Integer couponsId);
+
 }

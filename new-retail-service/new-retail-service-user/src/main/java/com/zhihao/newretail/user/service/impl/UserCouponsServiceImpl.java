@@ -42,4 +42,9 @@ public class UserCouponsServiceImpl implements UserCouponsService {
         return couponsApiVOList;
     }
 
+    @Override
+    public CouponsApiVO getUserCouponsVO(Integer couponsId) {
+        return couponsFeignService.getCouponsApiVO(couponsId);
+    }
+
 }

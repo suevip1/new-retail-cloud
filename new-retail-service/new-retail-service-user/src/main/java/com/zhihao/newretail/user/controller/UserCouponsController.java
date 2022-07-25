@@ -7,6 +7,7 @@ import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.service.UserCouponsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -25,6 +26,12 @@ public class UserCouponsController {
         UserLoginContext.clean();
 
         return R.ok().put("data", couponsApiVOList);
+    }
+
+    @GetMapping("/userCoupons/{couponsId}")
+    public R getUserCouponsVO(@PathVariable Integer couponsId) {
+        CouponsApiVO userCouponsVO = userCouponsService.getUserCouponsVO(couponsId);
+        return R.ok().put("data", userCouponsVO);
     }
 
 }

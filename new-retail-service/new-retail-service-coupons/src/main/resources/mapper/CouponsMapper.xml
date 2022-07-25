@@ -13,7 +13,7 @@
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, deno, condition, start_date, end_date, max_num, is_saleable, is_delete
+    id, deno, `condition`, start_date, end_date, max_num, is_saleable, is_delete
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">

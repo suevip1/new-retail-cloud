@@ -132,4 +132,14 @@
       is_delete = #{isDelete,jdbcType=TINYINT}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectListByCouponsIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_coupons
+    where
+    <foreach collection="couponsIdSet" item="item" separator="or">
+      id = #{item}
+    </foreach>
+  </select>
 </mapper>

@@ -3,6 +3,7 @@ package com.zhihao.newretail.user.service.impl;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
+import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.UserAddress;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
@@ -41,6 +42,18 @@ public class UserAddressServiceImpl implements UserAddressService {
         UserAddressVO userAddressVO = new UserAddressVO();
         BeanUtils.copyProperties(userAddress, userAddressVO);
         return userAddressVO;
+    }
+
+    @Override
+    public void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form) {
+        UserAddress userAddress = new UserAddress();
+        BeanUtils.copyProperties(form, userAddress);
+        userAddress.setId(addressId);
+        userAddress.setUserId(userId);
+        int updateUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
+
+        if (updateUserAddressRow <= 0)
+            throw new ServiceException("更新收货地址失败");
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.aspect.RequiresLoginAspect;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
+import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
 import org.apache.http.HttpStatus;
@@ -52,6 +53,17 @@ public class UserAddressController {
         RequiresLoginAspect.threadLocal.remove();
 
         return R.ok("新增收货地址成功");
+    }
+
+    @RequiresLogin
+    @PutMapping("/address/{addressId}")
+    public R updateUserAddress(@PathVariable Integer addressId,
+                               @Valid @RequestBody UserAddressUpdateForm form) {
+        Integer userId = RequiresLoginAspect.threadLocal.get();
+        userAddressService.updateUserAddress(userId, addressId, form);
+        RequiresLoginAspect.threadLocal.remove();
+
+        return R.ok("更新收货地址成功");
     }
 
 }

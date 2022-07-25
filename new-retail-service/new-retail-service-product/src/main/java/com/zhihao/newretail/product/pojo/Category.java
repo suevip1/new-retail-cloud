@@ -8,7 +8,7 @@ public class Category {
 
     private Integer parentId;
 
-    private Byte isParent;
+    private Integer isParent;
 
     private Integer sort;
 
@@ -38,11 +38,11 @@ public class Category {
         this.parentId = parentId;
     }
 
-    public Byte getIsParent() {
+    public Integer getIsParent() {
         return isParent;
     }
 
-    public void setIsParent(Byte isParent) {
+    public void setIsParent(Integer isParent) {
         this.isParent = isParent;
     }
 

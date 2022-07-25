@@ -110,4 +110,10 @@
       is_delete = #{isDelete,jdbcType=TINYINT}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectListByAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_category
+  </select>
 </mapper>

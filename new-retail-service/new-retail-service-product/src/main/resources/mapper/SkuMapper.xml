@@ -4,6 +4,7 @@
   <resultMap id="BaseResultMap" type="com.zhihao.newretail.product.pojo.Sku">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="sku_image" jdbcType="VARCHAR" property="skuImage" />
     <result column="param" jdbcType="VARCHAR" property="param" />
     <result column="price" jdbcType="DECIMAL" property="price" />
     <result column="is_saleable" jdbcType="TINYINT" property="isSaleable" />
@@ -13,7 +14,7 @@
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, spu_id, param, price, is_saleable, is_delete, create_time, update_time
+    id, spu_id, sku_image, param, price, is_saleable, is_delete, create_time, update_time
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -29,12 +30,12 @@
   </delete>
 
   <insert id="insert" parameterType="com.zhihao.newretail.product.pojo.Sku">
-    insert into tb_sku (id, spu_id, param, 
-      price, is_saleable, is_delete, 
-      create_time, update_time)
-    values (#{id,jdbcType=INTEGER}, #{spuId,jdbcType=INTEGER}, #{param,jdbcType=VARCHAR}, 
-      #{price,jdbcType=DECIMAL}, #{isSaleable,jdbcType=TINYINT}, #{isDelete,jdbcType=TINYINT}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
+    insert into tb_sku (id, spu_id, sku_image,
+      param, price, is_saleable,
+      is_delete, create_time, update_time)
+    values (#{id,jdbcType=INTEGER}, #{spuId,jdbcType=INTEGER}, #{skuImage,jdbcType=VARCHAR},
+      #{param,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{isSaleable,jdbcType=TINYINT},
+      #{isDelete,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>
 
   <insert id="insertSelective" parameterType="com.zhihao.newretail.product.pojo.Sku">
@@ -45,6 +46,9 @@
       </if>
       <if test="spuId != null">
         spu_id,
+      </if>
+      <if test="skuImage != null">
+        sku_image,
       </if>
       <if test="param != null">
         param,
@@ -71,6 +75,9 @@
       </if>
       <if test="spuId != null">
         #{spuId,jdbcType=INTEGER},
+      </if>
+      <if test="skuImage != null">
+        #{skuImage,jdbcType=VARCHAR},
       </if>
       <if test="param != null">
         #{param,jdbcType=VARCHAR},
@@ -99,6 +106,9 @@
       <if test="spuId != null">
         spu_id = #{spuId,jdbcType=INTEGER},
       </if>
+      <if test="skuImage != null">
+        sku_image = #{skuImage,jdbcType=VARCHAR},
+      </if>
       <if test="param != null">
         param = #{param,jdbcType=VARCHAR},
       </if>
@@ -124,6 +134,7 @@
   <update id="updateByPrimaryKey" parameterType="com.zhihao.newretail.product.pojo.Sku">
     update tb_sku
     set spu_id = #{spuId,jdbcType=INTEGER},
+      sku_image = #{skuImage,jdbcType=VARCHAR},
       param = #{param,jdbcType=VARCHAR},
       price = #{price,jdbcType=DECIMAL},
       is_saleable = #{isSaleable,jdbcType=TINYINT},

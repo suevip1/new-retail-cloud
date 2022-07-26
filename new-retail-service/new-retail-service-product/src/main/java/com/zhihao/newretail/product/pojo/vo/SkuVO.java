@@ -8,6 +8,8 @@ public class SkuVO {
 
     private Integer spuId;
 
+    private String skuImage;
+
     private String param;
 
     private BigDecimal price;
@@ -26,6 +28,14 @@ public class SkuVO {
 
     public void setSpuId(Integer spuId) {
         this.spuId = spuId;
+    }
+
+    public String getSkuImage() {
+        return skuImage;
+    }
+
+    public void setSkuImage(String skuImage) {
+        this.skuImage = skuImage;
     }
 
     public String getParam() {
@@ -49,6 +59,7 @@ public class SkuVO {
         return "SkuVO{" +
                 "id=" + id +
                 ", spuId=" + spuId +
+                ", skuImage='" + skuImage + '\'' +
                 ", param='" + param + '\'' +
                 ", price=" + price +
                 '}';

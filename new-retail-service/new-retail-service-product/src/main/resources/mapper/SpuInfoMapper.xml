@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhihao.newretail.product.dao.SpuInfoMapper">
+  <resultMap id="BaseResultMap" type="com.zhihao.newretail.product.pojo.SpuInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="show_image" jdbcType="VARCHAR" property="showImage" />
+    <result column="slider_image" jdbcType="VARCHAR" property="sliderImage" />
+    <result column="detail_title" jdbcType="VARCHAR" property="detailTitle" />
+    <result column="detail_pram" jdbcType="VARCHAR" property="detailPram" />
+    <result column="detail_image" jdbcType="VARCHAR" property="detailImage" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, spu_id, show_image, slider_image, detail_title, detail_pram, detail_image, is_delete
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from tb_spu_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from tb_spu_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.zhihao.newretail.product.pojo.SpuInfo">
+    insert into tb_spu_info (id, spu_id, show_image, 
+      slider_image, detail_title, detail_pram, 
+      detail_image, is_delete)
+    values (#{id,jdbcType=INTEGER}, #{spuId,jdbcType=INTEGER}, #{showImage,jdbcType=VARCHAR}, 
+      #{sliderImage,jdbcType=VARCHAR}, #{detailTitle,jdbcType=VARCHAR}, #{detailPram,jdbcType=VARCHAR}, 
+      #{detailImage,jdbcType=VARCHAR}, #{isDelete,jdbcType=INTEGER})
+  </insert>
+
+  <insert id="insertSelective" parameterType="com.zhihao.newretail.product.pojo.SpuInfo">
+    insert into tb_spu_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="spuId != null">
+        spu_id,
+      </if>
+      <if test="showImage != null">
+        show_image,
+      </if>
+      <if test="sliderImage != null">
+        slider_image,
+      </if>
+      <if test="detailTitle != null">
+        detail_title,
+      </if>
+      <if test="detailPram != null">
+        detail_pram,
+      </if>
+      <if test="detailImage != null">
+        detail_image,
+      </if>
+      <if test="isDelete != null">
+        is_delete,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="spuId != null">
+        #{spuId,jdbcType=INTEGER},
+      </if>
+      <if test="showImage != null">
+        #{showImage,jdbcType=VARCHAR},
+      </if>
+      <if test="sliderImage != null">
+        #{sliderImage,jdbcType=VARCHAR},
+      </if>
+      <if test="detailTitle != null">
+        #{detailTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="detailPram != null">
+        #{detailPram,jdbcType=VARCHAR},
+      </if>
+      <if test="detailImage != null">
+        #{detailImage,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null">
+        #{isDelete,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.zhihao.newretail.product.pojo.SpuInfo">
+    update tb_spu_info
+    <set>
+      <if test="spuId != null">
+        spu_id = #{spuId,jdbcType=INTEGER},
+      </if>
+      <if test="showImage != null">
+        show_image = #{showImage,jdbcType=VARCHAR},
+      </if>
+      <if test="sliderImage != null">
+        slider_image = #{sliderImage,jdbcType=VARCHAR},
+      </if>
+      <if test="detailTitle != null">
+        detail_title = #{detailTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="detailPram != null">
+        detail_pram = #{detailPram,jdbcType=VARCHAR},
+      </if>
+      <if test="detailImage != null">
+        detail_image = #{detailImage,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null">
+        is_delete = #{isDelete,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.zhihao.newretail.product.pojo.SpuInfo">
+    update tb_spu_info
+    set spu_id = #{spuId,jdbcType=INTEGER},
+      show_image = #{showImage,jdbcType=VARCHAR},
+      slider_image = #{sliderImage,jdbcType=VARCHAR},
+      detail_title = #{detailTitle,jdbcType=VARCHAR},
+      detail_pram = #{detailPram,jdbcType=VARCHAR},
+      detail_image = #{detailImage,jdbcType=VARCHAR},
+      is_delete = #{isDelete,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectBySpuId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_spu_info
+    where spu_id = #{spuId,jdbcType=INTEGER}
+  </select>
+</mapper>

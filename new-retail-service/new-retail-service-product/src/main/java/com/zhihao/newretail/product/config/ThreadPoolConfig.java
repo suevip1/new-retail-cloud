@@ -1,6 +1,5 @@
 package com.zhihao.newretail.product.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,11 +14,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class ThreadPoolConfig {
 
-    @Autowired
-    private ThreadPoolPramConfig threadPoolPram;
-
     @Bean(name = "threadPoolExecutor")
-    public ThreadPoolExecutor threadPoolExecutor() {
+    public ThreadPoolExecutor threadPoolExecutor(ThreadPoolPramConfig threadPoolPram) {
         return new ThreadPoolExecutor(
                 threadPoolPram.getCorePoolSize(),       // 核心线程数
                 threadPoolPram.getMaxPoolSize(),        // 最大线程数

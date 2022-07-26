@@ -1,8 +1,10 @@
 package com.zhihao.newretail.product.dao;
 
 import com.zhihao.newretail.product.pojo.Sku;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SkuMapper {
 
@@ -22,5 +24,10 @@ public interface SkuMapper {
     * spuId获取规格列表
     * */
     List<Sku> selectListBySpuId(Integer spuId);
+
+    /*
+    * 批量查询
+    * */
+    List<Sku> selectListByIdSet(@Param("idSet") Set<Integer> idSet);
 
 }

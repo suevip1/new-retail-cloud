@@ -132,4 +132,14 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectListByIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_spu
+    where
+    <foreach collection="idSet" item="item" separator="or">
+      id = #{item}
+    </foreach>
+  </select>
 </mapper>

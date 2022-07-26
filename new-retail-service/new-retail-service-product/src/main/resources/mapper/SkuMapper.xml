@@ -150,4 +150,14 @@
     from tb_sku
     where spu_id = #{spuId,jdbcType=INTEGER}
   </select>
+
+  <select id="selectListByIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sku
+    where
+    <foreach collection="idSet" item="item" separator="or">
+      id = #{item}
+    </foreach>
+  </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.zhihao.newretail.security.aspect;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.util.JwtUtil;
@@ -37,8 +38,13 @@ public class RequiresLoginAspect {
         if (StringUtils.isEmpty(token))
             throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "请登录后再操作");
 
-        Integer userId = JwtUtil.getUserId(token);
-        UserLoginContext.setUserLoginInfo(userId);
+        try {
+            JwtUtil.verifierToken(token);
+            Integer userId = JwtUtil.getUserId(token);
+            UserLoginContext.setUserLoginInfo(userId);
+        } catch (TokenExpiredException e) {
+            throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "令牌已失效");
+        }
     }
 
 }

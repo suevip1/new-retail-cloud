@@ -4,6 +4,7 @@ import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.cart.form.CartAddForm;
+import com.zhihao.newretail.cart.form.CartUpdateForm;
 import com.zhihao.newretail.cart.pojo.Cart;
 import com.zhihao.newretail.cart.pojo.vo.CartProductVO;
 import com.zhihao.newretail.cart.pojo.vo.CartVO;
@@ -108,6 +109,24 @@ public class CartServiceImpl implements CartService {
             cart.setQuantity(cart.getQuantity() + form.getQuantity());
         }
         redisUtil.setHash(redisKey, skuApiVO.getId(), cart);
+        return getCartVO(userId);
+    }
+
+    @Override
+    public CartVO updateCart(Integer userId, CartUpdateForm form) {
+        String redisKey = String.format(CART_REDIS_KEY, userId);
+        Cart cart = (Cart) redisUtil.getMapValue(redisKey, form.getSkuId());
+
+        if (ObjectUtils.isEmpty(cart))
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "购物车无此商品");
+
+        if (form.getQuantity() != null && form.getQuantity() >= 0)
+            cart.setQuantity(form.getQuantity());
+
+        if (form.getSelected() != null)
+            cart.setSelected(form.getSelected());
+
+        redisUtil.setHash(redisKey, form.getSkuId(), cart);
         return getCartVO(userId);
     }
 

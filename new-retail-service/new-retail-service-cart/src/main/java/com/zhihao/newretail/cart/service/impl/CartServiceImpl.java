@@ -130,4 +130,15 @@ public class CartServiceImpl implements CartService {
         return getCartVO(userId);
     }
 
+    @Override
+    public CartVO deleteCart(Integer userId, Integer skuId) {
+        String redisKey = String.format(CART_REDIS_KEY, userId);
+        Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuId);
+
+        if (ObjectUtils.isEmpty(cart))
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "购物车无此商品");
+        redisUtil.deleteEntry(redisKey, skuId);
+        return getCartVO(userId);
+    }
+
 }

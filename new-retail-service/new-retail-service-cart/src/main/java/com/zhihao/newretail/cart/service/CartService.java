@@ -21,4 +21,9 @@ public interface CartService {
     * */
     CartVO updateCart(Integer userId, CartUpdateForm form);
 
+    /*
+    * 购物车删除商品
+    * */
+    CartVO deleteCart(Integer userId, Integer skuId);
+
 }

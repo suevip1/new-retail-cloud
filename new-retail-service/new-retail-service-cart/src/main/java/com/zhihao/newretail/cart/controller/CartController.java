@@ -48,4 +48,14 @@ public class CartController {
         return R.ok().put("data", cartVO);
     }
 
+    @RequiresLogin
+    @DeleteMapping("/cart/{skuId}")
+    public R deleteCart(@PathVariable Integer skuId) {
+        Integer userId = UserLoginContext.getUserLoginInfo();
+        CartVO cartVO = cartService.deleteCart(userId, skuId);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", cartVO);
+    }
+
 }

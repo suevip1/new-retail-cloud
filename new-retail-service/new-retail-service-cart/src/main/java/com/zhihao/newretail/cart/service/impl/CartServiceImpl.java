@@ -90,8 +90,11 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO addCart(Integer userId, CartAddForm form) {
         SkuApiVO skuApiVO = productFeignService.getSkuApiVO(form.getSkuId());
-        String redisKey = String.format(CART_REDIS_KEY, userId);
 
+        if (ObjectUtils.isEmpty(skuApiVO) || ObjectUtils.isEmpty(skuApiVO.getId()))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "库存不足");
+
+        String redisKey = String.format(CART_REDIS_KEY, userId);
         Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuApiVO.getId());
 
         if (ObjectUtils.isEmpty(cart)) {

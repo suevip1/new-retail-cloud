@@ -4,9 +4,12 @@ import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SkuMapper;
+import com.zhihao.newretail.product.dao.SkuStockMapper;
 import com.zhihao.newretail.product.dao.SpuInfoMapper;
 import com.zhihao.newretail.product.dao.SpuMapper;
+import com.zhihao.newretail.product.enums.ProductEnum;
 import com.zhihao.newretail.product.pojo.Sku;
+import com.zhihao.newretail.product.pojo.SkuStock;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.SpuInfo;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
@@ -38,6 +41,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Autowired
+    private SkuStockMapper skuStockMapper;
 
     @Autowired
     private ThreadPoolExecutor executor;
@@ -138,14 +144,24 @@ public class ProductServiceImpl implements ProductService {
     public SkuApiVO getSkuApiVO(Integer skuId) {
         Sku sku = skuMapper.selectByPrimaryKey(skuId);
 
-//        if (ObjectUtils.isEmpty(sku)
-//                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())
-//                || ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable()))
-//            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+        if (ObjectUtils.isEmpty(sku)
+                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete()))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+        else if (ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable()))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品已失效");
+        else {
+            SkuStock skuStock = skuStockMapper.selectBySkuId(skuId);
 
-        SkuApiVO skuApiVO = new SkuApiVO();
-        BeanUtils.copyProperties(sku, skuApiVO);
-        return skuApiVO;
+            if (ObjectUtils.isEmpty(skuStock))
+                throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存异常");
+            else if (skuStock.getStock() <= 0)
+                throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存不足");
+            else {
+                SkuApiVO skuApiVO = new SkuApiVO();
+                BeanUtils.copyProperties(sku, skuApiVO);
+                return skuApiVO;
+            }
+        }
     }
 
 }

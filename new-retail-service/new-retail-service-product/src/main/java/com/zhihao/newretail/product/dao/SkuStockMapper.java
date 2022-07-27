@@ -16,4 +16,6 @@ public interface SkuStockMapper {
 
     int updateByPrimaryKey(SkuStock record);
 
+    SkuStock selectBySkuId(Integer skuId);
+
 }

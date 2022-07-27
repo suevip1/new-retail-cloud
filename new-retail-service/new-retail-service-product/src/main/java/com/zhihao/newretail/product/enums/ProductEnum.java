@@ -2,7 +2,7 @@ package com.zhihao.newretail.product.enums;
 
 public enum ProductEnum {
 
-    NOT_SALEABLE(1, "无效"),
+    NOT_SALEABLE(0, "无效"),
 
     SALEABLE(1, "有效");
 

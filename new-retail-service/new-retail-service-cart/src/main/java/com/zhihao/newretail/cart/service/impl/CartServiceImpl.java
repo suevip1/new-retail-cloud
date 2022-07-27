@@ -155,6 +155,11 @@ public class CartServiceImpl implements CartService {
         return getCartVO(userId);
     }
 
+    @Override
+    public Integer getQuantity(Integer userId) {
+        return listCarts(userId).stream().map(Cart::getQuantity).reduce(0, Integer::sum);
+    }
+
     private List<Cart> listCarts(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Map<Object, Object> redisMap = redisUtil.getMap(redisKey);

@@ -68,4 +68,14 @@ public class CartController {
         return R.ok().put("data", cartVO);
     }
 
+    @RequiresLogin
+    @GetMapping("/cart/quantity")
+    public R getQuantity() {
+        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer quantity = cartService.getQuantity(userId);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", quantity);
+    }
+
 }

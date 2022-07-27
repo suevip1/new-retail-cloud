@@ -1,9 +1,7 @@
 package com.zhihao.newretail.product.feign;
 
-import com.zhihao.newretail.api.product.dto.ProductBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
-import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +18,6 @@ public class ProductFeignController implements ProductFeignService {
     @Override
     public List<SkuApiVO> listSkuApiVOs(SkuBatchApiDTO skuBatchApiDTO) {
         return productService.listSkuApiVOs(skuBatchApiDTO.getIdSet());
-    }
-
-    @Override
-    public List<ProductApiVO> listProductApiVOs(ProductBatchApiDTO productBatchApiDTO) {
-        return productService.listProductApiVOs(productBatchApiDTO.getIdSet());
     }
 
     @Override

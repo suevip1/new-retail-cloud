@@ -1,9 +1,7 @@
 package com.zhihao.newretail.cart.service.impl;
 
-import com.zhihao.newretail.api.product.dto.ProductBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
-import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.pojo.Cart;
@@ -34,56 +32,45 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartVO getCartVO(Integer userId) {
+        /* 初始化购物车显示信息 */
         CartVO cartVO = new CartVO();
-        boolean selectedAll = true;
-        Integer totalQuantity = 0;
-        BigDecimal cartTotalPrice = BigDecimal.ZERO;
-        List<CartProductVO> cartProductVOList = new ArrayList<>();
+        boolean selectedAll = true;     // 是否全选
+        Integer totalQuantity = 0;      // 购物车商品总数
+        BigDecimal cartTotalPrice = BigDecimal.ZERO;    // 总金额
+        List<CartProductVO> cartProductVOList = new ArrayList<>();  // 购物车商品列表
 
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Map<Object, Object> redisMap = redisUtil.getMap(redisKey);
-
-        Set<Integer> skuIdSet = new HashSet<>();
-        Set<Integer> spuIdSet = new HashSet<>();
+        Set<Integer> skuIdSet = new HashSet<>();    // 获取skuId集合
         redisMap.forEach((k, v) -> {
             skuIdSet.add((Integer) k);
-            Cart cart = (Cart) v;
-            spuIdSet.add(cart.getSpuId());
         });
 
-        if (CollectionUtils.isEmpty(skuIdSet) || CollectionUtils.isEmpty(spuIdSet))
+        if (CollectionUtils.isEmpty(skuIdSet))
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "购物车为空");
 
         SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
-        ProductBatchApiDTO productBatchApiDTO = new ProductBatchApiDTO();
         skuBatchApiDTO.setIdSet(skuIdSet);
-        productBatchApiDTO.setIdSet(spuIdSet);
         List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
-        List<ProductApiVO> productApiVOList = productFeignService.listProductApiVOs(productBatchApiDTO);
 
         for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
             Cart cart = (Cart) entry.getValue();
             CartProductVO cartProductVO = new CartProductVO();
-            productApiVOList.stream()
-                    .filter(productApiVO -> cart.getSpuId().equals(productApiVO.getId()))
-                    .forEach(productApiVO -> {
-                        cartProductVO.setSpuId(productApiVO.getId());
-                        cartProductVO.setTitle(productApiVO.getTitle());
-                    });
             skuApiVOList.stream()
                     .filter(skuApiVO -> cart.getSkuId().equals(skuApiVO.getId()))
                     .forEach(skuApiVO -> {
-                        cartProductVO.setSkuId(skuApiVO.getId());
-                        cartProductVO.setSkuImage(skuApiVO.getSkuImage());
-                        cartProductVO.setParam(skuApiVO.getParam());
-                        cartProductVO.setPrice(skuApiVO.getPrice());
-                        cartProductVO.setQuantity(cart.getQuantity());
-                        cartProductVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
-                        cartProductVO.setIsSaleable(skuApiVO.getIsSaleable());
-                        cartProductVO.setSelected(cart.getSelected());
+                        cartProductVO.setSpuId(skuApiVO.getSpuId());    // 商品ID
+                        cartProductVO.setSkuId(skuApiVO.getId());       // 商品规格ID
+                        cartProductVO.setTitle(skuApiVO.getTitle());    // 商品标题
+                        cartProductVO.setSkuImage(skuApiVO.getSkuImage());  // 商品图片地址
+                        cartProductVO.setParam(skuApiVO.getParam());        // 商品规格参数
+                        cartProductVO.setPrice(skuApiVO.getPrice());        // 单价
+                        cartProductVO.setQuantity(cart.getQuantity());      // 数量
+                        cartProductVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));  // 总价
+                        cartProductVO.setIsSaleable(skuApiVO.getIsSaleable());  // 是否有效
+                        cartProductVO.setSelected(cart.getSelected());          // 是否选中
+                        cartProductVOList.add(cartProductVO);
                     });
-            cartProductVOList.add(cartProductVO);
-
             if (!cart.getSelected()) {
                 selectedAll = false;
             }

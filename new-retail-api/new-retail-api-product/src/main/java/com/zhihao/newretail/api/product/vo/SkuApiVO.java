@@ -8,6 +8,8 @@ public class SkuApiVO {
 
     private Integer spuId;
 
+    private String title;
+
     private String skuImage;
 
     private String param;
@@ -30,6 +32,14 @@ public class SkuApiVO {
 
     public void setSpuId(Integer spuId) {
         this.spuId = spuId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getSkuImage() {
@@ -69,6 +79,7 @@ public class SkuApiVO {
         return "SkuApiVO{" +
                 "id=" + id +
                 ", spuId=" + spuId +
+                ", title='" + title + '\'' +
                 ", skuImage='" + skuImage + '\'' +
                 ", param='" + param + '\'' +
                 ", price=" + price +

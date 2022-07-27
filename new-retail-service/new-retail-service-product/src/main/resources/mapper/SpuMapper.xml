@@ -137,8 +137,8 @@
     select
     <include refid="Base_Column_List" />
     from tb_spu
-    where
-    <foreach collection="idSet" item="item" separator="or">
+    where is_saleable = 1 and is_delete = 0
+    <foreach collection="idSet" item="item" open="and" separator="or">
       id = #{item}
     </foreach>
   </select>

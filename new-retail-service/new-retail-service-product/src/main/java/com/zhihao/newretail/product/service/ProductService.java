@@ -1,6 +1,5 @@
 package com.zhihao.newretail.product.service;
 
-import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
@@ -19,11 +18,6 @@ public interface ProductService {
     * 批量获取sku
     * */
     List<SkuApiVO> listSkuApiVOs(Set<Integer> skuIdSet);
-
-    /*
-    * 批量获取spu
-    * */
-    List<ProductApiVO> listProductApiVOs(Set<Integer> spuIdSet);
 
     /*
     * 获取sku

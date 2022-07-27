@@ -26,4 +26,9 @@ public interface CartService {
     * */
     CartVO deleteCart(Integer userId, Integer skuId);
 
+    /*
+    * 购物车商品全选、取消全选
+    * */
+    CartVO updateCartSelectedAll(Integer userId);
+
 }

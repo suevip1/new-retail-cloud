@@ -58,4 +58,14 @@ public class CartController {
         return R.ok().put("data", cartVO);
     }
 
+    @RequiresLogin
+    @PutMapping("/cart/selectedAll")
+    public R updateCartSelectedAll() {
+        Integer userId = UserLoginContext.getUserLoginInfo();
+        CartVO cartVO = cartService.updateCartSelectedAll(userId);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", cartVO);
+    }
+
 }

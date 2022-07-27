@@ -25,4 +25,9 @@ public interface ProductService {
     * */
     List<ProductApiVO> listProductApiVOs(Set<Integer> spuIdSet);
 
+    /*
+    * 获取sku
+    * */
+    SkuApiVO getSkuApiVO(Integer skuId);
+
 }

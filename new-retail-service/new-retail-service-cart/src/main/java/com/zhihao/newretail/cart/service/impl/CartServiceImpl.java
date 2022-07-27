@@ -5,6 +5,7 @@ import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.pojo.Cart;
 import com.zhihao.newretail.cart.pojo.vo.CartProductVO;
 import com.zhihao.newretail.cart.pojo.vo.CartVO;
@@ -15,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -96,6 +98,27 @@ public class CartServiceImpl implements CartService {
         cartVO.setCartTotalPrice(cartTotalPrice);
         cartVO.setCartProductVOList(cartProductVOList);
         return cartVO;
+    }
+
+    @Override
+    public CartVO addCart(Integer userId, CartAddForm form) {
+        SkuApiVO skuApiVO = productFeignService.getSkuApiVO(form.getSkuId());
+        String redisKey = String.format(CART_REDIS_KEY, userId);
+
+        Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuApiVO.getId());
+
+        if (ObjectUtils.isEmpty(cart)) {
+            cart = new Cart(
+                    skuApiVO.getSpuId(),
+                    skuApiVO.getId(),
+                    form.getQuantity(),
+                    form.getSelected()
+            );
+        } else {
+            cart.setQuantity(cart.getQuantity() + form.getQuantity());
+        }
+        redisUtil.setHash(redisKey, skuApiVO.getId(), cart);
+        return getCartVO(userId);
     }
 
 }

@@ -139,4 +139,18 @@ public class ProductServiceImpl implements ProductService {
         return productApiVOList;
     }
 
+    @Override
+    public SkuApiVO getSkuApiVO(Integer skuId) {
+        Sku sku = skuMapper.selectByPrimaryKey(skuId);
+
+//        if (ObjectUtils.isEmpty(sku)
+//                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())
+//                || ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable()))
+//            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+
+        SkuApiVO skuApiVO = new SkuApiVO();
+        BeanUtils.copyProperties(sku, skuApiVO);
+        return skuApiVO;
+    }
+
 }

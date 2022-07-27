@@ -27,4 +27,9 @@ public class ProductFeignController implements ProductFeignService {
         return productService.listProductApiVOs(productBatchApiDTO.getIdSet());
     }
 
+    @Override
+    public SkuApiVO getSkuApiVO(Integer skuId) {
+        return productService.getSkuApiVO(skuId);
+    }
+
 }

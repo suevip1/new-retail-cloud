@@ -36,7 +36,7 @@ public class LoginServiceImpl implements LoginService {
         userApiDTO.setUsername(username);
         UserApiVO userInfo = userFeignService.getUserInfo(userApiDTO);
 
-        if (ObjectUtils.isEmpty(userInfo))
+        if (ObjectUtils.isEmpty(userInfo) || ObjectUtils.isEmpty(userInfo.getId()))
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
 
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());

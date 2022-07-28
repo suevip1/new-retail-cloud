@@ -24,6 +24,42 @@
         </dependency>
 
         <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-common-security</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-cart</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-product</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-user</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-coupons</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-common-redis</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>runtime</scope>

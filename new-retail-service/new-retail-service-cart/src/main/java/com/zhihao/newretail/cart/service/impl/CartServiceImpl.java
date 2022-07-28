@@ -1,5 +1,6 @@
 package com.zhihao.newretail.cart.service.impl;
 
+import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
@@ -12,6 +13,7 @@ import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -19,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -172,6 +175,18 @@ public class CartServiceImpl implements CartService {
     @Override
     public Integer getQuantity(Integer userId) {
         return listCarts(userId).stream().map(Cart::getQuantity).reduce(0, Integer::sum);
+    }
+
+    @Override
+    public List<CartApiVO> listCartApiVOs(Integer userId) {
+        List<Cart> cartList = listCarts(userId);
+        return cartList.stream()
+                .filter(Cart::getSelected)
+                .map(cart -> {
+                    CartApiVO cartApiVO = new CartApiVO();
+                    BeanUtils.copyProperties(cart, cartApiVO);
+                    return cartApiVO;
+                }).collect(Collectors.toList());
     }
 
     private List<Cart> listCarts(Integer userId) {

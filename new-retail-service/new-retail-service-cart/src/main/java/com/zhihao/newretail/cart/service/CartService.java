@@ -1,8 +1,11 @@
 package com.zhihao.newretail.cart.service;
 
+import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.form.CartUpdateForm;
 import com.zhihao.newretail.cart.pojo.vo.CartVO;
+
+import java.util.List;
 
 public interface CartService {
 
@@ -40,5 +43,10 @@ public interface CartService {
     * 购物车商品选中数量
     * */
     Integer getQuantity(Integer userId);
+
+    /*
+    * Api购物车列表
+    * */
+    List<CartApiVO> listCartApiVOs(Integer userId);
 
 }

@@ -3,11 +3,13 @@ package com.zhihao.newretail.user.service.impl;
 import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserCouponsMapper;
 import com.zhihao.newretail.user.pojo.UserCoupons;
 import com.zhihao.newretail.user.service.UserCouponsService;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -45,6 +47,21 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     @Override
     public CouponsApiVO getUserCouponsVO(Integer couponsId) {
         return couponsFeignService.getCouponsApiVO(couponsId);
+    }
+
+    @Override
+    public List<UserCouponsApiVO> listUserCouponsApiVOs(Integer userId) {
+        List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
+
+        if (CollectionUtils.isEmpty(userCouponsList))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无优惠券");
+
+        return userCouponsList.stream()
+                .map(userCoupons -> {
+                    UserCouponsApiVO userCouponsApiVO = new UserCouponsApiVO();
+                    BeanUtils.copyProperties(userCoupons, userCouponsApiVO);
+                    return userCouponsApiVO;
+                }).collect(Collectors.toList());
     }
 
 }

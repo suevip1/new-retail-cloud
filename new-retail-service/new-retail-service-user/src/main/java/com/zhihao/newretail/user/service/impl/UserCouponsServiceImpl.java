@@ -53,9 +53,6 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     public List<UserCouponsApiVO> listUserCouponsApiVOs(Integer userId) {
         List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
 
-        if (CollectionUtils.isEmpty(userCouponsList))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无优惠券");
-
         return userCouponsList.stream()
                 .map(userCoupons -> {
                     UserCouponsApiVO userCouponsApiVO = new UserCouponsApiVO();

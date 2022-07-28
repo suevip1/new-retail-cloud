@@ -6,6 +6,9 @@ import java.util.concurrent.ExecutionException;
 
 public interface OrderService {
 
+    /*
+    * 订单提交页
+    * */
     OrderSubmitVO getOrderSubmitVO() throws ExecutionException, InterruptedException;
 
 }

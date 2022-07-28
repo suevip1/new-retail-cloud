@@ -69,6 +69,16 @@ public class CartController {
     }
 
     @RequiresLogin
+    @PutMapping("/cart/notSelectedAll")
+    public R updateCartNotSelectedAll() {
+        Integer userId = UserLoginContext.getUserLoginInfo();
+        CartVO cartVO = cartService.updateCartNotSelectedAll(userId);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", cartVO);
+    }
+
+    @RequiresLogin
     @GetMapping("/cart/quantity")
     public R getQuantity() {
         Integer userId = UserLoginContext.getUserLoginInfo();

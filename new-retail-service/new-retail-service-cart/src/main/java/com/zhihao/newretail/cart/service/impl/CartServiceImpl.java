@@ -148,7 +148,21 @@ public class CartServiceImpl implements CartService {
 
         if (!CollectionUtils.isEmpty(cartList)) {
             cartList.forEach(cart -> {
-                cart.setSelected(!cart.getSelected());
+                cart.setSelected(true);
+                redisUtil.setHash(redisKey, cart.getSkuId(), cart);
+            });
+        }
+        return getCartVO(userId);
+    }
+
+    @Override
+    public CartVO updateCartNotSelectedAll(Integer userId) {
+        String redisKey = String.format(CART_REDIS_KEY, userId);
+        List<Cart> cartList = listCarts(userId);
+
+        if (!CollectionUtils.isEmpty(cartList)) {
+            cartList.forEach(cart -> {
+                cart.setSelected(false);
                 redisUtil.setHash(redisKey, cart.getSkuId(), cart);
             });
         }

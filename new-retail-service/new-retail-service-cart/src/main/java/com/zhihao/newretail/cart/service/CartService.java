@@ -32,6 +32,11 @@ public interface CartService {
     CartVO updateCartSelectedAll(Integer userId);
 
     /*
+    * 购物车商品取消全选
+    * */
+    CartVO updateCartNotSelectedAll(Integer userId);
+
+    /*
     * 购物车商品选中数量
     * */
     Integer getQuantity(Integer userId);

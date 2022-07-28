@@ -3,6 +3,7 @@ package com.zhihao.newretail.order.dao;
 import com.zhihao.newretail.order.pojo.Order;
 
 public interface OrderMapper {
+
     int deleteByPrimaryKey(Long id);
 
     int insert(Order record);
@@ -14,4 +15,5 @@ public interface OrderMapper {
     int updateByPrimaryKeySelective(Order record);
 
     int updateByPrimaryKey(Order record);
+
 }

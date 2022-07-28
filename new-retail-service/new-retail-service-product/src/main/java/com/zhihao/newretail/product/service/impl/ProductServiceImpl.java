@@ -127,7 +127,6 @@ public class ProductServiceImpl implements ProductService {
                         spuList.stream()
                                 .filter(spu -> sku.getSpuId().equals(spu.getId()))
                                 .forEach(spu -> {
-                                    skuApiVO.setSpuId(spu.getId());
                                     skuApiVO.setTitle(spu.getTitle());
                                 });
                     } else

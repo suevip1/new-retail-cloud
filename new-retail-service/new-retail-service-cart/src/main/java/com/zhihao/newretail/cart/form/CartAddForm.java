@@ -4,9 +4,6 @@ import javax.validation.constraints.NotNull;
 
 public class CartAddForm {
 
-    @NotNull(message = "商品不能为空")
-    private Integer spuId;
-
     @NotNull(message = "商品规格不能为空")
     private Integer skuId;
 
@@ -14,14 +11,6 @@ public class CartAddForm {
     private Integer quantity;
 
     private Boolean selected = true;
-
-    public Integer getSpuId() {
-        return spuId;
-    }
-
-    public void setSpuId(Integer spuId) {
-        this.spuId = spuId;
-    }
 
     public Integer getSkuId() {
         return skuId;
@@ -50,8 +39,7 @@ public class CartAddForm {
     @Override
     public String toString() {
         return "CartAddForm{" +
-                "spuId=" + spuId +
-                ", skuId=" + skuId +
+                "skuId=" + skuId +
                 ", quantity=" + quantity +
                 ", selected=" + selected +
                 '}';

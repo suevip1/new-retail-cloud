@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.service;
 
+import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
@@ -32,5 +33,10 @@ public interface UserAddressService {
     * 删除收货地址
     * */
     void deleteUserAddress(Integer userId, Integer addressId);
+
+    /*
+    * 获取收货地址列表
+    * */
+    List<UserAddressApiVO> listUserAddressApiVOs(Integer userId);
 
 }

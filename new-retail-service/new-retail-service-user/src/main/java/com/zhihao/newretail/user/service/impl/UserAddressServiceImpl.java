@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.service.impl;
 
+import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
@@ -12,6 +13,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -74,6 +76,21 @@ public class UserAddressServiceImpl implements UserAddressService {
 
         if (deleteUserAddressRow <= 0)
             throw new ServiceException("删除失败");
+    }
+
+    @Override
+    public List<UserAddressApiVO> listUserAddressApiVOs(Integer userId) {
+        List<UserAddress> userAddressList = userAddressMapper.selectListByUserId(userId);
+
+        if (CollectionUtils.isEmpty(userAddressList))
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无收货地址");
+
+        return userAddressList.stream()
+                .map(userAddress -> {
+                    UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
+                    BeanUtils.copyProperties(userAddress, userAddressApiVO);
+                    return userAddressApiVO;
+                }).collect(Collectors.toList());
     }
 
     @Override

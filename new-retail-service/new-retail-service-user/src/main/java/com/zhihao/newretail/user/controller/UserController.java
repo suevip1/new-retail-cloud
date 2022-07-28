@@ -1,6 +1,5 @@
 package com.zhihao.newretail.user.controller;
 
-import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;

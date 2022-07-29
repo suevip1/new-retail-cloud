@@ -29,7 +29,7 @@
   </delete>
 
   <insert id="insert" parameterType="com.zhihao.newretail.coupons.pojo.Coupons">
-    insert into tb_coupons (id, deno, condition, 
+    insert into tb_coupons (id, deno, `condition`,
       start_date, end_date, max_num, 
       is_saleable, is_delete)
     values (#{id,jdbcType=INTEGER}, #{deno,jdbcType=DECIMAL}, #{condition,jdbcType=DECIMAL}, 
@@ -47,7 +47,7 @@
         deno,
       </if>
       <if test="condition != null">
-        condition,
+        `condition`,
       </if>
       <if test="startDate != null">
         start_date,
@@ -100,7 +100,7 @@
         deno = #{deno,jdbcType=DECIMAL},
       </if>
       <if test="condition != null">
-        condition = #{condition,jdbcType=DECIMAL},
+        `condition` = #{condition,jdbcType=DECIMAL},
       </if>
       <if test="startDate != null">
         start_date = #{startDate,jdbcType=DATE},
@@ -124,7 +124,7 @@
   <update id="updateByPrimaryKey" parameterType="com.zhihao.newretail.coupons.pojo.Coupons">
     update tb_coupons
     set deno = #{deno,jdbcType=DECIMAL},
-      condition = #{condition,jdbcType=DECIMAL},
+      `condition` = #{condition,jdbcType=DECIMAL},
       start_date = #{startDate,jdbcType=DATE},
       end_date = #{endDate,jdbcType=DATE},
       max_num = #{maxNum,jdbcType=INTEGER},

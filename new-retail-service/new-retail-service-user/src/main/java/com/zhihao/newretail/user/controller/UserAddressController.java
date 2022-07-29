@@ -24,7 +24,7 @@ public class UserAddressController {
     @RequiresLogin
     @GetMapping("/listAddresses")
     public R listUserAddressVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
         UserLoginContext.clean();
 
@@ -38,7 +38,7 @@ public class UserAddressController {
     @RequiresLogin
     @GetMapping("/address/{addressId}")
     public R getUserAddressVO(@PathVariable Integer addressId) {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserAddressVO userAddressVO = userAddressService.getUserAddressVO(userId, addressId);
         UserLoginContext.clean();
 
@@ -48,7 +48,7 @@ public class UserAddressController {
     @RequiresLogin
     @PostMapping("/address")
     public R insertUserAddress(@Valid @RequestBody UserAddressAddForm form) {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.insertUserAddress(userId, form);
         UserLoginContext.clean();
 
@@ -59,7 +59,7 @@ public class UserAddressController {
     @PutMapping("/address/{addressId}")
     public R updateUserAddress(@PathVariable Integer addressId,
                                @Valid @RequestBody UserAddressUpdateForm form) {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.updateUserAddress(userId, addressId, form);
         UserLoginContext.clean();
 
@@ -69,7 +69,7 @@ public class UserAddressController {
     @RequiresLogin
     @DeleteMapping("/address/{addressId}")
     public R deleteUserAddress(@PathVariable Integer addressId) {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.deleteUserAddress(userId, addressId);
         UserLoginContext.clean();
 

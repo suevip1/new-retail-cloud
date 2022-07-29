@@ -27,7 +27,7 @@ public class UserController {
     @RequiresLogin
     @GetMapping("/userInfo")
     public R getUserInfoVO() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
         UserLoginContext.clean();
 

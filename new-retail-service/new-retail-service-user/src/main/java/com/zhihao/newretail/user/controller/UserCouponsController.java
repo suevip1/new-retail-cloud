@@ -21,7 +21,7 @@ public class UserCouponsController {
     @RequiresLogin
     @GetMapping("/listUserCouponsVOs")
     public R listUserCouponsVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CouponsApiVO> couponsApiVOList = userCouponsService.listUserCouponsVOs(userId);
         UserLoginContext.clean();
 

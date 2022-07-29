@@ -19,7 +19,7 @@ public class UserCouponsFeignController implements UserCouponsFeignService {
     @RequiresLogin
     @Override
     public List<UserCouponsApiVO> listUserCouponsApiVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserCouponsApiVO> userCouponsApiVOList = userCouponsService.listUserCouponsApiVOs(userId);
         UserLoginContext.clean();
         return userCouponsApiVOList;

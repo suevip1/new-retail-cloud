@@ -19,7 +19,7 @@ public class UserAddressFeignController implements UserAddressFeignService {
     @RequiresLogin
     @Override
     public List<UserAddressApiVO> listUserAddressApiVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserAddressApiVO> userAddressApiVOList = userAddressService.listUserAddressApiVOs(userId);
         UserLoginContext.clean();
         return userAddressApiVOList;

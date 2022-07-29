@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "new-retail-user", path = "/user")
 public interface UserFeignService {
 
-    @PostMapping("/getUserInfo")
+    @PostMapping("/api/getUserInfo")
     UserApiVO getUserInfo(@RequestBody UserApiDTO userApiDTO);
 
 }

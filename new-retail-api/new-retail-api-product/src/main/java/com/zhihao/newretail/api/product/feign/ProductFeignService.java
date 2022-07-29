@@ -15,13 +15,13 @@ import java.util.List;
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface ProductFeignService {
 
-    @PostMapping("/listSkus")
+    @PostMapping("/api/listSkus")
     List<SkuApiVO> listSkuApiVOs(@RequestBody SkuBatchApiDTO skuBatchApiDTO);
 
-    @GetMapping("/sku/{skuId}")
+    @GetMapping("/api/sku/{skuId}")
     SkuApiVO getSkuApiVO(@PathVariable Integer skuId);
 
-    @PostMapping("/listSkuStocks")
+    @PostMapping("/api/listSkuStocks")
     List<SkuStockApiVO> listSkuStockApiVOs(@RequestBody SkuStockBatchApiDTO skuStockBatchApiDTO);
 
 }

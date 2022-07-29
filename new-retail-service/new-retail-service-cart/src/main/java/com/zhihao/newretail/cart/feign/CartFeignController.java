@@ -19,7 +19,7 @@ public class CartFeignController implements CartFeignService {
     @RequiresLogin
     @Override
     public List<CartApiVO> listCartApiVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo();
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CartApiVO> cartApiVOList = cartService.listCartApiVOs(userId);
         UserLoginContext.clean();
         return cartApiVOList;

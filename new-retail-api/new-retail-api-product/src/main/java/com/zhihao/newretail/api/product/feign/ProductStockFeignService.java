@@ -12,6 +12,9 @@ import java.util.List;
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface ProductStockFeignService {
 
+    /*
+    * 获取库存信息
+    * */
     @PostMapping("/api/listSkuStocks")
     List<SkuStockApiVO> listSkuStockApiVOs(@RequestBody SkuStockBatchApiDTO skuStockBatchApiDTO);
 

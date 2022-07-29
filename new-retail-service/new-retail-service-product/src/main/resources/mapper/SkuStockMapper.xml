@@ -139,4 +139,14 @@
     from tb_sku_stock
     where sku_id = #{skuId,jdbcType=INTEGER} and is_delete = 0
   </select>
+
+  <select id="selectListBySkuIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sku_stock
+    where is_delete = 0
+    <foreach collection="SkuIdSet" item="item" open="and">
+      sku_id = #{item}
+    </foreach>
+  </select>
 </mapper>

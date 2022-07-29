@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SkuMapper;
@@ -161,6 +162,21 @@ public class ProductServiceImpl implements ProductService {
                 return skuApiVO;
             }
         }
+    }
+
+    @Override
+    public List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet) {
+        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
+
+        if (!CollectionUtils.isEmpty(skuStockList)) {
+            return skuStockList.stream()
+                    .map(skuStock -> {
+                        SkuStockApiVO skuStockApiVO = new SkuStockApiVO();
+                        BeanUtils.copyProperties(skuStock, skuStockApiVO);
+                        return skuStockApiVO;
+                    }).collect(Collectors.toList());
+        }
+        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品库存信息异常");
     }
 
 }

@@ -1,6 +1,10 @@
 package com.zhihao.newretail.product.dao;
 
 import com.zhihao.newretail.product.pojo.SkuStock;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+import java.util.Set;
 
 public interface SkuStockMapper {
 
@@ -17,5 +21,10 @@ public interface SkuStockMapper {
     int updateByPrimaryKey(SkuStock record);
 
     SkuStock selectBySkuId(Integer skuId);
+
+    /*
+    * 批量查询
+    * */
+    List<SkuStock> selectListBySkuIdSet(@Param("SkuIdSet") Set<Integer> SkuIdSet);
 
 }

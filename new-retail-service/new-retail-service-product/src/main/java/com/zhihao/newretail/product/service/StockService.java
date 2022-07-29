@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.service;
 
+import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.product.pojo.SkuStock;
 
@@ -17,5 +18,10 @@ public interface StockService {
      * 批量获取商品库存信息
      * */
     List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet);
+
+    /*
+    * 锁定商品库存
+    * */
+    void stockLock(SkuStockLockApiDTO skuStockLockApiDTO);
 
 }

@@ -145,7 +145,7 @@
     <include refid="Base_Column_List" />
     from tb_sku_stock
     where is_delete = 0
-    <foreach collection="SkuIdSet" item="item" open="and">
+    <foreach collection="SkuIdSet" item="item" open="and" separator="or">
       sku_id = #{item}
     </foreach>
   </select>

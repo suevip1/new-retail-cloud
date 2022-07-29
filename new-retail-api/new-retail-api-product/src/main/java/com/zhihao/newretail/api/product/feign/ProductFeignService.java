@@ -21,7 +21,4 @@ public interface ProductFeignService {
     @GetMapping("/api/sku/{skuId}")
     SkuApiVO getSkuApiVO(@PathVariable Integer skuId);
 
-    @PostMapping("/api/listSkuStocks")
-    List<SkuStockApiVO> listSkuStockApiVOs(@RequestBody SkuStockBatchApiDTO skuStockBatchApiDTO);
-
 }

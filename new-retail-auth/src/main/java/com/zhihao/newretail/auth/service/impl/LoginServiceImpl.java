@@ -36,20 +36,19 @@ public class LoginServiceImpl implements LoginService {
         userApiDTO.setUsername(username);
         UserApiVO userInfo = userFeignService.getUserInfo(userApiDTO);
 
-        if (ObjectUtils.isEmpty(userInfo) || ObjectUtils.isEmpty(userInfo.getId()))
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
-        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());
-        if (!secretPassword.equals(userInfo.getPassword()))
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
-
-        UserLoginVO userLoginVO = new UserLoginVO();
-        userLoginVO.setUserId(userInfo.getId());
-        userLoginVO.setUuid(userInfo.getUuid());
-        userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
-        userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
-
-        return tokenService.getToken(userLoginVO);
+        if (!ObjectUtils.isEmpty(userInfo.getId())) {
+            String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());
+            if (!secretPassword.equals(userInfo.getPassword())) {
+                throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
+            }
+            UserLoginVO userLoginVO = new UserLoginVO();
+            userLoginVO.setUserId(userInfo.getId());
+            userLoginVO.setUuid(userInfo.getUuid());
+            userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
+            userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
+            return tokenService.getToken(userLoginVO);
+        }
+        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }
 
 }

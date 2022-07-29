@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 public class UserLoginVO implements Serializable {
 
-    private String userToken;
-
     private Integer userId;
 
     private String uuid;
@@ -14,13 +12,9 @@ public class UserLoginVO implements Serializable {
 
     private String photo;
 
-    public String getUserToken() {
-        return userToken;
-    }
+    private String gender;
 
-    public void setUserToken(String userToken) {
-        this.userToken = userToken;
-    }
+    private Integer integral;
 
     public Integer getUserId() {
         return userId;
@@ -54,14 +48,31 @@ public class UserLoginVO implements Serializable {
         this.photo = photo;
     }
 
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Integer getIntegral() {
+        return integral;
+    }
+
+    public void setIntegral(Integer integral) {
+        this.integral = integral;
+    }
+
     @Override
     public String toString() {
         return "UserLoginVO{" +
-                "userToken='" + userToken + '\'' +
-                ", userId=" + userId +
+                "userId=" + userId +
                 ", uuid='" + uuid + '\'' +
                 ", nickName='" + nickName + '\'' +
                 ", photo='" + photo + '\'' +
+                ", gender='" + gender + '\'' +
+                ", integral=" + integral +
                 '}';
     }
 

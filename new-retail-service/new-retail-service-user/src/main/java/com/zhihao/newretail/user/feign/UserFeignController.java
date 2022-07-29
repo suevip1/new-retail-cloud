@@ -8,8 +8,8 @@ import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -30,15 +30,8 @@ public class UserFeignController implements UserFeignService {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "该项不能为空");
 
         User user = new User();
-        user.setUuid(uuid);
-        user.setUsername(username);
-        user.setWeChat(weChat);
-        UserApiVO userApiVO = userService.getUserApiVO(user);
-
-        if (ObjectUtils.isEmpty(userApiVO))
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
-        return userApiVO;
+        BeanUtils.copyProperties(userApiDTO, user);
+        return userService.getUserApiVO(user);
     }
 
 }

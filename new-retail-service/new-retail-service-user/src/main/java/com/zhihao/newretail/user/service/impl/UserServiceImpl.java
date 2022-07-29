@@ -78,23 +78,22 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     public UserApiVO getUserApiVO(User scope) {
-        User user = userMapper.selectByScope(scope);
-
-        if (ObjectUtils.isEmpty(user))
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
-        UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
-
-        if (ObjectUtils.isEmpty(userInfo))
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
         UserApiVO userApiVO = new UserApiVO();
         UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
-        BeanUtils.copyProperties(user, userApiVO);
-        BeanUtils.copyProperties(userInfo, userInfoApiVO);
-        userApiVO.setUserInfoApiVO(userInfoApiVO);
+        User user = userMapper.selectByScope(scope);
 
-        return userApiVO;
+        if (!ObjectUtils.isEmpty(user)) {
+            UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
+
+            if (ObjectUtils.isEmpty(userInfo)) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+            }
+            BeanUtils.copyProperties(user, userApiVO);
+            BeanUtils.copyProperties(userInfo, userInfoApiVO);
+            userApiVO.setUserInfoApiVO(userInfoApiVO);
+            return userApiVO;
+        }
+        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }
 
     @Override

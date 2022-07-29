@@ -25,13 +25,13 @@ public class JwtUtil {
         return builder.withClaim("userId", userId).withExpiresAt(time).sign(algorithm);
     }
 
-    public static String createToken(Integer userId, String userToken) {
+    public static String createToken(Integer userId, String uuid) {
         DateTime time = DateUtil.offset(new Date(), DateField.DAY_OF_YEAR, EXPIRE); // 获取日期偏移量，1天后的时间
         Algorithm algorithm = Algorithm.HMAC256(SECRET);
         JWTCreator.Builder builder = JWT.create();
         return builder
                 .withClaim("userId", userId)
-                .withClaim("userToken", userToken)
+                .withClaim("uuid", uuid)
                 .withExpiresAt(time)
                 .sign(algorithm);
     }
@@ -42,9 +42,9 @@ public class JwtUtil {
         return jwt.getClaim("userId").asInt();
     }
 
-    public static String getUserToken(String token) {
-        DecodedJWT jwt = JWT.decode(token);
-        return jwt.getClaim("userToken").asString();
+    public static String getUuid(String uuid) {
+        DecodedJWT jwt = JWT.decode(uuid);
+        return jwt.getClaim("uuid").asString();
     }
 
     /* 验证 token 是否过期 */

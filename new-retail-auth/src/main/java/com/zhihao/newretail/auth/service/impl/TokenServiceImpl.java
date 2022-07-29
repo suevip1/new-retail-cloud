@@ -24,12 +24,13 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String getToken(UserLoginVO userLoginVO) {
-        if (ObjectUtils.isEmpty(userLoginVO))
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
-
-        Integer userId = userLoginVO.getUserId();
-        cacheUserInfo(userId, userLoginVO);
-        return JwtUtil.createToken(userLoginVO.getUserId());
+        if (!ObjectUtils.isEmpty(userLoginVO)) {
+            Integer userId = userLoginVO.getUserId();
+            String uuid = userLoginVO.getUuid();
+            cacheUserInfo(userId, userLoginVO);
+            return JwtUtil.createToken(userId, uuid);
+        }
+        throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
     }
 
     @Override
@@ -38,7 +39,7 @@ public class TokenServiceImpl implements TokenService {
             return R.error(HttpStatus.SC_UNAUTHORIZED, "用户未登录").put("token", token);
 
         Integer userId = JwtUtil.getUserId(token);
-
+        String uuid = JwtUtil.getUuid(token);
         try {
             /* token 有效，直接返回 */
             JwtUtil.verifierToken(token);
@@ -47,7 +48,7 @@ public class TokenServiceImpl implements TokenService {
         } catch (TokenExpiredException e) {
             if (redisUtil.isExist(String.valueOf(userId))) {
                 refreshCacheUserInfo(userId);
-                String newToken = JwtUtil.createToken(userId);
+                String newToken = JwtUtil.createToken(userId, uuid);
                 return R.ok().put("token", newToken);
             } else
                 return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", null);

@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.security.UserLoginContext;
 import com.zhihao.newretail.security.util.JwtUtil;
+import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.aspectj.lang.annotation.Aspect;
@@ -40,8 +41,10 @@ public class RequiresLoginAspect {
 
         try {
             JwtUtil.verifierToken(token);
-            Integer userId = JwtUtil.getUserId(token);
-            UserLoginContext.setUserLoginInfo(userId);
+            UserLoginVO userLoginVO = new UserLoginVO();
+            userLoginVO.setUserId(JwtUtil.getUserId(token));
+            userLoginVO.setUuid(JwtUtil.getUuid(token));
+            UserLoginContext.setUserLoginInfo(userLoginVO);
         } catch (TokenExpiredException e) {
             throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "令牌已失效");
         }

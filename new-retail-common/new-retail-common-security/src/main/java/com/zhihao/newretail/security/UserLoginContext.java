@@ -1,15 +1,17 @@
 package com.zhihao.newretail.security;
 
+import com.zhihao.newretail.security.vo.UserLoginVO;
+
 public class UserLoginContext {
 
-    private static final ThreadLocal<Integer> USER_LOGIN_INFO = new ThreadLocal<>();
+    private static final ThreadLocal<UserLoginVO> USER_LOGIN_INFO = new ThreadLocal<>();
 
-    public static Integer getUserLoginInfo() {
+    public static UserLoginVO getUserLoginInfo() {
         return USER_LOGIN_INFO.get();
     }
 
-    public static void setUserLoginInfo(Integer userLoginInfo) {
-        USER_LOGIN_INFO.set(userLoginInfo);
+    public static void setUserLoginInfo(UserLoginVO userLoginVO) {
+        USER_LOGIN_INFO.set(userLoginVO);
     }
 
     public static void clean() {

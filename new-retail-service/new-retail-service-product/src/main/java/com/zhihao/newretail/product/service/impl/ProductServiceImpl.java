@@ -1,11 +1,9 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
-import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SkuMapper;
-import com.zhihao.newretail.product.dao.SkuStockMapper;
 import com.zhihao.newretail.product.dao.SpuInfoMapper;
 import com.zhihao.newretail.product.dao.SpuMapper;
 import com.zhihao.newretail.product.enums.ProductEnum;
@@ -17,6 +15,7 @@ import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.SkuVO;
 import com.zhihao.newretail.product.service.ProductService;
+import com.zhihao.newretail.product.service.StockService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class ProductServiceImpl implements ProductService {
     private SpuInfoMapper spuInfoMapper;
 
     @Autowired
-    private SkuStockMapper skuStockMapper;
+    private StockService stockService;
 
     @Autowired
     private ThreadPoolExecutor executor;
@@ -150,7 +149,7 @@ public class ProductServiceImpl implements ProductService {
         else if (ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable()))
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品已失效");
         else {
-            SkuStock skuStock = skuStockMapper.selectBySkuId(skuId);
+            SkuStock skuStock = stockService.getSkuStock(skuId);
 
             if (ObjectUtils.isEmpty(skuStock))
                 throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存异常");
@@ -162,21 +161,6 @@ public class ProductServiceImpl implements ProductService {
                 return skuApiVO;
             }
         }
-    }
-
-    @Override
-    public List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet) {
-        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
-
-        if (!CollectionUtils.isEmpty(skuStockList)) {
-            return skuStockList.stream()
-                    .map(skuStock -> {
-                        SkuStockApiVO skuStockApiVO = new SkuStockApiVO();
-                        BeanUtils.copyProperties(skuStock, skuStockApiVO);
-                        return skuStockApiVO;
-                    }).collect(Collectors.toList());
-        }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品库存信息异常");
     }
 
 }

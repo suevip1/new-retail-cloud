@@ -25,9 +25,4 @@ public interface ProductService {
     * */
     SkuApiVO getSkuApiVO(Integer skuId);
 
-    /*
-    * 批量获取商品库存信息
-    * */
-    List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet);
-
 }

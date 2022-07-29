@@ -157,4 +157,14 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <insert id="insertBatch" parameterType="java.util.List">
+    insert into tb_sku_stock_lock (spu_id, sku_id, order_id,
+                                   `count`, `status`, mq_version)
+    values
+    <foreach collection="skuStockLockList" item="item" index="index" separator=",">
+      (#{item.spuId,jdbcType=INTEGER}, #{item.skuId,jdbcType=INTEGER}, #{item.orderId,jdbcType=BIGINT},
+       #{item.count,jdbcType=INTEGER}, #{item.status,jdbcType=INTEGER}, #{item.mqVersion,jdbcType=INTEGER})
+    </foreach>
+  </insert>
 </mapper>

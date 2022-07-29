@@ -24,4 +24,9 @@ public interface StockService {
     * */
     void stockLock(SkuStockLockApiDTO skuStockLockApiDTO);
 
+    /*
+    * 批量锁定商品库存
+    * */
+    void batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList);
+
 }

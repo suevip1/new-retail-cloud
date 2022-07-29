@@ -59,4 +59,19 @@ public class StockServiceImpl implements StockService {
             throw new ServiceException("库存锁定失败");
     }
 
+    @Override
+    public void batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+        List<SkuStockLock> skuStockLockList = skuStockLockApiDTOList.stream()
+                .map(skuStockLockApiDTO -> {
+                    SkuStockLock skuStockLock = new SkuStockLock();
+                    BeanUtils.copyProperties(skuStockLockApiDTO, skuStockLock);
+                    skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
+                    return skuStockLock;
+                }).collect(Collectors.toList());
+        int insertBatchSkuStockLockRow = skuStockLockMapper.insertBatch(skuStockLockList);
+
+        if (insertBatchSkuStockLockRow <= 0)
+            throw new ServiceException("库存锁定失败");
+    }
+
 }

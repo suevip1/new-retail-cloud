@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SkuStockBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
+import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductStockFeignService;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.product.service.StockService;
@@ -24,6 +25,12 @@ public class ProductStockFeignController implements ProductStockFeignService {
     @Override
     public void stockLock(SkuStockLockApiDTO skuStockLockApiDTO) {
         stockService.stockLock(skuStockLockApiDTO);
+    }
+
+    @Override
+    public void batchStockLock(SkuStockLockBatchApiDTO skuStockLockBatchApiDTO) {
+        List<SkuStockLockApiDTO> skuStockLockApiDTOList = skuStockLockBatchApiDTO.getSkuStockLockApiDTOList();
+        stockService.batchStockLock(skuStockLockApiDTOList);
     }
 
 }

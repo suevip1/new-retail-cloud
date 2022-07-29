@@ -1,6 +1,9 @@
 package com.zhihao.newretail.product.dao;
 
 import com.zhihao.newretail.product.pojo.SkuStockLock;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface SkuStockLockMapper {
 
@@ -15,5 +18,10 @@ public interface SkuStockLockMapper {
     int updateByPrimaryKeySelective(SkuStockLock record);
 
     int updateByPrimaryKey(SkuStockLock record);
+
+    /*
+    * 批量插入
+    * */
+    int insertBatch(@Param("skuStockLockList") List<SkuStockLock> skuStockLockList);
 
 }

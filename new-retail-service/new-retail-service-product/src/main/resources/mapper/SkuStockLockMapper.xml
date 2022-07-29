@@ -15,7 +15,7 @@
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, spu_id, sku_id, order_id, count, status, mq_version, is_delete, create_time, 
+    id, spu_id, sku_id, order_id, `count`, `status`, mq_version, is_delete, create_time,
     update_time
   </sql>
 
@@ -33,7 +33,7 @@
 
   <insert id="insert" parameterType="com.zhihao.newretail.product.pojo.SkuStockLock">
     insert into tb_sku_stock_lock (id, spu_id, sku_id, 
-      order_id, count, status, 
+      order_id, `count`, `status`,
       mq_version, is_delete, create_time, 
       update_time)
     values (#{id,jdbcType=INTEGER}, #{spuId,jdbcType=INTEGER}, #{skuId,jdbcType=INTEGER}, 
@@ -58,10 +58,10 @@
         order_id,
       </if>
       <if test="count != null">
-        count,
+        `count`,
       </if>
       <if test="status != null">
-        status,
+        `status`,
       </if>
       <if test="mqVersion != null">
         mq_version,
@@ -123,10 +123,10 @@
         order_id = #{orderId,jdbcType=BIGINT},
       </if>
       <if test="count != null">
-        count = #{count,jdbcType=INTEGER},
+        `count` = #{count,jdbcType=INTEGER},
       </if>
       <if test="status != null">
-        status = #{status,jdbcType=INTEGER},
+        `status` = #{status,jdbcType=INTEGER},
       </if>
       <if test="mqVersion != null">
         mq_version = #{mqVersion,jdbcType=INTEGER},
@@ -149,8 +149,8 @@
     set spu_id = #{spuId,jdbcType=INTEGER},
       sku_id = #{skuId,jdbcType=INTEGER},
       order_id = #{orderId,jdbcType=BIGINT},
-      count = #{count,jdbcType=INTEGER},
-      status = #{status,jdbcType=INTEGER},
+      `count` = #{count,jdbcType=INTEGER},
+      `status` = #{status,jdbcType=INTEGER},
       mq_version = #{mqVersion,jdbcType=INTEGER},
       is_delete = #{isDelete,jdbcType=TINYINT},
       create_time = #{createTime,jdbcType=TIMESTAMP},

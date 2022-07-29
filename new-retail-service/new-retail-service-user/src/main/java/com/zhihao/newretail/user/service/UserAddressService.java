@@ -39,4 +39,9 @@ public interface UserAddressService {
     * */
     List<UserAddressApiVO> listUserAddressApiVOs(Integer userId);
 
+    /*
+    * 获取收货地址信息
+    * */
+    UserAddressApiVO getUserAddressApiVO(Integer addressId);
+
 }

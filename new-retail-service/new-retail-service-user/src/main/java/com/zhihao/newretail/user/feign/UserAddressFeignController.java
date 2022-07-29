@@ -25,4 +25,9 @@ public class UserAddressFeignController implements UserAddressFeignService {
         return userAddressApiVOList;
     }
 
+    @Override
+    public UserAddressApiVO getUserAddressApiVO(Integer addressId) {
+        return userAddressService.getUserAddressApiVO(addressId);
+    }
+
 }

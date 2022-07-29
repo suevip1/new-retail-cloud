@@ -16,8 +16,7 @@ public class LoginWebController {
 
     @PostMapping("/login")
     public R login(@RequestBody UserLoginForm form) {
-        String token = loginService.login(form);
-        return R.ok("登录成功").put("token", token);
+        return loginService.login(form);
     }
 
 }

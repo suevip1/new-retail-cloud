@@ -8,6 +8,7 @@ import com.zhihao.newretail.auth.service.LoginService;
 import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
+import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -25,7 +26,7 @@ public class LoginServiceImpl implements LoginService {
     private UserFeignService userFeignService;
 
     @Override
-    public String login(UserLoginForm form) {
+    public R login(UserLoginForm form) {
         String username = form.getUsername();
         String password = form.getPassword();
 
@@ -46,7 +47,11 @@ public class LoginServiceImpl implements LoginService {
             userLoginVO.setUuid(userInfo.getUuid());
             userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
             userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
-            return tokenService.getToken(userLoginVO);
+            String token = tokenService.getToken(userLoginVO);
+            if (!StringUtils.isEmpty(token)) {
+                return R.ok("登录成功").put("token", token);
+            }
+            throw new ServiceException("登录失败");
         }
         throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }

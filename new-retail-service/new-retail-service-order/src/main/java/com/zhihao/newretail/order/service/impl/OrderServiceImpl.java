@@ -12,11 +12,13 @@ import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyUUIDUtil;
 import com.zhihao.newretail.order.pojo.vo.OrderSubmitVO;
 import com.zhihao.newretail.order.pojo.vo.ProductSubmitItemVO;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -71,21 +73,24 @@ public class OrderServiceImpl implements OrderService {
                     .map(CartApiVO::getSkuId)
                     .collect(Collectors.toSet());
 
-            /* 获取商品信息 */
-            SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
-            skuBatchApiDTO.setIdSet(skuIdSet);
-            List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
+            if (!CollectionUtils.isEmpty(skuIdSet)) {
+                /* 获取商品信息 */
+                SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
+                skuBatchApiDTO.setIdSet(skuIdSet);
+                List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
 
-            /* 渲染返回 */
-            List<ProductSubmitItemVO> productSubmitItemVOList = new ArrayList<>();
-            cartApiVOList.forEach(cartApiVO -> {
-                ProductSubmitItemVO productSubmitItemVO = new ProductSubmitItemVO();
-                buildProductSubmitItemVO(cartApiVO, skuApiVOList, productSubmitItemVO);
-                totalPrice[0] = totalPrice[0].add(productSubmitItemVO.getTotalPrice());
-                productSubmitItemVOList.add(productSubmitItemVO);
-            });
-            orderSubmitVO.setProductSubmitItemVOList(productSubmitItemVOList);
-            orderSubmitVO.setTotalPrice(totalPrice[0]);
+                /* 渲染返回 */
+                List<ProductSubmitItemVO> productSubmitItemVOList = new ArrayList<>();
+                cartApiVOList.forEach(cartApiVO -> {
+                    ProductSubmitItemVO productSubmitItemVO = new ProductSubmitItemVO();
+                    buildProductSubmitItemVO(cartApiVO, skuApiVOList, productSubmitItemVO);
+                    totalPrice[0] = totalPrice[0].add(productSubmitItemVO.getTotalPrice());
+                    productSubmitItemVOList.add(productSubmitItemVO);
+                });
+                orderSubmitVO.setProductSubmitItemVOList(productSubmitItemVOList);
+                orderSubmitVO.setTotalPrice(totalPrice[0]);
+            }
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "请选中商品再下单");
         }, executor);
 
         /* 获取用户收货地址列表 */

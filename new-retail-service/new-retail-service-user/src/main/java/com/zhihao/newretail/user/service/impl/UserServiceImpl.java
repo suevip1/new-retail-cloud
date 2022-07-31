@@ -7,9 +7,9 @@ import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
+import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.pojo.UserInfo;
-import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -37,40 +37,31 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertUser(UserRegisterDTO userRegisterDTO) {
-        String username = userRegisterDTO.getUsername();
-        String password = userRegisterDTO.getPassword();
-
-        /* 前置条件失败 */
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户名或密码不能为空");
-
-        String uuid = getUserUuid();    // 获取分布式唯一id
-        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, uuid);  // 密码md5盐值加密
+    public Integer register(UserRegisterForm form) {
+        String username = form.getUsername();
+        String password = form.getPassword();
+        String uid = getUserUID();    // 获取分布式唯一id
+        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, uid);  // 密码md5盐值加密
 
         User user = new User();
-        user.setUuid(uuid);
+        user.setUuid(uid);
         user.setUsername(username);
         user.setPassword(secretPassword);
-        int countByScope = userMapper.countByScope(user);
+        Integer countUser = countUserByScope(user);     // 用户是否存在
 
-        if (countByScope == 0) {
-            int insertUserRow = userMapper.insertSelective(user);
+        if (countUser == 0) {
+            insertUser(user);                   // 保存用户
+            Integer userId = user.getId();      // 插入成功返回主键
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUserId(userId);         // 用户id
+            userInfo.setNickName("用户:" + uid); // 用户昵称
+            userInfo.setPhoto("photoURL");      // TODO 用户头像URL
+            insertUserInfo(userInfo);           // 保存用户信息
 
-            if (insertUserRow <= 0)
-                throw new ServiceException("注册失败");
-            else {
-                UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(user.getId());   // 获取返回主键值
-                userInfo.setNickName("用户:" + uuid); // 用户uid
-                userInfo.setPhoto("photoURL");      // TODO 用户头像URL
-                int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
-
-                if (insertUserInfoRow <= 0)
-                    throw new ServiceException("注册失败");
-            }
-        } else
+            return userId;
+        } else {
             throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
+        }
     }
 
     /*
@@ -111,9 +102,29 @@ public class UserServiceImpl implements UserService {
     /*
     * 雪花生成唯一ID
     * */
-    private String getUserUuid() {
+    private String getUserUID() {
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 0);
         return StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 4);
+    }
+
+    private Integer countUserByScope(User user) {
+        return userMapper.countByScope(user);
+    }
+
+    private void insertUser(User user) {
+        int insertUserRow = userMapper.insertSelective(user);
+
+        if (insertUserRow <= 0) {
+            throw new ServiceException("保存用户失败");
+        }
+    }
+
+    private void insertUserInfo(UserInfo userInfo) {
+        int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
+
+        if (insertUserInfoRow <= 0) {
+            throw new ServiceException("保存用户信息失败");
+        }
     }
 
 }

@@ -1,12 +1,18 @@
-package com.zhihao.newretail.user.pojo.dto;
+package com.zhihao.newretail.user.form;
+
+import javax.validation.constraints.NotBlank;
 
 /*
-* 用户注册
-* */
-public class UserRegisterDTO {
+ * @Project: NewRetail-Cloud
+ * @Author: Zhihao
+ * @Email: cafebabe0508@163.com
+ * */
+public class UserRegisterForm {
 
+    @NotBlank(message = "用户名不能为空")
     private String username;
 
+    @NotBlank(message = "密码不能为空")
     private String password;
 
     public String getUsername() {
@@ -27,7 +33,7 @@ public class UserRegisterDTO {
 
     @Override
     public String toString() {
-        return "RegisterUserDTO{" +
+        return "UserRegisterForm{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';

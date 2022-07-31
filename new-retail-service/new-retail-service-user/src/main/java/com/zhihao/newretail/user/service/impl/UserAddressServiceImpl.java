@@ -105,13 +105,9 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public UserAddressApiVO getUserAddressApiVO(Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-
-        if (!ObjectUtils.isEmpty(userAddress)) {
-            UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
-            BeanUtils.copyProperties(userAddress, userAddressApiVO);
-            return userAddressApiVO;
-        }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址信息异常");
+        UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
+        BeanUtils.copyProperties(userAddress, userAddressApiVO);
+        return userAddressApiVO;
     }
 
 }

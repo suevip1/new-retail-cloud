@@ -73,10 +73,10 @@ public class UserServiceImpl implements UserService {
     public UserApiVO getUserApiVO(User scope) {
         UserApiVO userApiVO = new UserApiVO();
         UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
-        User user = userMapper.selectByScope(scope);
+        User user = getUser(scope);
 
         if (!ObjectUtils.isEmpty(user)) {
-            UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
+            UserInfo userInfo = getUserInfo(user.getId());
 
             if (ObjectUtils.isEmpty(userInfo)) {
                 throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
@@ -134,6 +134,10 @@ public class UserServiceImpl implements UserService {
 
     private UserInfo getUserInfo(Integer userId) {
         return userInfoMapper.selectByUserId(userId);
+    }
+
+    private User getUser(User user) {
+        return userMapper.selectByScope(user);
     }
 
 }

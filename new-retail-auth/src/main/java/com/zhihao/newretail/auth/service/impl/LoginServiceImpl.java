@@ -35,7 +35,7 @@ public class LoginServiceImpl implements LoginService {
 
         UserApiDTO userApiDTO = new UserApiDTO();
         userApiDTO.setUsername(username);
-        UserApiVO userInfo = userFeignService.getUserInfo(userApiDTO);
+        UserApiVO userInfo = userFeignService.getUserApiVO(userApiDTO);
 
         if (!ObjectUtils.isEmpty(userInfo.getId())) {
             String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());

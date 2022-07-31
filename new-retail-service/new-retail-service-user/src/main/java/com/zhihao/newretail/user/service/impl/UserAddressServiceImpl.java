@@ -94,16 +94,12 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public List<UserAddressApiVO> listUserAddressApiVOs(Integer userId) {
         List<UserAddress> userAddressList = userAddressMapper.selectListByUserId(userId);
-
-        if (!CollectionUtils.isEmpty(userAddressList)) {
-            return userAddressList.stream()
-                    .map(userAddress -> {
-                        UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
-                        BeanUtils.copyProperties(userAddress, userAddressApiVO);
-                        return userAddressApiVO;
-                    }).collect(Collectors.toList());
-        }
-        throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无收货地址");
+        return userAddressList.stream()
+                .map(userAddress -> {
+                    UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
+                    BeanUtils.copyProperties(userAddress, userAddressApiVO);
+                    return userAddressApiVO;
+                }).collect(Collectors.toList());
     }
 
     @Override

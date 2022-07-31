@@ -50,15 +50,11 @@ public class UserAddressController {
         }
     }
 
-    @RequiresLogin
     @PutMapping("/address/{addressId}")
     public R updateUserAddress(@PathVariable Integer addressId,
                                @Valid @RequestBody UserAddressUpdateForm form) {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        userAddressService.updateUserAddress(userId, addressId, form);
-        UserLoginContext.clean();
-
-        return R.ok("更新成功");
+        userAddressService.updateUserAddress(addressId, form);
+        return R.ok("更新收货地址成功");
     }
 
     @RequiresLogin

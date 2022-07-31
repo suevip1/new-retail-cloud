@@ -15,6 +15,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -71,15 +72,19 @@ public class UserAddressServiceImpl implements UserAddressService {
     }
 
     @Override
-    public void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form) {
+    @RequiresLogin
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserAddress(Integer addressId, UserAddressUpdateForm form) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(form, userAddress);
         userAddress.setId(addressId);
         userAddress.setUserId(userId);
         int updateUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
 
-        if (updateUserAddressRow <= 0)
-            throw new ServiceException("更新失败");
+        if (updateUserAddressRow <= 0) {
+            throw new ServiceException("更新收货地址失败");
+        }
     }
 
     @Override

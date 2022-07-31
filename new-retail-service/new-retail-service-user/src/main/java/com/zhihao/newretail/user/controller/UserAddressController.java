@@ -21,7 +21,7 @@ public class UserAddressController {
     @Autowired
     private UserAddressService userAddressService;
 
-    @GetMapping("/addresses")
+    @GetMapping("/address/list")
     public R listUserAddressVOs() {
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs();
 

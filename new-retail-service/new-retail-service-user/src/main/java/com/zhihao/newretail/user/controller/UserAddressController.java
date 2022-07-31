@@ -10,6 +10,7 @@ import com.zhihao.newretail.user.service.UserAddressService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -38,14 +39,15 @@ public class UserAddressController {
         return R.ok().put("data", userAddressVO);
     }
 
-    @RequiresLogin
     @PostMapping("/address")
-    public R insertUserAddress(@Valid @RequestBody UserAddressAddForm form) {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        userAddressService.insertUserAddress(userId, form);
-        UserLoginContext.clean();
+    public R addUserAddress(@Valid @RequestBody UserAddressAddForm form) {
+        Integer addUserAddressRow = userAddressService.addUserAddress(form);
 
-        return R.ok("新增成功");
+        if (!ObjectUtils.isEmpty(addUserAddressRow)) {
+            return R.ok("新增收货地址成功");
+        } else {
+            return R.error("新增收货地址失败");
+        }
     }
 
     @RequiresLogin

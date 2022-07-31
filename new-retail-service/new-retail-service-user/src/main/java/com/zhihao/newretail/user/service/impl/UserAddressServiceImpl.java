@@ -59,6 +59,18 @@ public class UserAddressServiceImpl implements UserAddressService {
     }
 
     @Override
+    @RequiresLogin
+    public Integer addUserAddress(UserAddressAddForm form) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        UserAddress userAddress = new UserAddress();
+        BeanUtils.copyProperties(form, userAddress);
+        userAddress.setUserId(userId);
+        UserLoginContext.clean();
+        insertUserAddress(userAddress);
+        return userAddress.getId();
+    }
+
+    @Override
     public void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(form, userAddress);
@@ -112,23 +124,20 @@ public class UserAddressServiceImpl implements UserAddressService {
         throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址信息异常");
     }
 
-    @Override
-    public void insertUserAddress(Integer userId, UserAddressAddForm form) {
-        UserAddress userAddress = new UserAddress();
-        BeanUtils.copyProperties(form, userAddress);
-        userAddress.setUserId(userId);
-        int insertUserAddressRow = userAddressMapper.insertSelective(userAddress);
-
-        if (insertUserAddressRow <= 0)
-            throw new ServiceException("新增失败");
-    }
-
     private List<UserAddress> listUserAddresses(Integer userId) {
         return userAddressMapper.selectListByUserId(userId);
     }
 
     private UserAddress getUserAddress(Integer addressId) {
         return userAddressMapper.selectByPrimaryKey(addressId);
+    }
+
+    private void insertUserAddress(UserAddress userAddress) {
+        int insertUserAddressRow = userAddressMapper.insertSelective(userAddress);
+
+        if (insertUserAddressRow <= 0) {
+            throw new ServiceException("保存收货地址失败");
+        }
     }
 
 }

@@ -22,7 +22,7 @@ public interface UserAddressService {
     /*
     * 新增收货地址
     * */
-    void insertUserAddress(Integer userId, UserAddressAddForm form);
+    Integer addUserAddress(UserAddressAddForm form);
 
     /*
     * 更新收货地址信息

@@ -1,7 +1,6 @@
 package com.zhihao.newretail.product.service;
 
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
-import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
 import java.util.List;

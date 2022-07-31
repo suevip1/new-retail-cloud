@@ -1,6 +1,5 @@
 package com.zhihao.newretail.product.service.impl;
 
-import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
@@ -27,22 +26,20 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryVO> listCategoryVOs() {
         List<Category> categoryList = categoryMapper.selectListByAll();
 
-        if (CollectionUtils.isEmpty(categoryList))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-
-        List<CategoryVO> categoryVOList = categoryList.stream()
-                .filter(category -> DeleteEnum.NOT_DELETE.getCode().equals(category.getIsDelete()))
-                .filter(category -> CategoryEnum.ROOT_NODE.getCode().equals(category.getParentId()))
-                .map(this::Category2CategoryVO).collect(Collectors.toList());
-        findSubCategoryVOList(categoryList, categoryVOList);
-        return categoryVOList;
+        if (!CollectionUtils.isEmpty(categoryList)) {
+            List<CategoryVO> categoryVOList = categoryList.stream()
+                    .filter(category -> CategoryEnum.ROOT_NODE.getCode().equals(category.getParentId()))
+                    .map(this::Category2CategoryVO).collect(Collectors.toList());
+            findSubCategoryVOList(categoryList, categoryVOList);
+            return categoryVOList;
+        }
+        throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
     }
 
     private void findSubCategoryVOList(List<Category> categoryList, List<CategoryVO> categoryVOList) {
         categoryVOList.forEach(categoryVO -> {
             List<CategoryVO> subCategoryVOList = new ArrayList<>();
             categoryList.stream()
-                    .filter(category -> DeleteEnum.NOT_DELETE.getCode().equals(category.getIsDelete()))
                     .filter(category -> categoryVO.getId().equals(category.getParentId()))
                     .collect(Collectors.toList())
                     .forEach(category -> {

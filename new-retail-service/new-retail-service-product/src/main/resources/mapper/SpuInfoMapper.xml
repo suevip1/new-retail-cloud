@@ -137,6 +137,6 @@
     select
     <include refid="Base_Column_List" />
     from tb_spu_info
-    where spu_id = #{spuId,jdbcType=INTEGER}
+    where spu_id = #{spuId,jdbcType=INTEGER} and is_delete = 0
   </select>
 </mapper>

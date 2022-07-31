@@ -148,7 +148,7 @@
     select
     <include refid="Base_Column_List" />
     from tb_sku
-    where spu_id = #{spuId,jdbcType=INTEGER}
+    where spu_id = #{spuId,jdbcType=INTEGER} and is_delete = 0
   </select>
 
   <select id="selectListByIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">

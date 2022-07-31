@@ -15,8 +15,8 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    @GetMapping("/listCategory")
-    public R listCategoryVOs() {
+    @GetMapping("/category/list")
+    public R categories() {
         List<CategoryVO> categoryVOList = categoryService.listCategoryVOs();
         return R.ok().put("data", categoryVOList);
     }

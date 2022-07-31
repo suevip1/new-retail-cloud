@@ -13,6 +13,7 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -55,11 +56,13 @@ public class StockServiceImpl implements StockService {
         skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
         int insertSkuStockLockRow = skuStockLockMapper.insertSelective(skuStockLock);
 
-        if (insertSkuStockLockRow <= 0)
+        if (insertSkuStockLockRow <= 0) {
             throw new ServiceException("库存锁定失败");
+        }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
         List<SkuStockLock> skuStockLockList = skuStockLockApiDTOList.stream()
                 .map(skuStockLockApiDTO -> {
@@ -70,8 +73,9 @@ public class StockServiceImpl implements StockService {
                 }).collect(Collectors.toList());
         int insertBatchSkuStockLockRow = skuStockLockMapper.insertBatch(skuStockLockList);
 
-        if (insertBatchSkuStockLockRow <= 0)
+        if (insertBatchSkuStockLockRow <= 0) {
             throw new ServiceException("库存锁定失败");
+        }
     }
 
 }

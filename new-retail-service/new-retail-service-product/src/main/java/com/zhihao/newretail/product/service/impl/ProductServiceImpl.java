@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<ProductDetailVO> detailFuture = CompletableFuture.supplyAsync(() -> {
             Spu spu = spuMapper.selectByPrimaryKey(spuId);
             if (ObjectUtils.isEmpty(spu)) {
-                throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品不存在");
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品不存在");
             }
             BeanUtils.copyProperties(spu, productDetailVO);
             return productDetailVO;
@@ -69,10 +69,9 @@ public class ProductServiceImpl implements ProductService {
             if (!ObjectUtils.isEmpty(res)) {
                 List<Sku> skuList = skuMapper.selectListBySpuId(res.getId());
                 if (CollectionUtils.isEmpty(skuList)) {
-                    throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品规格不存在");
+                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格不存在");
                 }
                 List<SkuVO> skuVOList = skuList.stream()
-                        .filter(sku -> DeleteEnum.NOT_DELETE.getCode().equals(sku.getIsDelete()))
                         .map(sku -> {
                             SkuVO skuVO = new SkuVO();
                             BeanUtils.copyProperties(sku, skuVO);
@@ -85,9 +84,8 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<Void> detailInfoFuture = detailFuture.thenAcceptAsync((res) -> {
             if (!ObjectUtils.isEmpty(res)) {
                 SpuInfo spuInfo = spuInfoMapper.selectBySpuId(res.getId());
-                if (ObjectUtils.isEmpty(spuInfo)
-                        || DeleteEnum.DELETE.getCode().equals(spuInfo.getIsDelete())) {
-                    throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品信息不存在");
+                if (ObjectUtils.isEmpty(spuInfo)) {
+                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品信息不存在");
                 }
                 ProductInfoVO productInfoVO = new ProductInfoVO();
                 BeanUtils.copyProperties(spuInfo, productInfoVO);
@@ -97,9 +95,9 @@ public class ProductServiceImpl implements ProductService {
 
         CompletableFuture.allOf(detailSkuFuture, detailInfoFuture).get();
 
-        if (ObjectUtils.isEmpty(productDetailVO))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品详情不存在");
-
+        if (ObjectUtils.isEmpty(productDetailVO)) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品详情不存在");
+        }
         return productDetailVO;
     }
 
@@ -119,43 +117,38 @@ public class ProductServiceImpl implements ProductService {
 
         /* 批量获取商品 */
         List<Spu> spuList = spuMapper.selectListByIdSet(spuIdSet);
-        List<SkuApiVO> skuApiVOList = skuList.stream()
-                .map(sku -> {
-                    SkuApiVO skuApiVO = new SkuApiVO();
-                    BeanUtils.copyProperties(sku, skuApiVO);
-                    if (!CollectionUtils.isEmpty(spuList)) {
+        if (!CollectionUtils.isEmpty(spuList)) {
+            return skuList.stream()
+                    .map(sku -> {
+                        SkuApiVO skuApiVO = new SkuApiVO();
+                        BeanUtils.copyProperties(sku, skuApiVO);
                         spuList.stream()
                                 .filter(spu -> sku.getSpuId().equals(spu.getId()))
                                 .forEach(spu -> {
                                     skuApiVO.setTitle(spu.getTitle());
                                 });
-                    } else
-                        throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-                    return skuApiVO;
-                }).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(skuApiVOList))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-        return skuApiVOList;
+                        return skuApiVO;
+                    }).collect(Collectors.toList());
+        }
+        throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
     }
 
     @Override
     public SkuApiVO getSkuApiVO(Integer skuId) {
         Sku sku = skuMapper.selectByPrimaryKey(skuId);
 
-        if (ObjectUtils.isEmpty(sku)
-                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete()))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-        else if (ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable()))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品已失效");
-        else {
+        if (ObjectUtils.isEmpty(sku) || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格不存在");
+        } else if (ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格已失效");
+        } else {
             SkuStock skuStock = stockService.getSkuStock(skuId);
 
-            if (ObjectUtils.isEmpty(skuStock))
-                throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存异常");
-            else if (skuStock.getStock() <= 0)
+            if (ObjectUtils.isEmpty(skuStock)) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品库存异常");
+            } else if (skuStock.getStock() <= 0) {
                 throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存不足");
-            else {
+            } else {
                 SkuApiVO skuApiVO = new SkuApiVO();
                 BeanUtils.copyProperties(sku, skuApiVO);
                 return skuApiVO;

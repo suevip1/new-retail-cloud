@@ -19,12 +19,14 @@ public class OrderFeignConfig {
     public RequestInterceptor requestInterceptor() {
         return requestTemplate -> {
             ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            assert requestAttributes != null;
-            HttpServletRequest request = requestAttributes.getRequest();
 
-            if (!ObjectUtils.isEmpty(request)) {
-                String token = request.getHeader("token");
-                requestTemplate.header("token", token);
+            if (!ObjectUtils.isEmpty(requestAttributes)) {
+                HttpServletRequest request = requestAttributes.getRequest();
+
+                if (!ObjectUtils.isEmpty(request)) {
+                    String token = request.getHeader("token");
+                    requestTemplate.header("token", token);
+                }
             }
         };
     }

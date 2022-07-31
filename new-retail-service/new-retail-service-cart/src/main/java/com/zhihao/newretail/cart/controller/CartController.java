@@ -20,7 +20,7 @@ public class CartController {
 
     @RequiresLogin
     @GetMapping("/cart")
-    public R getCartVO() {
+    public R getCart() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.getCartVO(userId);
         UserLoginContext.clean();

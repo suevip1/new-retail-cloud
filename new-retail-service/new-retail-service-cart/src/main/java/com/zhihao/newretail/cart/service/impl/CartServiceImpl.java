@@ -63,16 +63,7 @@ public class CartServiceImpl implements CartService {
             skuApiVOList.stream()
                     .filter(skuApiVO -> cart.getSkuId().equals(skuApiVO.getId()))
                     .forEach(skuApiVO -> {
-                        cartProductVO.setSpuId(skuApiVO.getSpuId());    // 商品ID
-                        cartProductVO.setSkuId(skuApiVO.getId());       // 商品规格ID
-                        cartProductVO.setTitle(skuApiVO.getTitle());    // 商品标题
-                        cartProductVO.setSkuImage(skuApiVO.getSkuImage());  // 商品图片地址
-                        cartProductVO.setParam(skuApiVO.getParam());        // 商品规格参数
-                        cartProductVO.setPrice(skuApiVO.getPrice());        // 单价
-                        cartProductVO.setQuantity(cart.getQuantity());      // 数量
-                        cartProductVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));  // 总价
-                        cartProductVO.setIsSaleable(skuApiVO.getIsSaleable());  // 是否有效
-                        cartProductVO.setSelected(cart.getSelected());          // 是否选中
+                        buildCartProductVO(cart, skuApiVO, cartProductVO);
                         cartProductVOList.add(cartProductVO);
                     });
             if (!cart.getSelected()) {
@@ -198,6 +189,19 @@ public class CartServiceImpl implements CartService {
             cartList.add((Cart) v);
         });
         return cartList;
+    }
+
+    private void buildCartProductVO(Cart cart, SkuApiVO skuApiVO, CartProductVO cartProductVO) {
+        cartProductVO.setSpuId(skuApiVO.getSpuId());    // 商品ID
+        cartProductVO.setSkuId(skuApiVO.getId());       // 商品规格ID
+        cartProductVO.setTitle(skuApiVO.getTitle());    // 商品标题
+        cartProductVO.setSkuImage(skuApiVO.getSkuImage());  // 商品图片地址
+        cartProductVO.setParam(skuApiVO.getParam());        // 商品规格参数
+        cartProductVO.setPrice(skuApiVO.getPrice());        // 单价
+        cartProductVO.setQuantity(cart.getQuantity());      // 数量
+        cartProductVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));  // 总价
+        cartProductVO.setIsSaleable(skuApiVO.getIsSaleable());  // 是否有效
+        cartProductVO.setSelected(cart.getSelected());          // 是否选中
     }
 
 }

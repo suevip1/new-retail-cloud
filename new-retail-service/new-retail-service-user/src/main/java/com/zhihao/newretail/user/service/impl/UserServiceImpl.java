@@ -37,15 +37,16 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertUser(UserRegisterDTO userRegisterDTO) {
+    public Integer insertUser(UserRegisterDTO userRegisterDTO) {
         String username = userRegisterDTO.getUsername();
         String password = userRegisterDTO.getPassword();
 
         /* 前置条件失败 */
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password))
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户名或密码不能为空");
+        }
 
-        String uuid = getUserUuid();    // 获取分布式唯一id
+        String uuid = getUserUUID();    // 获取分布式唯一id
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, uuid);  // 密码md5盐值加密
 
         User user = new User();
@@ -57,20 +58,23 @@ public class UserServiceImpl implements UserService {
         if (countByScope == 0) {
             int insertUserRow = userMapper.insertSelective(user);
 
-            if (insertUserRow <= 0)
-                throw new ServiceException("注册失败");
-            else {
+            if (insertUserRow <= 0) {
+                throw new ServiceException("保存用户失败");
+            } else {
+                Integer userId = user.getId();          // 获取返回主键值
                 UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(user.getId());   // 获取返回主键值
-                userInfo.setNickName("用户:" + uuid); // 用户uid
-                userInfo.setPhoto("photoURL");      // TODO 用户头像URL
+                userInfo.setUserId(userId);
+                userInfo.setNickName("用户:" + uuid);     // 用户昵称
+                userInfo.setPhoto("photoURL");          // TODO 用户头像URL
                 int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
 
-                if (insertUserInfoRow <= 0)
-                    throw new ServiceException("注册失败");
+                if (insertUserInfoRow <= 0) {
+                    throw new ServiceException("保存用户信息失败");
+                }
+                return userId;
             }
-        } else
-            throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
+        }
+        throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
     }
 
     /*
@@ -100,18 +104,18 @@ public class UserServiceImpl implements UserService {
     public UserInfoVO getUserInfoVO(Integer userId) {
         UserInfo userInfo = userInfoMapper.selectByUserId(userId);
 
-        if (ObjectUtils.isEmpty(userInfo))
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
-        UserInfoVO userInfoVO = new UserInfoVO();
-        BeanUtils.copyProperties(userInfo, userInfoVO);
-        return userInfoVO;
+        if (!ObjectUtils.isEmpty(userInfo)) {
+            UserInfoVO userInfoVO = new UserInfoVO();
+            BeanUtils.copyProperties(userInfo, userInfoVO);
+            return userInfoVO;
+        }
+        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }
 
     /*
     * 雪花生成唯一ID
     * */
-    private String getUserUuid() {
+    private String getUserUUID() {
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 0);
         return StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 4);
     }

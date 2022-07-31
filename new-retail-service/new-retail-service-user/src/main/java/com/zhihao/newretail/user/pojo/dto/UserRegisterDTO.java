@@ -1,8 +1,10 @@
 package com.zhihao.newretail.user.pojo.dto;
 
 /*
-* 用户注册
-* */
+ * @Project: NewRetail-Cloud
+ * @Author: Zhihao
+ * @Email: cafebabe0508@163.com
+ * */
 public class UserRegisterDTO {
 
     private String username;
@@ -27,7 +29,7 @@ public class UserRegisterDTO {
 
     @Override
     public String toString() {
-        return "RegisterUserDTO{" +
+        return "UserRegisterDTO{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';

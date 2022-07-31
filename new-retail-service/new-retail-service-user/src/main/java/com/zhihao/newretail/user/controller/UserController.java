@@ -7,6 +7,7 @@ import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,13 +21,17 @@ public class UserController {
 
     @PostMapping("/register")
     public R register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        userService.insertUser(userRegisterDTO);
-        return R.ok("注册成功");
+        Integer registerRow = userService.insertUser(userRegisterDTO);
+
+        if (!ObjectUtils.isEmpty(registerRow)) {
+            return R.ok("注册成功");
+        }
+        return R.error("注册失败");
     }
 
     @RequiresLogin
     @GetMapping("/userInfo")
-    public R getUserInfoVO() {
+    public R userInfo() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
         UserLoginContext.clean();

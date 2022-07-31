@@ -10,7 +10,7 @@ import java.util.List;
 @FeignClient(name = "new-retail-user", path = "/user")
 public interface UserAddressFeignService {
 
-    @GetMapping("/api/address")
+    @GetMapping("/api/address/list")
     List<UserAddressApiVO> listUserAddressApiVOs();
 
     @GetMapping("/api/address/{addressId}")

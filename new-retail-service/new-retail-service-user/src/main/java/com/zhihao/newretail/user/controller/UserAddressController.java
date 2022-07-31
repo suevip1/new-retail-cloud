@@ -22,22 +22,21 @@ public class UserAddressController {
     private UserAddressService userAddressService;
 
     @RequiresLogin
-    @GetMapping("/listAddresses")
-    public R listUserAddressVOs() {
+    @GetMapping("/address/list")
+    public R getAddresses() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
         UserLoginContext.clean();
 
-        if (CollectionUtils.isEmpty(listUserAddressVOs)) {
-            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据")
-                    .put("data", listUserAddressVOs);
+        if (!CollectionUtils.isEmpty(listUserAddressVOs)) {
+            return R.ok().put("data", listUserAddressVOs);
         }
-        return R.ok().put("data", listUserAddressVOs);
+        return R.error(HttpStatus.SC_NO_CONTENT, "暂无收货地址").put("data", listUserAddressVOs);
     }
 
     @RequiresLogin
     @GetMapping("/address/{addressId}")
-    public R getUserAddressVO(@PathVariable Integer addressId) {
+    public R getAddress(@PathVariable Integer addressId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserAddressVO userAddressVO = userAddressService.getUserAddressVO(userId, addressId);
         UserLoginContext.clean();
@@ -47,33 +46,32 @@ public class UserAddressController {
 
     @RequiresLogin
     @PostMapping("/address")
-    public R insertUserAddress(@Valid @RequestBody UserAddressAddForm form) {
+    public R addAddress(@Valid @RequestBody UserAddressAddForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.insertUserAddress(userId, form);
         UserLoginContext.clean();
 
-        return R.ok("新增成功");
+        return R.ok("新增收货地址成功");
     }
 
     @RequiresLogin
     @PutMapping("/address/{addressId}")
-    public R updateUserAddress(@PathVariable Integer addressId,
-                               @Valid @RequestBody UserAddressUpdateForm form) {
+    public R updateAddress(@PathVariable Integer addressId, @Valid @RequestBody UserAddressUpdateForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.updateUserAddress(userId, addressId, form);
         UserLoginContext.clean();
 
-        return R.ok("更新成功");
+        return R.ok("更新收货地址成功");
     }
 
     @RequiresLogin
     @DeleteMapping("/address/{addressId}")
-    public R deleteUserAddress(@PathVariable Integer addressId) {
+    public R deleteAddress(@PathVariable Integer addressId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         userAddressService.deleteUserAddress(userId, addressId);
         UserLoginContext.clean();
 
-        return R.ok("删除成功");
+        return R.ok("删除收货地址成功");
     }
 
 }

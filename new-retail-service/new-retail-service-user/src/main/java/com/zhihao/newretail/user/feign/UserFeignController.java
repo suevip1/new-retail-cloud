@@ -19,16 +19,16 @@ public class UserFeignController implements UserFeignService {
     private UserService userService;
 
     @Override
-    public UserApiVO getUserInfo(UserApiDTO userApiDTO) {
+    public UserApiVO getUserApiVO(UserApiDTO userApiDTO) {
         String uuid = userApiDTO.getUuid();
         String username = userApiDTO.getUsername();
         String weChat = userApiDTO.getWeChat();
 
         if (StringUtils.isEmpty(uuid)
                 && StringUtils.isEmpty(username)
-                && StringUtils.isEmpty(weChat))
+                && StringUtils.isEmpty(weChat)) {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "该项不能为空");
-
+        }
         User user = new User();
         BeanUtils.copyProperties(userApiDTO, user);
         return userService.getUserApiVO(user);

@@ -13,10 +13,10 @@ import java.util.List;
 @FeignClient(name = "new-retail-coupons", path = "/coupons")
 public interface CouponsFeignService {
 
-    @GetMapping("/api/getCouponsApiVO/{couponsId}")
+    @GetMapping("/api/coupons/{couponsId}")
     CouponsApiVO getCouponsApiVO(@PathVariable Integer couponsId);
 
-    @PostMapping("/api/listCoupons")
+    @PostMapping("/api/coupons/list")
     List<CouponsApiVO> listCouponsApiVOs(@RequestBody CouponsBatchApiDTO couponsBatchApiDTO);
 
 }

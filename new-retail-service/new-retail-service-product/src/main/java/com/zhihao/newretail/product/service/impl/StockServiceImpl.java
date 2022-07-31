@@ -9,12 +9,10 @@ import com.zhihao.newretail.product.enums.SkuStockLockEnum;
 import com.zhihao.newretail.product.pojo.SkuStock;
 import com.zhihao.newretail.product.pojo.SkuStockLock;
 import com.zhihao.newretail.product.service.StockService;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -37,16 +35,12 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
-
-        if (!CollectionUtils.isEmpty(skuStockList)) {
-            return skuStockList.stream()
-                    .map(skuStock -> {
-                        SkuStockApiVO skuStockApiVO = new SkuStockApiVO();
-                        BeanUtils.copyProperties(skuStock, skuStockApiVO);
-                        return skuStockApiVO;
-                    }).collect(Collectors.toList());
-        }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品库存信息异常");
+        return skuStockList.stream()
+                .map(skuStock -> {
+                    SkuStockApiVO skuStockApiVO = new SkuStockApiVO();
+                    BeanUtils.copyProperties(skuStock, skuStockApiVO);
+                    return skuStockApiVO;
+                }).collect(Collectors.toList());
     }
 
     @Override

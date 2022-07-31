@@ -23,20 +23,20 @@ public class OrderController {
     private OrderService orderService;
 
     @RequiresLogin
-    @GetMapping("/order/orderSubmit")
-    public R getOrderSubmitVO() throws ExecutionException, InterruptedException {
+    @GetMapping("/order/submit")
+    public R orderSubmit() throws ExecutionException, InterruptedException {
         OrderSubmitVO orderSubmitVO = orderService.getOrderSubmitVO();
         return R.ok().put("data", orderSubmitVO);
     }
 
-    @RequiresLogin
-    @PostMapping("/order")
-    public R insertOrder(@Valid @RequestBody OrderCreateForm form) throws ExecutionException, InterruptedException {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        OrderVO orderVO = orderService.insertOrder(userId, form);
-        UserLoginContext.clean();
-
-        return R.ok().put("data", orderVO);
-    }
+//    @RequiresLogin
+//    @PostMapping("/order")
+//    public R insertOrder(@Valid @RequestBody OrderCreateForm form) throws ExecutionException, InterruptedException {
+//        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+//        OrderVO orderVO = orderService.insertOrder(userId, form);
+//        UserLoginContext.clean();
+//
+//        return R.ok().put("data", orderVO);
+//    }
 
 }

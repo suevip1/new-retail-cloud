@@ -10,7 +10,7 @@ public class OrderSubmitVO {
 
     private List<UserAddressApiVO> userAddressApiVOList;
 
-    private List<ProductSubmitItemVO> productSubmitItemVOList;
+    private List<OrderItemSubmitVO> orderItemSubmitVOList;
 
     private List<CouponsApiVO> couponsApiVOList;
 
@@ -26,12 +26,12 @@ public class OrderSubmitVO {
         this.userAddressApiVOList = userAddressApiVOList;
     }
 
-    public List<ProductSubmitItemVO> getProductSubmitItemVOList() {
-        return productSubmitItemVOList;
+    public List<OrderItemSubmitVO> getOrderItemSubmitVOList() {
+        return orderItemSubmitVOList;
     }
 
-    public void setProductSubmitItemVOList(List<ProductSubmitItemVO> productSubmitItemVOList) {
-        this.productSubmitItemVOList = productSubmitItemVOList;
+    public void setOrderItemSubmitVOList(List<OrderItemSubmitVO> orderItemSubmitVOList) {
+        this.orderItemSubmitVOList = orderItemSubmitVOList;
     }
 
     public List<CouponsApiVO> getCouponsApiVOList() {
@@ -62,7 +62,7 @@ public class OrderSubmitVO {
     public String toString() {
         return "OrderSubmitVO{" +
                 "userAddressApiVOList=" + userAddressApiVOList +
-                ", productSubmitItemVOList=" + productSubmitItemVOList +
+                ", orderItemSubmitVOList=" + orderItemSubmitVOList +
                 ", couponsApiVOList=" + couponsApiVOList +
                 ", totalPrice=" + totalPrice +
                 ", orderToken='" + orderToken + '\'' +

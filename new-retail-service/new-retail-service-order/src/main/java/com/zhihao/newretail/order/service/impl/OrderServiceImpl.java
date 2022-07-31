@@ -81,15 +81,12 @@ public class OrderServiceImpl implements OrderService {
         OrderSubmitVO orderSubmitVO = new OrderSubmitVO();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        /* 获取购物车选中商品 */
         CompletableFuture<Void> cartFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);       // 请求内容共享
 
             /* 获取购物车选中的商品 */
             List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOs();
-            Set<Integer> skuIdSet = cartApiVOList.stream()
-                    .map(CartApiVO::getSkuId)
-                    .collect(Collectors.toSet());
+            Set<Integer> skuIdSet = cartApiVOList.stream().map(CartApiVO::getSkuId).collect(Collectors.toSet());
 
             if (CollectionUtils.isEmpty(skuIdSet)) {
                 throw new ServiceException(HttpStatus.SC_NOT_FOUND, "请选中商品再下单");
@@ -99,19 +96,19 @@ public class OrderServiceImpl implements OrderService {
             skuBatchApiDTO.setIdSet(skuIdSet);
             List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
 
-            /* 渲染返回 */
-            List<ProductSubmitItemVO> productSubmitItemVOList = new ArrayList<>();
+            /* 渲染订单项 */
+            List<OrderItemSubmitVO> orderItemSubmitVOList = new ArrayList<>();
             cartApiVOList.forEach(cartApiVO -> {
-                ProductSubmitItemVO productSubmitItemVO = new ProductSubmitItemVO();
-                buildProductSubmitItemVO(cartApiVO, skuApiVOList, productSubmitItemVO);
-                productSubmitItemVOList.add(productSubmitItemVO);
+                OrderItemSubmitVO orderItemSubmitVO = new OrderItemSubmitVO();
+                buildOrderItemSubmitVO(cartApiVO, skuApiVOList, orderItemSubmitVO);
+                orderItemSubmitVOList.add(orderItemSubmitVO);
             });
 
             /* 计算商品总价格 */
-            BigDecimal totalPrice = productSubmitItemVOList.stream()
-                    .map(ProductSubmitItemVO::getTotalPrice)
+            BigDecimal totalPrice = orderItemSubmitVOList.stream()
+                    .map(OrderItemSubmitVO::getTotalPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            orderSubmitVO.setProductSubmitItemVOList(productSubmitItemVOList);
+            orderSubmitVO.setOrderItemSubmitVOList(orderItemSubmitVOList);
             orderSubmitVO.setTotalPrice(totalPrice);
         }, executor);
 
@@ -119,23 +116,24 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> addressFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<UserAddressApiVO> userAddressApiVOList = userAddressFeignService.listUserAddressApiVOs();
-            if (!CollectionUtils.isEmpty(userAddressApiVOList))
-                orderSubmitVO.setUserAddressApiVOList(userAddressApiVOList);
+            orderSubmitVO.setUserAddressApiVOList(userAddressApiVOList);
         }, executor);
 
         /* 获取用户优惠券列表 */
         CompletableFuture<Void> couponsFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
+
+            /* 获取用户优惠券id */
             List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOs();
             Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
                     .map(UserCouponsApiVO::getCouponsId)
                     .collect(Collectors.toSet());
-            if (!CollectionUtils.isEmpty(couponsIdSet)) {
-                CouponsBatchApiDTO couponsBatchApiDTO = new CouponsBatchApiDTO();
-                couponsBatchApiDTO.setCouponsIdSet(couponsIdSet);
-                List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOs(couponsBatchApiDTO);
-                orderSubmitVO.setCouponsApiVOList(couponsApiVOList);
-            }
+
+            /* 获取优惠券信息 */
+            CouponsBatchApiDTO couponsBatchApiDTO = new CouponsBatchApiDTO();
+            couponsBatchApiDTO.setCouponsIdSet(couponsIdSet);
+            List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOs(couponsBatchApiDTO);
+            orderSubmitVO.setCouponsApiVOList(couponsApiVOList);
         }, executor);
 
         /* 返回订单唯一标识符 */
@@ -256,17 +254,16 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 构造订单提交页商品列表
     * */
-    private void buildProductSubmitItemVO(CartApiVO cartApiVO,
-                                          List<SkuApiVO> skuApiVOList,
-                                          ProductSubmitItemVO productSubmitItemVO) {
+    private void buildOrderItemSubmitVO(CartApiVO cartApiVO,
+                                        List<SkuApiVO> skuApiVOList,
+                                        OrderItemSubmitVO orderItemSubmitVO) {
         skuApiVOList.stream()
                 .filter(skuApiVO -> cartApiVO.getSkuId().equals(skuApiVO.getId()))
                 .forEach(skuApiVO -> {
-                    BeanUtils.copyProperties(skuApiVO, productSubmitItemVO);
-                    productSubmitItemVO.setSkuId(skuApiVO.getId());
-                    productSubmitItemVO.setQuantity(cartApiVO.getQuantity());
-                    productSubmitItemVO.setTotalPrice(skuApiVO.getPrice()
-                            .multiply(BigDecimal.valueOf(cartApiVO.getQuantity())));
+                    BeanUtils.copyProperties(skuApiVO, orderItemSubmitVO);
+                    orderItemSubmitVO.setSkuId(skuApiVO.getId());
+                    orderItemSubmitVO.setQuantity(cartApiVO.getQuantity());
+                    orderItemSubmitVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cartApiVO.getQuantity())));
                 });
     }
 

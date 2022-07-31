@@ -20,19 +20,16 @@ public class UserAddressController {
 
     @Autowired
     private UserAddressService userAddressService;
-
-    @RequiresLogin
-    @GetMapping("/listAddresses")
+    
+    @GetMapping("/addresses")
     public R listUserAddressVOs() {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
-        UserLoginContext.clean();
+        List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs();
 
-        if (CollectionUtils.isEmpty(listUserAddressVOs)) {
-            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据")
-                    .put("data", listUserAddressVOs);
+        if (!CollectionUtils.isEmpty(listUserAddressVOs)) {
+            return R.ok().put("data", listUserAddressVOs);
+        } else {
+            return R.error(HttpStatus.SC_NO_CONTENT, "暂无收货地址").put("data", listUserAddressVOs);
         }
-        return R.ok().put("data", listUserAddressVOs);
     }
 
     @RequiresLogin

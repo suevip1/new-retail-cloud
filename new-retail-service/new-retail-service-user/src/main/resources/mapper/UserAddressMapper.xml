@@ -137,6 +137,6 @@
     select
     <include refid="Base_Column_List" />
     from tb_user_address
-    where user_id = #{userId,jdbcType=INTEGER}
+    where user_id = #{userId,jdbcType=INTEGER} and is_delete = 0;
   </select>
 </mapper>

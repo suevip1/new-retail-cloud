@@ -3,6 +3,8 @@ package com.zhihao.newretail.user.service.impl;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
@@ -26,10 +28,12 @@ public class UserAddressServiceImpl implements UserAddressService {
     private UserAddressMapper userAddressMapper;
 
     @Override
-    public List<UserAddressVO> listUserAddressVOs(Integer userId) {
-        List<UserAddress> userAddresses = userAddressMapper.selectListByUserId(userId);
+    @RequiresLogin
+    public List<UserAddressVO> listUserAddressVOs() {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        List<UserAddress> userAddresses = listUserAddresses(userId);
+        UserLoginContext.clean();
         return userAddresses.stream()
-                .filter(userAddress -> DeleteEnum.NOT_DELETE.getCode().equals(userAddress.getIsDelete()))
                 .map(userAddress -> {
                     UserAddressVO userAddressVO = new UserAddressVO();
                     BeanUtils.copyProperties(userAddress, userAddressVO);
@@ -114,6 +118,10 @@ public class UserAddressServiceImpl implements UserAddressService {
 
         if (insertUserAddressRow <= 0)
             throw new ServiceException("新增失败");
+    }
+
+    private List<UserAddress> listUserAddresses(Integer userId) {
+        return userAddressMapper.selectListByUserId(userId);
     }
 
 }

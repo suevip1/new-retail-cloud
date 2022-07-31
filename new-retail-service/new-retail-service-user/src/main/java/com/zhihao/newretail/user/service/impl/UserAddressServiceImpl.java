@@ -80,6 +80,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         BeanUtils.copyProperties(form, userAddress);
         userAddress.setId(addressId);
         userAddress.setUserId(userId);
+        UserLoginContext.clean();
         int updateUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
 
         if (updateUserAddressRow <= 0) {
@@ -88,18 +89,25 @@ public class UserAddressServiceImpl implements UserAddressService {
     }
 
     @Override
-    public void deleteUserAddress(Integer userId, Integer addressId) {
-        UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-
-        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId()))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "收货地址不存在");
-
+    @RequiresLogin
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteUserAddress(Integer addressId) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        UserAddress userAddress = getUserAddress(addressId);
+        try {
+            if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+            }
+        } finally {
+            UserLoginContext.clean();
+        }
         /* 使用逻辑删除 */
         userAddress.setIsDelete(DeleteEnum.DELETE.getCode());
         int deleteUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
 
-        if (deleteUserAddressRow <= 0)
-            throw new ServiceException("删除失败");
+        if (deleteUserAddressRow <= 0) {
+            throw new ServiceException("删除收货地址失败");
+        }
     }
 
     @Override

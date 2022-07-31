@@ -1,8 +1,6 @@
 package com.zhihao.newretail.user.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.security.UserLoginContext;
-import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
@@ -57,14 +55,10 @@ public class UserAddressController {
         return R.ok("更新收货地址成功");
     }
 
-    @RequiresLogin
     @DeleteMapping("/address/{addressId}")
     public R deleteUserAddress(@PathVariable Integer addressId) {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        userAddressService.deleteUserAddress(userId, addressId);
-        UserLoginContext.clean();
-
-        return R.ok("删除成功");
+        userAddressService.deleteUserAddress(addressId);
+        return R.ok("删除收货地址成功");
     }
 
 }

@@ -17,7 +17,7 @@ public interface UserAddressService {
     /*
     * 用户收货地址
     * */
-    UserAddressVO getUserAddressVO(Integer userId, Integer addressId);
+    UserAddressVO getUserAddressVO(Integer addressId);
 
     /*
     * 新增收货地址

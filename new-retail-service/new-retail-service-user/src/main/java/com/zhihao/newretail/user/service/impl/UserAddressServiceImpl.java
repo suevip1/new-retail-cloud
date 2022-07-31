@@ -42,14 +42,17 @@ public class UserAddressServiceImpl implements UserAddressService {
     }
 
     @Override
-    public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
-        UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
+    @RequiresLogin
+    public UserAddressVO getUserAddressVO(Integer addressId) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        UserAddress userAddress = getUserAddress(addressId);
 
         if (ObjectUtils.isEmpty(userAddress)
                 || !userId.equals(userAddress.getUserId())
-                || DeleteEnum.DELETE.getCode().equals(userAddress.getIsDelete()))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "收货地址不存在");
-
+                || DeleteEnum.DELETE.getCode().equals(userAddress.getIsDelete())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+        }
+        UserLoginContext.clean();
         UserAddressVO userAddressVO = new UserAddressVO();
         BeanUtils.copyProperties(userAddress, userAddressVO);
         return userAddressVO;
@@ -122,6 +125,10 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     private List<UserAddress> listUserAddresses(Integer userId) {
         return userAddressMapper.selectListByUserId(userId);
+    }
+
+    private UserAddress getUserAddress(Integer addressId) {
+        return userAddressMapper.selectByPrimaryKey(addressId);
     }
 
 }

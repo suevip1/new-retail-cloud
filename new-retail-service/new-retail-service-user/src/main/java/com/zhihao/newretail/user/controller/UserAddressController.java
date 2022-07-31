@@ -20,7 +20,7 @@ public class UserAddressController {
 
     @Autowired
     private UserAddressService userAddressService;
-    
+
     @GetMapping("/addresses")
     public R listUserAddressVOs() {
         List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs();
@@ -32,13 +32,9 @@ public class UserAddressController {
         }
     }
 
-    @RequiresLogin
     @GetMapping("/address/{addressId}")
     public R getUserAddressVO(@PathVariable Integer addressId) {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        UserAddressVO userAddressVO = userAddressService.getUserAddressVO(userId, addressId);
-        UserLoginContext.clean();
-
+        UserAddressVO userAddressVO = userAddressService.getUserAddressVO(addressId);
         return R.ok().put("data", userAddressVO);
     }
 

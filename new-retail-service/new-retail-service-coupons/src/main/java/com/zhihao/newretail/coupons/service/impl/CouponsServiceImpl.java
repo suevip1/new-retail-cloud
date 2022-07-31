@@ -1,9 +1,7 @@
 package com.zhihao.newretail.coupons.service.impl;
 
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
-import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.coupons.dao.CouponsMapper;
-import com.zhihao.newretail.coupons.enums.CouponsSaleableEnum;
 import com.zhihao.newretail.coupons.pojo.Coupons;
 import com.zhihao.newretail.coupons.service.CouponsService;
 import org.springframework.beans.BeanUtils;
@@ -32,8 +30,6 @@ public class CouponsServiceImpl implements CouponsService {
     public List<CouponsApiVO> listCouponsApiVOs(Set<Integer> couponsIdSet) {
         List<Coupons> couponsList = couponsMapper.selectListByCouponsIdSet(couponsIdSet);
         return couponsList.stream()
-                .filter(coupons -> DeleteEnum.NOT_DELETE.getCode().equals(coupons.getIsDelete()))
-                .filter(coupons -> CouponsSaleableEnum.SALEABLE.getCode().equals(coupons.getIsSaleable()))
                 .map(coupons -> {
                     CouponsApiVO couponsApiVO = new CouponsApiVO();
                     BeanUtils.copyProperties(coupons, couponsApiVO);

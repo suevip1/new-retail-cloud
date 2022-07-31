@@ -35,9 +35,9 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public R verifierToken(String token) {
-        if (StringUtils.isEmpty(token))
+        if (StringUtils.isEmpty(token)) {
             return R.error(HttpStatus.SC_UNAUTHORIZED, "用户未登录").put("token", token);
-
+        }
         Integer userId = JwtUtil.getUserId(token);
         String uuid = JwtUtil.getUuid(token);
         try {
@@ -50,8 +50,8 @@ public class TokenServiceImpl implements TokenService {
                 refreshCacheUserInfo(userId);
                 String newToken = JwtUtil.createToken(userId, uuid);
                 return R.ok().put("token", newToken);
-            } else
-                return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", null);
+            }
+            return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", null);
         }
     }
 

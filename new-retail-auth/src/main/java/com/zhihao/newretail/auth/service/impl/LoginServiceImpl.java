@@ -32,7 +32,7 @@ public class LoginServiceImpl implements LoginService {
 
         UserApiDTO userApiDTO = new UserApiDTO();
         userApiDTO.setUsername(username);
-        UserApiVO userInfo = getUserApiVO(userApiDTO);
+        UserApiVO userInfo = userFeignService.getUserApiVO(userApiDTO);
 
         if (!ObjectUtils.isEmpty(userInfo.getId())) {
             String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());
@@ -43,7 +43,7 @@ public class LoginServiceImpl implements LoginService {
                 userLoginVO.setUuid(userInfo.getUuid());
                 userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
                 userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
-                String token = getToken(userLoginVO);
+                String token = tokenService.getToken(userLoginVO);
 
                 if (!StringUtils.isEmpty(token)) {
                     return R.ok("登录成功").put("token", token);
@@ -53,14 +53,6 @@ public class LoginServiceImpl implements LoginService {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
         }
         throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-    }
-
-    private UserApiVO getUserApiVO(UserApiDTO userApiDTO) {
-        return userFeignService.getUserApiVO(userApiDTO);
-    }
-
-    private String getToken(UserLoginVO userLoginVO) {
-        return tokenService.getToken(userLoginVO);
     }
 
 }

@@ -12,27 +12,27 @@ public interface UserAddressService {
     /*
     * 用户收货地址列表
     * */
-    List<UserAddressVO> listUserAddressVOs();
+    List<UserAddressVO> listUserAddressVOs(Integer userId);
 
     /*
     * 用户收货地址
     * */
-    UserAddressVO getUserAddressVO(Integer addressId);
+    UserAddressVO getUserAddressVO(Integer userId, Integer addressId);
 
     /*
     * 新增收货地址
     * */
-    Integer addUserAddress(UserAddressAddForm form);
+    void insertUserAddress(Integer userId, UserAddressAddForm form);
 
     /*
     * 更新收货地址信息
     * */
-    void updateUserAddress(Integer addressId, UserAddressUpdateForm form);
+    void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form);
 
     /*
     * 删除收货地址
     * */
-    void deleteUserAddress(Integer addressId);
+    void deleteUserAddress(Integer userId, Integer addressId);
 
     /*
     * 获取收货地址列表

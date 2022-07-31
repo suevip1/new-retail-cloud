@@ -103,56 +103,32 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<SkuApiVO> listSkuApiVOs(Set<Integer> skuIdSet) {
-        if (CollectionUtils.isEmpty(skuIdSet))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-
-        /* 集合中的ID批量获取商品规格 */
         List<Sku> skuList = skuMapper.selectListByIdSet(skuIdSet);
-        Set<Integer> spuIdSet = skuList.stream()
-                .map(Sku::getSpuId)
-                .collect(Collectors.toSet());
-
-        if (CollectionUtils.isEmpty(spuIdSet))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
-
-        /* 批量获取商品 */
+        Set<Integer> spuIdSet = skuList.stream().map(Sku::getSpuId).collect(Collectors.toSet());
         List<Spu> spuList = spuMapper.selectListByIdSet(spuIdSet);
-        if (!CollectionUtils.isEmpty(spuList)) {
-            return skuList.stream()
-                    .map(sku -> {
-                        SkuApiVO skuApiVO = new SkuApiVO();
-                        BeanUtils.copyProperties(sku, skuApiVO);
-                        spuList.stream()
-                                .filter(spu -> sku.getSpuId().equals(spu.getId()))
-                                .forEach(spu -> {
-                                    skuApiVO.setTitle(spu.getTitle());
-                                });
-                        return skuApiVO;
-                    }).collect(Collectors.toList());
-        }
-        throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+        return skuList.stream().map(sku -> {
+            SkuApiVO skuApiVO = new SkuApiVO();
+            BeanUtils.copyProperties(sku, skuApiVO);
+            spuList.stream().filter(spu -> sku.getSpuId().equals(spu.getId()))
+                    .forEach(spu -> {
+                        skuApiVO.setTitle(spu.getTitle());
+                    });
+            return skuApiVO;
+        }).collect(Collectors.toList());
     }
 
     @Override
     public SkuApiVO getSkuApiVO(Integer skuId) {
+        SkuApiVO skuApiVO = new SkuApiVO();
         Sku sku = skuMapper.selectByPrimaryKey(skuId);
 
-        if (ObjectUtils.isEmpty(sku) || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格不存在");
-        } else if (ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格已失效");
+        if (ObjectUtils.isEmpty(sku)
+                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())
+                || ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable())) {
+            return skuApiVO;
         } else {
-            SkuStock skuStock = stockService.getSkuStock(skuId);
-
-            if (ObjectUtils.isEmpty(skuStock)) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品库存异常");
-            } else if (skuStock.getStock() <= 0) {
-                throw new ServiceException(HttpStatus.SC_NO_CONTENT, "商品库存不足");
-            } else {
-                SkuApiVO skuApiVO = new SkuApiVO();
-                BeanUtils.copyProperties(sku, skuApiVO);
-                return skuApiVO;
-            }
+            BeanUtils.copyProperties(sku, skuApiVO);
+            return skuApiVO;
         }
     }
 

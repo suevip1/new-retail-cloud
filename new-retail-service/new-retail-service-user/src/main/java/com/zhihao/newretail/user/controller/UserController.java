@@ -1,8 +1,6 @@
 package com.zhihao.newretail.user.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.security.UserLoginContext;
-import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
@@ -32,13 +30,9 @@ public class UserController {
         }
     }
 
-    @RequiresLogin
     @GetMapping("/userInfo")
     public R getUserInfoVO() {
-        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
-        UserLoginContext.clean();
-
+        UserInfoVO userInfoVO = userService.getUserInfoVO();
         return R.ok().put("data", userInfoVO);
     }
 

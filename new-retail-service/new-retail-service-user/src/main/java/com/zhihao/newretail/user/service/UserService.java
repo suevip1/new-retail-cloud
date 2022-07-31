@@ -21,6 +21,6 @@ public interface UserService {
     /*
     * 用户基本信息
     * */
-    UserInfoVO getUserInfoVO(Integer userId);
+    UserInfoVO getUserInfoVO();
 
 }

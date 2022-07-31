@@ -5,6 +5,8 @@ import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
+import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.form.UserRegisterForm;
@@ -88,12 +90,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoVO getUserInfoVO(Integer userId) {
-        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+    @RequiresLogin
+    public UserInfoVO getUserInfoVO() {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        UserInfo userInfo = getUserInfo(userId);
+        UserLoginContext.clean();
 
-        if (ObjectUtils.isEmpty(userInfo))
+        if (ObjectUtils.isEmpty(userInfo)) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-
+        }
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(userInfo, userInfoVO);
         return userInfoVO;
@@ -125,6 +130,10 @@ public class UserServiceImpl implements UserService {
         if (insertUserInfoRow <= 0) {
             throw new ServiceException("保存用户信息失败");
         }
+    }
+
+    private UserInfo getUserInfo(Integer userId) {
+        return userInfoMapper.selectByUserId(userId);
     }
 
 }

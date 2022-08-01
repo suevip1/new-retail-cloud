@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,7 +59,25 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+    public int batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+        Set<Integer> skuIdSet = skuStockLockApiDTOList.stream().map(SkuStockLockApiDTO::getSkuId).collect(Collectors.toSet());
+        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
+
+        Map<Integer, SkuStockLockApiDTO> skuStockLockApiDTOMap = skuStockLockApiDTOList.stream()
+                .collect(Collectors.toMap(SkuStockLockApiDTO::getSkuId, skuStockLockApiDTO -> skuStockLockApiDTO));
+        List<SkuStock> skuStocks = new ArrayList<>();
+        for (SkuStock skuStock : skuStockList) {
+            SkuStockLockApiDTO skuStockLockApiDTO = skuStockLockApiDTOMap.get(skuStock.getSkuId());
+            skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
+            if (skuStock.getLockStock() == 0) {
+                skuStock.setStock(skuStock.getActualStock() - skuStockLockApiDTO.getCount());
+            } else {
+                skuStock.setStock(skuStock.getActualStock() - (skuStock.getLockStock() + skuStockLockApiDTO.getCount()));
+            }
+            skuStocks.add(skuStock);
+        }
+        int updateBatchRow = skuStockMapper.updateBatch(skuStocks);
+
         List<SkuStockLock> skuStockLockList = skuStockLockApiDTOList.stream()
                 .map(skuStockLockApiDTO -> {
                     SkuStockLock skuStockLock = new SkuStockLock();
@@ -65,11 +85,9 @@ public class StockServiceImpl implements StockService {
                     skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
                     return skuStockLock;
                 }).collect(Collectors.toList());
-        int insertBatchSkuStockLockRow = skuStockLockMapper.insertBatch(skuStockLockList);
+        skuStockLockMapper.insertBatch(skuStockLockList);
 
-        if (insertBatchSkuStockLockRow <= 0) {
-            throw new ServiceException("库存锁定失败");
-        }
+        return updateBatchRow;
     }
 
 }

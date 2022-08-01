@@ -28,9 +28,9 @@ public class ProductStockFeignController implements ProductStockFeignService {
     }
 
     @Override
-    public void batchStockLock(SkuStockLockBatchApiDTO skuStockLockBatchApiDTO) {
+    public int batchStockLock(SkuStockLockBatchApiDTO skuStockLockBatchApiDTO) {
         List<SkuStockLockApiDTO> skuStockLockApiDTOList = skuStockLockBatchApiDTO.getSkuStockLockApiDTOList();
-        stockService.batchStockLock(skuStockLockApiDTOList);
+        return stockService.batchStockLock(skuStockLockApiDTOList);
     }
 
 }

@@ -148,5 +148,36 @@
     <foreach collection="SkuIdSet" item="item" open="and" separator="or">
       sku_id = #{item}
     </foreach>
+    for update
   </select>
+
+  <update id="updateBatch" parameterType="java.util.List">
+    <foreach collection="skuStockList" item="item" index="index" separator=";">
+      update `tb_sku_stock`
+      <set>
+        <if test="item.skuId != null">
+          `sku_id` = #{item.skuId,jdbcType=INTEGER},
+        </if>
+        <if test="item.actualStock != null">
+          `actual_stock` = #{item.actualStock,jdbcType=INTEGER},
+        </if>
+        <if test="item.lockStock != null">
+          `lock_stock` = #{item.lockStock,jdbcType=INTEGER},
+        </if>
+        <if test="item.stock != null">
+          `stock` = #{item.stock,jdbcType=INTEGER},
+        </if>
+        <if test="item.isDelete != null">
+          `is_delete` = #{item.isDelete,jdbcType=TINYINT},
+        </if>
+        <if test="item.createTime != null">
+          `create_time` = #{item.createTime,jdbcType=TIMESTAMP},
+        </if>
+        <if test="item.updateTime != null">
+          `update_time` = #{item.updateTime,jdbcType=TIMESTAMP},
+        </if>
+      </set>
+      where `id` = #{item.id,jdbcType=INTEGER}
+    </foreach>
+  </update>
 </mapper>

@@ -27,4 +27,9 @@ public interface SkuStockMapper {
     * */
     List<SkuStock> selectListBySkuIdSet(@Param("SkuIdSet") Set<Integer> SkuIdSet);
 
+    /*
+    * 批量更新
+    * */
+    int updateBatch(@Param("skuStockList") List<SkuStock> skuStockList);
+
 }

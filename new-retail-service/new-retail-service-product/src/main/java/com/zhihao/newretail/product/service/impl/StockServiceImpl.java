@@ -60,20 +60,16 @@ public class StockServiceImpl implements StockService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
-        Set<Integer> skuIdSet = skuStockLockApiDTOList.stream().map(SkuStockLockApiDTO::getSkuId).collect(Collectors.toSet());
-        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
-
+        Set<Integer> skuIdSet = skuStockLockApiDTOList.stream()
+                .map(SkuStockLockApiDTO::getSkuId).collect(Collectors.toSet());
         Map<Integer, SkuStockLockApiDTO> skuStockLockApiDTOMap = skuStockLockApiDTOList.stream()
                 .collect(Collectors.toMap(SkuStockLockApiDTO::getSkuId, skuStockLockApiDTO -> skuStockLockApiDTO));
+
+        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         List<SkuStock> skuStocks = new ArrayList<>();
         for (SkuStock skuStock : skuStockList) {
             SkuStockLockApiDTO skuStockLockApiDTO = skuStockLockApiDTOMap.get(skuStock.getSkuId());
-            skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
-            if (skuStock.getLockStock() == 0) {
-                skuStock.setStock(skuStock.getActualStock() - skuStockLockApiDTO.getCount());
-            } else {
-                skuStock.setStock(skuStock.getActualStock() - (skuStock.getLockStock() + skuStockLockApiDTO.getCount()));
-            }
+            buildSkuStock(skuStock, skuStockLockApiDTO);
             skuStocks.add(skuStock);
         }
         int updateBatchRow = skuStockMapper.updateBatch(skuStocks);
@@ -88,6 +84,15 @@ public class StockServiceImpl implements StockService {
         skuStockLockMapper.insertBatch(skuStockLockList);
 
         return updateBatchRow;
+    }
+
+    private void buildSkuStock(SkuStock skuStock, SkuStockLockApiDTO skuStockLockApiDTO) {
+        if (skuStock.getLockStock() == 0) {
+            skuStock.setStock(skuStock.getActualStock() - skuStockLockApiDTO.getCount());
+        } else {
+            skuStock.setStock(skuStock.getActualStock() - (skuStock.getLockStock() + skuStockLockApiDTO.getCount()));
+        }
+        skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
     }
 
 }

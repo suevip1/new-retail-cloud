@@ -29,14 +29,14 @@ public class OrderController {
         return R.ok().put("data", orderSubmitVO);
     }
 
-//    @RequiresLogin
-//    @PostMapping("/order")
-//    public R insertOrder(@Valid @RequestBody OrderCreateForm form) throws ExecutionException, InterruptedException {
-//        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-//        OrderVO orderVO = orderService.insertOrder(userId, form);
-//        UserLoginContext.clean();
-//
-//        return R.ok().put("data", orderVO);
-//    }
+    @RequiresLogin
+    @PostMapping("/order")
+    public R orderConfirm(@Valid @RequestBody OrderCreateForm form) throws ExecutionException, InterruptedException {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        OrderVO orderVO = orderService.insertOrder(userId, form);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", orderVO);
+    }
 
 }

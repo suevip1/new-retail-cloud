@@ -23,6 +23,7 @@ import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.order.dao.OrderAddressMapper;
 import com.zhihao.newretail.order.dao.OrderItemMapper;
 import com.zhihao.newretail.order.dao.OrderMapper;
+import com.zhihao.newretail.order.enums.OrderStatusEnum;
 import com.zhihao.newretail.order.enums.ProductEnum;
 import com.zhihao.newretail.order.form.OrderCreateForm;
 import com.zhihao.newretail.order.pojo.Order;
@@ -178,7 +179,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         /* 获取购物车选中的商品 */
-        CompletableFuture<Void> cartApiVOFuture = CompletableFuture.runAsync(() -> {
+        CompletableFuture<List<SkuApiVO>> cartApiVOFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOs();
             Set<Integer> skuIdSet = cartApiVOList.stream()
@@ -199,56 +200,49 @@ public class OrderServiceImpl implements OrderService {
             Map<Integer, SkuStockApiVO> skuStockApiVOMap = skuStockApiVOList.stream()
                     .collect(Collectors.toMap(SkuStockApiVO::getSkuId, skuStockApiVO -> skuStockApiVO));
 
-
             for (CartApiVO cartApiVO : cartApiVOList) {
                 /* 商品有效性校验 */
                 SkuApiVO skuApiVO = skuApiVOMap.get(cartApiVO.getSkuId());
-                CompletableFuture<SkuApiVO> skuApiVOFuture = CompletableFuture.supplyAsync(() -> {
-                    if (ProductEnum.NOT_SALEABLE.getCode().equals(skuApiVO.getIsSaleable())) {
-                        throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                "商品:" + skuApiVO.getTitle() + "商品规格ID:" + skuApiVO.getId() + "商品下架或删除");
-                    }
-                    return skuApiVO;
-                }, executor);
-
+                if (ProductEnum.NOT_SALEABLE.getCode().equals(skuApiVO.getIsSaleable())) {
+                    throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
+                            "商品:" + skuApiVO.getTitle() + "商品规格ID:" + skuApiVO.getId() + "商品下架或删除");
+                }
                 /* 库存校验 */
                 SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
-                CompletableFuture<Void> skuStockApiVOFuture = CompletableFuture.runAsync(() -> {
-                    if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
-                        throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                                "商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足");
-                    }
-                }, executor);
-
-                /* 封装orderItem、库存信息 */
-                CompletableFuture<Void> buildListFuture = skuApiVOFuture.thenAcceptAsync((res) -> {
-                    OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), res);
-                    SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), res);
-                    orderItemList.add(orderItem);
-                    skuStockLockApiDTOList.add(skuStockLockApiDTO);
-                }, executor);
-
-                try {
-                    CompletableFuture.allOf(skuApiVOFuture, skuStockApiVOFuture, buildListFuture).get();
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
+                    throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
+                            "商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足");
                 }
+                /* 封装orderItem、库存信息 */
+                OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), skuApiVO);
+                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), skuApiVO);
+                orderItemList.add(orderItem);
+                skuStockLockApiDTOList.add(skuStockLockApiDTO);
             }
+            return skuApiVOList;
         }, executor);
 
         CompletableFuture.allOf(orderAddressFuture, OrderCouponsFuture, cartApiVOFuture).get();
 
         Order order = buildOrder(orderNo, userId, orderItemList);
         int insertOrderRow = orderMapper.insertSelective(order);
-
         int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
-
         int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
 
+        if (insertOrderRow <= 0 || insertBatchOrderItemRow <= 0 || insertOrderAddressRow <=0) {
+            throw new ServiceException("订单确认失败");
+        }
         SkuStockLockBatchApiDTO skuStockLockBatchApiDTO = new SkuStockLockBatchApiDTO();
         skuStockLockBatchApiDTO.setSkuStockLockApiDTOList(skuStockLockApiDTOList);
-        productStockFeignService.batchStockLock(skuStockLockBatchApiDTO);
-        return null;
+        int batchStockLockRow = productStockFeignService.batchStockLock(skuStockLockBatchApiDTO);
+        /* 库存锁定失败，分布式事务回滚 */
+        if (batchStockLockRow <= 0) {
+            throw new ServiceException("库存锁定失败");
+        }
+        List<SkuApiVO> skuApiVOS = cartApiVOFuture.get();
+        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOS);
+        OrderAddressVO orderAddressVO = buildOrderAddressVO(orderAddress);
+        return buildOrderVO(order, orderItemVOList, orderAddressVO, orderCouponsVO);
     }
 
     /*
@@ -279,6 +273,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId);
         order.setAmount(amount);
         order.setActualAmount(amount);
+        order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
         return order;
     }
 
@@ -293,6 +288,39 @@ public class OrderServiceImpl implements OrderService {
         orderItem.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(quantity)));
         orderItem.setNum(quantity);
         return orderItem;
+    }
+
+    private OrderVO buildOrderVO(Order order,
+                                 List<OrderItemVO> orderItemVOList,
+                                 OrderAddressVO orderAddressVO,
+                                 OrderCouponsVO orderCouponsVO) {
+        OrderVO orderVO = new OrderVO();
+        BeanUtils.copyProperties(order, orderVO);
+        orderVO.setOrderAddressVO(orderAddressVO);
+        orderVO.setOrderCouponsVO(orderCouponsVO);
+        orderVO.setOrderItemVOList(orderItemVOList);
+        return orderVO;
+    }
+
+    private List<OrderItemVO> buildOrderItemVOList(List<OrderItem> orderItemList, List<SkuApiVO> skuApiVOList) {
+        Map<Integer, SkuApiVO> skuApiVOMap = skuApiVOList.stream().collect(Collectors.toMap(SkuApiVO::getId, skuApiVO -> skuApiVO));
+        return orderItemList.stream().map(orderItem -> {
+            OrderItemVO orderItemVO = new OrderItemVO();
+            BeanUtils.copyProperties(orderItem, orderItemVO);
+            SkuApiVO skuApiVO = skuApiVOMap.get(orderItemVO.getSkuId());
+            orderItemVO.setTitle(skuApiVO.getTitle());
+            orderItemVO.setSkuImage(skuApiVO.getSkuImage());
+            orderItemVO.setParam(skuApiVO.getParam());
+            orderItemVO.setPrice(skuApiVO.getPrice());
+            orderItemVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(orderItemVO.getNum())));
+            return orderItemVO;
+        }).collect(Collectors.toList());
+    }
+
+    private OrderAddressVO buildOrderAddressVO(OrderAddress orderAddress) {
+        OrderAddressVO orderAddressVO = new OrderAddressVO();
+        BeanUtils.copyProperties(orderAddress, orderAddressVO);
+        return orderAddressVO;
     }
 
     /*
@@ -311,8 +339,8 @@ public class OrderServiceImpl implements OrderService {
     * 获取订单号
     * */
     public Long getOrderNo(String uuid) {
-        /* 订单号:用户uuid后6位 + 雪花算法(去重字段) */
-        String str1 = StringUtils.substring(uuid, 9);
+        /* 订单号:用户uuid后3位 + 雪花算法(去重字段) */
+        String str1 = StringUtils.substring(uuid, 12);
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 1);
         String str2 = StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 6);
         String str3 = str1 + str2;

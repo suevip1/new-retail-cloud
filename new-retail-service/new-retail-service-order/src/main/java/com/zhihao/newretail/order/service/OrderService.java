@@ -4,6 +4,7 @@ import com.zhihao.newretail.order.form.OrderCreateForm;
 import com.zhihao.newretail.order.pojo.vo.OrderSubmitVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface OrderService {
@@ -22,5 +23,10 @@ public interface OrderService {
     * 获取订单详情
     * */
     OrderVO getOrderVO(Integer userId, Long orderId) throws ExecutionException, InterruptedException;
+
+    /*
+    * 获取订单列表
+    * */
+    List<OrderVO> listOrderVOs(Integer userId, Integer status);
 
 }

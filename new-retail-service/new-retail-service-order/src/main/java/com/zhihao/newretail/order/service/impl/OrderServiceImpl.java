@@ -286,6 +286,20 @@ public class OrderServiceImpl implements OrderService {
         return orderVO;
     }
 
+    @Override
+    public List<OrderVO> listOrderVOs(Integer userId, Integer status) {
+        List<Order> orderList = orderMapper.selectListByUserIdAndStatus(userId, status);
+
+        if (CollectionUtils.isEmpty(orderList)) {
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+        }
+        Set<Long> orderIdSet = orderList.stream().map(Order::getId).collect(Collectors.toSet());
+        List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);
+        List<SkuApiVO> skuApiVOList = buildSkuApiVOList(orderItemList);
+        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOList);
+        return buildOrderVOList(orderList, orderItemVOList);
+    }
+
     /*
     * 构造订单提交页商品列表
     * */
@@ -331,16 +345,16 @@ public class OrderServiceImpl implements OrderService {
         return orderItem;
     }
 
-    private OrderVO buildOrderVO(Order order,
-                                 List<OrderItemVO> orderItemVOList,
-                                 OrderAddressVO orderAddressVO,
-                                 OrderCouponsVO orderCouponsVO) {
-        OrderVO orderVO = new OrderVO();
-        BeanUtils.copyProperties(order, orderVO);
-        orderVO.setOrderAddressVO(orderAddressVO);
-        orderVO.setOrderCouponsVO(orderCouponsVO);
-        orderVO.setOrderItemVOList(orderItemVOList);
-        return orderVO;
+    private List<OrderVO> buildOrderVOList(List<Order> orderList, List<OrderItemVO> orderItemVOList) {
+        Map<Long, List<OrderItemVO>> orderItemVOListMap = orderItemVOList.stream()
+                .collect(Collectors.groupingBy(OrderItemVO::getOrderId));
+        return orderList.stream().map(order -> {
+            List<OrderItemVO> orderItemVOS = orderItemVOListMap.get(order.getId());
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(order, orderVO);
+            orderVO.setOrderItemVOList(orderItemVOS);
+            return orderVO;
+        }).collect(Collectors.toList());
     }
 
     private List<OrderItemVO> buildOrderItemVOList(List<OrderItem> orderItemList, List<SkuApiVO> skuApiVOList) {
@@ -358,10 +372,11 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
     }
 
-    private OrderAddressVO buildOrderAddressVO(OrderAddress orderAddress) {
-        OrderAddressVO orderAddressVO = new OrderAddressVO();
-        BeanUtils.copyProperties(orderAddress, orderAddressVO);
-        return orderAddressVO;
+    private List<SkuApiVO> buildSkuApiVOList(List<OrderItem> orderItemList) {
+        Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
+        SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
+        skuBatchApiDTO.setIdSet(skuIdSet);
+        return productFeignService.listSkuApiVOs(skuBatchApiDTO);
     }
 
     /*

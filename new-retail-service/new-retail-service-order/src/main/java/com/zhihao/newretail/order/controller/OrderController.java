@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -45,6 +46,16 @@ public class OrderController {
         UserLoginContext.clean();
 
         return R.ok().put("data", orderVO);
+    }
+
+    @RequiresLogin
+    @GetMapping("/order/list")
+    public R orderList(@RequestParam(name = "status", required = false) Integer status) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        List<OrderVO> orderVOList = orderService.listOrderVOs(userId, status);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", orderVOList);
     }
 
 }

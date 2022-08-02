@@ -1,6 +1,9 @@
 package com.zhihao.newretail.order.dao;
 
 import com.zhihao.newretail.order.pojo.Order;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface OrderMapper {
 
@@ -15,5 +18,7 @@ public interface OrderMapper {
     int updateByPrimaryKeySelective(Order record);
 
     int updateByPrimaryKey(Order record);
+
+    List<Order> selectListByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") Integer status);
 
 }

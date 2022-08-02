@@ -4,6 +4,7 @@ import com.zhihao.newretail.order.pojo.OrderItem;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface OrderItemMapper {
 
@@ -32,5 +33,10 @@ public interface OrderItemMapper {
     * 订单号获取订单项集合
     * */
     List<OrderItem> selectListByOrderId(Long orderId);
+
+    /*
+    * 订单号批量获取订单项集合
+    * */
+    List<OrderItem> selectListByOrderIdSet(@Param("orderIdSet") Set<Long> orderIdSet);
 
 }

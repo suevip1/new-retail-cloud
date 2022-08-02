@@ -82,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
         OrderSubmitVO orderSubmitVO = new OrderSubmitVO();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        CompletableFuture<Void> cartFuture = CompletableFuture.runAsync(() -> {
+        CompletableFuture<BigDecimal> cartFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);       // 请求内容共享
 
             /* 获取购物车选中的商品 */
@@ -111,6 +111,7 @@ public class OrderServiceImpl implements OrderService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
             orderSubmitVO.setOrderItemSubmitVOList(orderItemSubmitVOList);
             orderSubmitVO.setTotalPrice(totalPrice);
+            return totalPrice;
         }, executor);
 
         /* 获取用户收货地址列表 */
@@ -121,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         /* 获取用户优惠券列表 */
-        CompletableFuture<Void> couponsFuture = CompletableFuture.runAsync(() -> {
+        CompletableFuture<Void> couponsFuture = cartFuture.thenAcceptAsync((res) -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
 
             /* 获取用户优惠券id */
@@ -134,7 +135,9 @@ public class OrderServiceImpl implements OrderService {
             CouponsBatchApiDTO couponsBatchApiDTO = new CouponsBatchApiDTO();
             couponsBatchApiDTO.setCouponsIdSet(couponsIdSet);
             List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOs(couponsBatchApiDTO);
-            orderSubmitVO.setCouponsApiVOList(couponsApiVOList);
+            List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
+                    .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1).collect(Collectors.toList());
+            orderSubmitVO.setCouponsApiVOList(couponsApiVOS);
         }, executor);
 
         /* 返回订单唯一标识符 */
@@ -223,7 +226,7 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture.allOf(orderAddressFuture, OrderCouponsFuture, cartApiVOFuture).get();
 
-        Order order = buildOrder(orderNo, userId, orderItemList);
+        Order order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);
         int insertOrderRow = orderMapper.insertSelective(order);
         int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
         int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
@@ -319,7 +322,7 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 构造订单
     * */
-    private Order buildOrder(Long orderNo, Integer userId, List<OrderItem> orderItemList) {
+    private Order buildOrder(Long orderNo, Integer userId, OrderCouponsVO orderCouponsVO, List<OrderItem> orderItemList) {
         BigDecimal amount = orderItemList.stream()
                 .map(OrderItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -327,7 +330,7 @@ public class OrderServiceImpl implements OrderService {
         order.setId(orderNo);
         order.setUserId(userId);
         order.setAmount(amount);
-        order.setActualAmount(amount);
+        order.setActualAmount(amount.subtract(orderCouponsVO.getDeno()));
         order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
         return order;
     }

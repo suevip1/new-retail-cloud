@@ -1,6 +1,6 @@
 package com.zhihao.newretail.order.service;
 
-import com.zhihao.newretail.order.form.OrderCreateForm;
+import com.zhihao.newretail.order.form.OrderConfirmForm;
 import com.zhihao.newretail.order.pojo.vo.OrderSubmitVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 
@@ -17,7 +17,7 @@ public interface OrderService {
     /*
     * 创建新订单
     * */
-    void insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException;
+    void insertOrder(Integer userId, OrderConfirmForm form) throws ExecutionException, InterruptedException;
 
     /*
     * 获取订单详情

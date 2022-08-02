@@ -4,9 +4,19 @@ import java.math.BigDecimal;
 
 public class OrderCouponsVO {
 
+    private Integer id;
+
     private BigDecimal deno;
 
     private BigDecimal condition;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public BigDecimal getDeno() {
         return deno;
@@ -27,7 +37,8 @@ public class OrderCouponsVO {
     @Override
     public String toString() {
         return "OrderCouponsVO{" +
-                "deno=" + deno +
+                "id=" + id +
+                ", deno=" + deno +
                 ", condition=" + condition +
                 '}';
     }

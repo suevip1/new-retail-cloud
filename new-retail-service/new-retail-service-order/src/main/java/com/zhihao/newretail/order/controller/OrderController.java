@@ -1,7 +1,7 @@
 package com.zhihao.newretail.order.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.order.form.OrderCreateForm;
+import com.zhihao.newretail.order.form.OrderConfirmForm;
 import com.zhihao.newretail.order.pojo.vo.OrderSubmitVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 import com.zhihao.newretail.order.service.OrderService;
@@ -29,13 +29,12 @@ public class OrderController {
 
     @RequiresLogin
     @PostMapping("/order")
-    public R orderConfirm(@Valid @RequestBody OrderCreateForm form) throws ExecutionException, InterruptedException {
-//        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-//        OrderVO orderVO = orderService.insertOrder(userId, form);
-//        UserLoginContext.clean();
-//
-//        return R.ok().put("data", orderVO);
-        return null;
+    public R orderConfirm(@Valid @RequestBody OrderConfirmForm form) throws ExecutionException, InterruptedException {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        orderService.insertOrder(userId, form);
+        UserLoginContext.clean();
+
+        return R.ok();
     }
 
     @RequiresLogin

@@ -25,7 +25,7 @@ import com.zhihao.newretail.order.dao.OrderItemMapper;
 import com.zhihao.newretail.order.dao.OrderMapper;
 import com.zhihao.newretail.order.enums.OrderStatusEnum;
 import com.zhihao.newretail.order.enums.ProductEnum;
-import com.zhihao.newretail.order.form.OrderCreateForm;
+import com.zhihao.newretail.order.form.OrderConfirmForm;
 import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.OrderAddress;
 import com.zhihao.newretail.order.pojo.OrderItem;
@@ -153,7 +153,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException {
+    public void insertOrder(Integer userId, OrderConfirmForm form) throws ExecutionException, InterruptedException {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         String orderToken = form.getOrderToken();
         Integer couponsId = form.getCouponsId();
@@ -189,6 +189,9 @@ public class OrderServiceImpl implements OrderService {
                     .map(CartApiVO::getSkuId)
                     .collect(Collectors.toSet());
 
+            if (CollectionUtils.isEmpty(skuIdSet)) {
+                throw new ServiceException("请选中商品再下单");
+            }
             SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
             skuBatchApiDTO.setIdSet(skuIdSet);
             List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
@@ -225,8 +228,12 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         CompletableFuture.allOf(orderAddressFuture, OrderCouponsFuture, cartApiVOFuture).get();
-
-        Order order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);
+        Order order;
+        if (ObjectUtils.isEmpty(orderCouponsVO.getId())) {
+            order = buildOrder(orderNo, userId, orderItemList);     // 无优惠券
+        } else {
+            order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);     // 有优惠券
+        }
         int insertOrderRow = orderMapper.insertSelective(order);
         int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
         int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
@@ -241,6 +248,7 @@ public class OrderServiceImpl implements OrderService {
         if (batchStockLockRow <= 0) {
             throw new ServiceException("库存锁定失败");
         }
+        cartFeignService.deleteCartBySelected();
     }
 
     @Override
@@ -320,7 +328,23 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /*
-    * 构造订单
+    * 构造订单(无优惠券)
+    * */
+    private Order buildOrder(Long orderNo, Integer userId, List<OrderItem> orderItemList) {
+        BigDecimal amount = orderItemList.stream()
+                .map(OrderItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Order order = new Order();
+        order.setId(orderNo);
+        order.setUserId(userId);
+        order.setAmount(amount);
+        order.setActualAmount(amount);
+        order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
+        return order;
+    }
+
+    /*
+    * 构造订单(优惠券)
     * */
     private Order buildOrder(Long orderNo, Integer userId, OrderCouponsVO orderCouponsVO, List<OrderItem> orderItemList) {
         BigDecimal amount = orderItemList.stream()
@@ -331,6 +355,7 @@ public class OrderServiceImpl implements OrderService {
         order.setUserId(userId);
         order.setAmount(amount);
         order.setActualAmount(amount.subtract(orderCouponsVO.getDeno()));
+        order.setCouponsId(orderCouponsVO.getId());
         order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
         return order;
     }

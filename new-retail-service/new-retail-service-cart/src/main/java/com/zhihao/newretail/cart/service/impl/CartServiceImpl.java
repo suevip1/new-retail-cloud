@@ -180,6 +180,17 @@ public class CartServiceImpl implements CartService {
                 }).collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteCartBySelected(Integer userId) {
+        String redisKey = String.format(CART_REDIS_KEY, userId);
+        List<Cart> cartList = listCarts(userId);
+        for (Cart cart : cartList) {
+            if (cart.getSelected()) {
+                redisUtil.deleteEntry(redisKey, cart.getSkuId());
+            }
+        }
+    }
+
     private List<Cart> listCarts(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Map<Object, Object> redisMap = redisUtil.getMap(redisKey);

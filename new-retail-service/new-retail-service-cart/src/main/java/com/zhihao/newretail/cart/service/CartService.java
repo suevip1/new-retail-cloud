@@ -49,4 +49,9 @@ public interface CartService {
     * */
     List<CartApiVO> listCartApiVOs(Integer userId);
 
+    /*
+    * 删除用户购物车选中的商品
+    * */
+    void deleteCartBySelected(Integer userId);
+
 }

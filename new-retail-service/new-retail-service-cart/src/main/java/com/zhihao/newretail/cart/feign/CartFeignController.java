@@ -25,4 +25,12 @@ public class CartFeignController implements CartFeignService {
         return cartApiVOList;
     }
 
+    @RequiresLogin
+    @Override
+    public void deleteCartBySelected() {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        cartService.deleteCartBySelected(userId);
+        UserLoginContext.clean();
+    }
+
 }

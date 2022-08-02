@@ -16,6 +16,11 @@ public interface OrderService {
     /*
     * 创建新订单
     * */
-    OrderVO insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException;
+    void insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException;
+
+    /*
+    * 获取订单详情
+    * */
+    OrderVO getOrderVO(Integer userId, Long orderId) throws ExecutionException, InterruptedException;
 
 }

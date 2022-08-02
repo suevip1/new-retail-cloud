@@ -150,7 +150,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderVO insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException {
+    public void insertOrder(Integer userId, OrderCreateForm form) throws ExecutionException, InterruptedException {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         String orderToken = form.getOrderToken();
         Integer couponsId = form.getCouponsId();
@@ -179,7 +179,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         /* 获取购物车选中的商品 */
-        CompletableFuture<List<SkuApiVO>> cartApiVOFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Void> cartApiVOFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOs();
             Set<Integer> skuIdSet = cartApiVOList.stream()
@@ -219,7 +219,6 @@ public class OrderServiceImpl implements OrderService {
                 orderItemList.add(orderItem);
                 skuStockLockApiDTOList.add(skuStockLockApiDTO);
             }
-            return skuApiVOList;
         }, executor);
 
         CompletableFuture.allOf(orderAddressFuture, OrderCouponsFuture, cartApiVOFuture).get();
@@ -239,10 +238,52 @@ public class OrderServiceImpl implements OrderService {
         if (batchStockLockRow <= 0) {
             throw new ServiceException("库存锁定失败");
         }
-        List<SkuApiVO> skuApiVOS = cartApiVOFuture.get();
-        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOS);
-        OrderAddressVO orderAddressVO = buildOrderAddressVO(orderAddress);
-        return buildOrderVO(order, orderItemVOList, orderAddressVO, orderCouponsVO);
+    }
+
+    @Override
+    public OrderVO getOrderVO(Integer userId, Long orderId) throws ExecutionException, InterruptedException {
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        OrderVO orderVO = new OrderVO();
+        OrderAddressVO orderAddressVO = new OrderAddressVO();
+        OrderCouponsVO orderCouponsVO = new OrderCouponsVO();
+
+        CompletableFuture<OrderVO> orderVOFuture = CompletableFuture.supplyAsync(() -> {
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (ObjectUtils.isEmpty(order) || !userId.equals(order.getUserId())) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
+            }
+            BeanUtils.copyProperties(order, orderVO);
+            return orderVO;
+        }, executor);
+
+        CompletableFuture<Void> orderItemVOListFuture = CompletableFuture.runAsync(() -> {
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderId);
+            Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
+            SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
+            skuBatchApiDTO.setIdSet(skuIdSet);
+            List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
+            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOList);
+            orderVO.setOrderItemVOList(orderItemVOList);
+        }, executor);
+
+        CompletableFuture<Void> orderAddressVOFuture = CompletableFuture.runAsync(() -> {
+            OrderAddress orderAddress = orderAddressMapper.selectByPrimaryKey(orderId);
+            BeanUtils.copyProperties(orderAddress, orderAddressVO);
+            orderVO.setOrderAddressVO(orderAddressVO);
+        }, executor);
+
+        CompletableFuture<Void> orderCouponsVOFuture = orderVOFuture.thenAcceptAsync((res) -> {
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            if (!ObjectUtils.isEmpty(res.getCouponsId())) {
+                CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(res.getCouponsId());
+                BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+            }
+            orderVO.setOrderCouponsVO(orderCouponsVO);
+        }, executor);
+
+        CompletableFuture.allOf(orderVOFuture, orderItemVOListFuture, orderAddressVOFuture, orderCouponsVOFuture).get();
+        return orderVO;
     }
 
     /*

@@ -1,7 +1,8 @@
 package com.zhihao.newretail.order.service;
 
-import com.zhihao.newretail.order.form.OrderConfirmForm;
-import com.zhihao.newretail.order.pojo.vo.OrderSubmitVO;
+import com.zhihao.newretail.order.form.OrderSubmitForm;
+import com.zhihao.newretail.order.pojo.Order;
+import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 
 import java.util.List;
@@ -12,12 +13,12 @@ public interface OrderService {
     /*
     * 订单提交页
     * */
-    OrderSubmitVO getOrderSubmitVO() throws ExecutionException, InterruptedException;
+    OrderCreateVO getOrderCreateVO(Integer userId) throws ExecutionException, InterruptedException;
 
     /*
     * 创建新订单
     * */
-    void insertOrder(Integer userId, OrderConfirmForm form) throws ExecutionException, InterruptedException;
+    void insertOrder(Integer userId, String uuid, OrderSubmitForm form) throws ExecutionException, InterruptedException;
 
     /*
     * 获取订单详情
@@ -28,5 +29,15 @@ public interface OrderService {
     * 获取订单列表
     * */
     List<OrderVO> listOrderVOs(Integer userId, Integer status);
+
+    /*
+    * 获取订单
+    * */
+    Order getOrder(Long orderId);
+
+    /*
+    * 更新订单
+    * */
+    void updateOrder(Order order);
 
 }

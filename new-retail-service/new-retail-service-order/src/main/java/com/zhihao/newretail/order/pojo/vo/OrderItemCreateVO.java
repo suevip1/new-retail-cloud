@@ -2,7 +2,7 @@ package com.zhihao.newretail.order.pojo.vo;
 
 import java.math.BigDecimal;
 
-public class OrderItemSubmitVO {
+public class OrderItemCreateVO {
 
     private Integer spuId;
 
@@ -86,7 +86,7 @@ public class OrderItemSubmitVO {
 
     @Override
     public String toString() {
-        return "OrderItemSubmitVO{" +
+        return "OrderItemCreateVO{" +
                 "spuId=" + spuId +
                 ", skuId=" + skuId +
                 ", title='" + title + '\'' +

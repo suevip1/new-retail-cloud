@@ -3,7 +3,7 @@ package com.zhihao.newretail.order.form;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-public class OrderConfirmForm {
+public class OrderSubmitForm {
 
     @NotBlank(message = "订单凭证不能为空")
     private String orderToken;
@@ -39,7 +39,7 @@ public class OrderConfirmForm {
 
     @Override
     public String toString() {
-        return "OrderConfirmForm{" +
+        return "OrderSubmitForm{" +
                 "orderToken='" + orderToken + '\'' +
                 ", addressId=" + addressId +
                 ", couponsId=" + couponsId +

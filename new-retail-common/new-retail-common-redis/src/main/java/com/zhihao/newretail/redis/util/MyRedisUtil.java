@@ -1,9 +1,13 @@
 package com.zhihao.newretail.redis.util;
 
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -92,6 +96,13 @@ public class MyRedisUtil {
     * */
     public void deleteEntry(String key, Object hashKey) {
         redisTemplate.opsForHash().delete(key, hashKey);
+    }
+
+    /*
+    * 执行脚本
+    * */
+    public Long executeScript(String script, String key, Object value) {
+        return redisTemplate.execute(new DefaultRedisScript<>(script, Long.class), Collections.singletonList(key), value);
     }
 
 }

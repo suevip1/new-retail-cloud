@@ -6,11 +6,11 @@ import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class OrderSubmitVO {
+public class OrderCreateVO {
 
     private List<UserAddressApiVO> userAddressApiVOList;
 
-    private List<OrderItemSubmitVO> orderItemSubmitVOList;
+    private List<OrderItemCreateVO> orderItemCreateVOList;
 
     private List<CouponsApiVO> couponsApiVOList;
 
@@ -26,12 +26,12 @@ public class OrderSubmitVO {
         this.userAddressApiVOList = userAddressApiVOList;
     }
 
-    public List<OrderItemSubmitVO> getOrderItemSubmitVOList() {
-        return orderItemSubmitVOList;
+    public List<OrderItemCreateVO> getOrderItemCreateVOList() {
+        return orderItemCreateVOList;
     }
 
-    public void setOrderItemSubmitVOList(List<OrderItemSubmitVO> orderItemSubmitVOList) {
-        this.orderItemSubmitVOList = orderItemSubmitVOList;
+    public void setOrderItemCreateVOList(List<OrderItemCreateVO> orderItemCreateVOList) {
+        this.orderItemCreateVOList = orderItemCreateVOList;
     }
 
     public List<CouponsApiVO> getCouponsApiVOList() {
@@ -60,9 +60,9 @@ public class OrderSubmitVO {
 
     @Override
     public String toString() {
-        return "OrderSubmitVO{" +
+        return "OrderCreateVO{" +
                 "userAddressApiVOList=" + userAddressApiVOList +
-                ", orderItemSubmitVOList=" + orderItemSubmitVOList +
+                ", orderItemCreateVOList=" + orderItemCreateVOList +
                 ", couponsApiVOList=" + couponsApiVOList +
                 ", totalPrice=" + totalPrice +
                 ", orderToken='" + orderToken + '\'' +

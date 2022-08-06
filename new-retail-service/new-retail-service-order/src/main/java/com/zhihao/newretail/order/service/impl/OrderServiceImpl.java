@@ -13,11 +13,14 @@ import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.ProductStockFeignService;
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
+import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
+import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.core.util.MyUUIDUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.order.dao.OrderAddressMapper;
@@ -25,16 +28,20 @@ import com.zhihao.newretail.order.dao.OrderItemMapper;
 import com.zhihao.newretail.order.dao.OrderMapper;
 import com.zhihao.newretail.order.enums.OrderStatusEnum;
 import com.zhihao.newretail.order.enums.ProductEnum;
-import com.zhihao.newretail.order.form.OrderConfirmForm;
+import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.OrderAddress;
 import com.zhihao.newretail.order.pojo.OrderItem;
 import com.zhihao.newretail.order.pojo.vo.*;
 import com.zhihao.newretail.order.service.OrderService;
+import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
+import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
+import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
+import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
-import com.zhihao.newretail.security.UserLoginContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,20 +76,24 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private MyRedisUtil redisUtil;
     @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
     private OrderMapper orderMapper;
     @Autowired
     private OrderItemMapper orderItemMapper;
     @Autowired
     private OrderAddressMapper orderAddressMapper;
 
-    private static final String PRESENT = null;
+    private static final String ORDER_TOKEN_REDIS_KEY = "order_token_user_id_%d";
+
+    private static final String REDIS_SCRIPT = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 
     @Override
-    public OrderSubmitVO getOrderSubmitVO() throws ExecutionException, InterruptedException {
-        OrderSubmitVO orderSubmitVO = new OrderSubmitVO();
+    public OrderCreateVO getOrderCreateVO(Integer userId) throws ExecutionException, InterruptedException {
+        OrderCreateVO orderCreateVO = new OrderCreateVO();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
-        CompletableFuture<BigDecimal> cartFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<BigDecimal> buildOrderItemSubmitVOFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);       // 请求内容共享
 
             /* 获取购物车选中的商品 */
@@ -98,19 +109,19 @@ public class OrderServiceImpl implements OrderService {
             List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
 
             /* 渲染订单项 */
-            List<OrderItemSubmitVO> orderItemSubmitVOList = new ArrayList<>();
+            List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
             cartApiVOList.forEach(cartApiVO -> {
-                OrderItemSubmitVO orderItemSubmitVO = new OrderItemSubmitVO();
-                buildOrderItemSubmitVO(cartApiVO, skuApiVOList, orderItemSubmitVO);
-                orderItemSubmitVOList.add(orderItemSubmitVO);
+                OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
+                buildOrderItemSubmitVO(cartApiVO, skuApiVOList, orderItemCreateVO);
+                orderItemCreateVOList.add(orderItemCreateVO);
             });
 
             /* 计算商品总价格 */
-            BigDecimal totalPrice = orderItemSubmitVOList.stream()
-                    .map(OrderItemSubmitVO::getTotalPrice)
+            BigDecimal totalPrice = orderItemCreateVOList.stream()
+                    .map(OrderItemCreateVO::getTotalPrice)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            orderSubmitVO.setOrderItemSubmitVOList(orderItemSubmitVOList);
-            orderSubmitVO.setTotalPrice(totalPrice);
+            orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
+            orderCreateVO.setTotalPrice(totalPrice);
             return totalPrice;
         }, executor);
 
@@ -118,11 +129,11 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> addressFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<UserAddressApiVO> userAddressApiVOList = userAddressFeignService.listUserAddressApiVOs();
-            orderSubmitVO.setUserAddressApiVOList(userAddressApiVOList);
+            orderCreateVO.setUserAddressApiVOList(userAddressApiVOList);
         }, executor);
 
         /* 获取用户优惠券列表 */
-        CompletableFuture<Void> couponsFuture = cartFuture.thenAcceptAsync((res) -> {
+        CompletableFuture<Void> couponsFuture = buildOrderItemSubmitVOFuture.thenAcceptAsync((res) -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
 
             /* 获取用户优惠券id */
@@ -136,32 +147,41 @@ public class OrderServiceImpl implements OrderService {
             couponsBatchApiDTO.setCouponsIdSet(couponsIdSet);
             List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOs(couponsBatchApiDTO);
             List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
-                    .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1).collect(Collectors.toList());
-            orderSubmitVO.setCouponsApiVOList(couponsApiVOS);
+                    .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1)
+                    .collect(Collectors.toList());
+            orderCreateVO.setCouponsApiVOList(couponsApiVOS);
         }, executor);
 
         /* 返回订单唯一标识符 */
         CompletableFuture<Void> orderTokenFuture = CompletableFuture.runAsync(() -> {
+            String redisKey = String.format(ORDER_TOKEN_REDIS_KEY, userId);
             String orderToken = MyUUIDUtil.getUUID();
-            redisUtil.setObject(orderToken, PRESENT, 300L);
-            orderSubmitVO.setOrderToken(orderToken);
+            redisUtil.setObject(redisKey, orderToken, 900L);
+            orderCreateVO.setOrderToken(orderToken);
         }, executor);
-
-        CompletableFuture.allOf(cartFuture, addressFuture, couponsFuture, orderTokenFuture).get();
-        return orderSubmitVO;
+        CompletableFuture.allOf(buildOrderItemSubmitVOFuture, addressFuture, couponsFuture, orderTokenFuture).get();
+        return orderCreateVO;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertOrder(Integer userId, OrderConfirmForm form) throws ExecutionException, InterruptedException {
+    public void insertOrder(Integer userId, String uuid, OrderSubmitForm form) throws ExecutionException, InterruptedException {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        /*
+        * 防止重复下单
+        * */
+        String redisKey = String.format(ORDER_TOKEN_REDIS_KEY, userId);
         String orderToken = form.getOrderToken();
-        Integer couponsId = form.getCouponsId();
-        String uuid = UserLoginContext.getUserLoginInfo().getUuid();
-        Long orderNo = getOrderNo(uuid);
+        Long result = redisUtil.executeScript(REDIS_SCRIPT, redisKey, orderToken);
+        if (result == 0) {
+            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "订单唯一标识错误");
+        }
+
+        Integer couponsId = form.getCouponsId();                    // 优惠券id
+        Long orderNo = getOrderNo(uuid);                            // 订单号
         OrderAddress orderAddress = new OrderAddress();             // 订单收货地址
-        OrderCouponsVO orderCouponsVO = new OrderCouponsVO();       // 是否有优惠券
-        List<OrderItem> orderItemList = new ArrayList<>();          // 子订单项
+        OrderCouponsVO orderCouponsVO = new OrderCouponsVO();       // 订单优惠券
+        List<OrderItem> orderItemList = new ArrayList<>();          // 订单项列表
         List<SkuStockLockApiDTO> skuStockLockApiDTOList = new ArrayList<>();    // 商品锁定库存信息
 
         /* 用户收货地址 */
@@ -173,7 +193,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         /* 优惠券 */
-        CompletableFuture<Void> OrderCouponsFuture = CompletableFuture.runAsync(() -> {
+        CompletableFuture<Void> orderCouponsFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             if (!ObjectUtils.isEmpty(couponsId)) {
                 CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(couponsId);
@@ -181,8 +201,8 @@ public class OrderServiceImpl implements OrderService {
             }
         }, executor);
 
-        /* 获取购物车选中的商品 */
-        CompletableFuture<Void> cartApiVOFuture = CompletableFuture.runAsync(() -> {
+        /* 构造订单项(订单商品) */
+        CompletableFuture<Void> buildOrderItemFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOs();
             Set<Integer> skuIdSet = cartApiVOList.stream()
@@ -192,17 +212,17 @@ public class OrderServiceImpl implements OrderService {
             if (CollectionUtils.isEmpty(skuIdSet)) {
                 throw new ServiceException("请选中商品再下单");
             }
+            /* 获取商品信息 */
             SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
             skuBatchApiDTO.setIdSet(skuIdSet);
             List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
+            Map<Integer, SkuApiVO> skuApiVOMap = skuApiVOList.stream()
+                    .collect(Collectors.toMap(SkuApiVO::getId, skuApiVO -> skuApiVO));
 
             /* 获取商品库存信息 */
             SkuStockBatchApiDTO skuStockBatchApiDTO = new SkuStockBatchApiDTO();
             skuStockBatchApiDTO.setIdSet(skuIdSet);
             List<SkuStockApiVO> skuStockApiVOList = productStockFeignService.listSkuStockApiVOs(skuStockBatchApiDTO);
-
-            Map<Integer, SkuApiVO> skuApiVOMap = skuApiVOList.stream()
-                    .collect(Collectors.toMap(SkuApiVO::getId, skuApiVO -> skuApiVO));
             Map<Integer, SkuStockApiVO> skuStockApiVOMap = skuStockApiVOList.stream()
                     .collect(Collectors.toMap(SkuStockApiVO::getSkuId, skuStockApiVO -> skuStockApiVO));
 
@@ -219,21 +239,25 @@ public class OrderServiceImpl implements OrderService {
                     throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
                             "商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足");
                 }
-                /* 封装orderItem、库存信息 */
+                /* 构造订单项、锁定库存信息 */
                 OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), skuApiVO);
-                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), skuApiVO);
                 orderItemList.add(orderItem);
+                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), skuApiVO);
                 skuStockLockApiDTOList.add(skuStockLockApiDTO);
             }
         }, executor);
+        CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderItemFuture).get();
 
-        CompletableFuture.allOf(orderAddressFuture, OrderCouponsFuture, cartApiVOFuture).get();
+        /*
+        * 订单信息保存数据库
+        * */
         Order order;
         if (ObjectUtils.isEmpty(orderCouponsVO.getId())) {
             order = buildOrder(orderNo, userId, orderItemList);     // 无优惠券
         } else {
             order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);     // 有优惠券
         }
+        order.setMqVersion(RabbitMQConst.CONSUME_VERSION);
         int insertOrderRow = orderMapper.insertSelective(order);
         int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
         int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
@@ -241,14 +265,83 @@ public class OrderServiceImpl implements OrderService {
         if (insertOrderRow <= 0 || insertBatchOrderItemRow <= 0 || insertOrderAddressRow <=0) {
             throw new ServiceException("订单确认失败");
         }
+
+        /*
+         * 锁定商品库存
+         * */
         SkuStockLockBatchApiDTO skuStockLockBatchApiDTO = new SkuStockLockBatchApiDTO();
         skuStockLockBatchApiDTO.setSkuStockLockApiDTOList(skuStockLockApiDTOList);
-        int batchStockLockRow = productStockFeignService.batchStockLock(skuStockLockBatchApiDTO);
-        /* 库存锁定失败，分布式事务回滚 */
-        if (batchStockLockRow <= 0) {
-            throw new ServiceException("库存锁定失败");
+        try {
+            int batchStockLockRow = productStockFeignService.batchStockLock(skuStockLockBatchApiDTO);
+            if (batchStockLockRow <= 0) {
+                throw new ServiceException("库存锁定失败");
+            }
+        } catch (Exception e) {
+            StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
+            stockUnLockMQDTO.setOrderNo(order.getId());
+            stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
+                    RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY,
+                    GsonUtil.obj2Json(stockUnLockMQDTO)
+            );
+            e.printStackTrace();
+            throw e;
         }
+
+        /*
+         * 优惠券存在，扣除优惠券
+         * */
+        if (!ObjectUtils.isEmpty(orderCouponsVO.getId())) {
+            UserCouponsApiDTO userCouponsApiDTO = new UserCouponsApiDTO();
+            userCouponsApiDTO.setCouponsId(orderCouponsVO.getId());
+            userCouponsApiDTO.setQuantity(1);
+            userCouponsApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+            try {
+                int consumeCouponsRow = userCouponsFeignService.consumeCoupons(userCouponsApiDTO);
+                if (consumeCouponsRow <= 0) {
+                    throw new ServiceException("优惠券扣除异常");
+                }
+            } catch (Exception e) {
+                StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
+                stockUnLockMQDTO.setOrderNo(order.getId());
+                stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
+                        RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY,
+                        GsonUtil.obj2Json(stockUnLockMQDTO)
+                );
+                CouponsUnSubMQDTO couponsUnSubMQDTO = new CouponsUnSubMQDTO();
+                couponsUnSubMQDTO.setCouponsId(order.getCouponsId());
+                couponsUnSubMQDTO.setQuantity(1);
+                couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
+                        RabbitMQConst.ORDER_NOTIFY_COUPONS_UNSUB_ROUTING_KEY,
+                        GsonUtil.obj2Json(couponsUnSubMQDTO)
+                );
+                e.printStackTrace();
+                throw e;
+            }
+        }
+        /* 下单成功删除购物车商品 */
         cartFeignService.deleteCartBySelected();
+        /*
+         * 发送消息到延迟队列，30分钟未支付关闭订单
+         * */
+        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
+        orderCloseMQDTO.setOrderNo(orderNo);
+        orderCloseMQDTO.setCouponsId(orderCouponsVO.getId());
+        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME,
+                RabbitMQConst.ORDER_DELAYED_ROUTING_KEY,
+                GsonUtil.obj2Json(orderCloseMQDTO),
+                message -> {
+                    message.getMessageProperties().setDelay(1800000); // 30分钟
+                    return message;
+                }
+        );
     }
 
     @Override
@@ -260,7 +353,9 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture<OrderVO> orderVOFuture = CompletableFuture.supplyAsync(() -> {
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (ObjectUtils.isEmpty(order) || !userId.equals(order.getUserId())) {
+            if (ObjectUtils.isEmpty(order)
+                    || !userId.equals(order.getUserId())
+                    || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
                 throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
             }
             BeanUtils.copyProperties(order, orderVO);
@@ -311,19 +406,29 @@ public class OrderServiceImpl implements OrderService {
         return buildOrderVOList(orderList, orderItemVOList);
     }
 
+    @Override
+    public Order getOrder(Long orderId) {
+        return orderMapper.selectByPrimaryKey(orderId);
+    }
+
+    @Override
+    public void updateOrder(Order order) {
+        orderMapper.updateByPrimaryKeySelective(order);
+    }
+
     /*
     * 构造订单提交页商品列表
     * */
     private void buildOrderItemSubmitVO(CartApiVO cartApiVO,
                                         List<SkuApiVO> skuApiVOList,
-                                        OrderItemSubmitVO orderItemSubmitVO) {
+                                        OrderItemCreateVO orderItemCreateVO) {
         skuApiVOList.stream()
                 .filter(skuApiVO -> cartApiVO.getSkuId().equals(skuApiVO.getId()))
                 .forEach(skuApiVO -> {
-                    BeanUtils.copyProperties(skuApiVO, orderItemSubmitVO);
-                    orderItemSubmitVO.setSkuId(skuApiVO.getId());
-                    orderItemSubmitVO.setQuantity(cartApiVO.getQuantity());
-                    orderItemSubmitVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cartApiVO.getQuantity())));
+                    BeanUtils.copyProperties(skuApiVO, orderItemCreateVO);
+                    orderItemCreateVO.setSkuId(skuApiVO.getId());
+                    orderItemCreateVO.setQuantity(cartApiVO.getQuantity());
+                    orderItemCreateVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cartApiVO.getQuantity())));
                 });
     }
 
@@ -416,6 +521,7 @@ public class OrderServiceImpl implements OrderService {
         skuStockLockApiDTO.setSkuId(skuApiVO.getId());
         skuStockLockApiDTO.setOrderId(orderNo);
         skuStockLockApiDTO.setCount(quantity);
+        skuStockLockApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
         return skuStockLockApiDTO;
     }
 

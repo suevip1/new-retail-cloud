@@ -23,4 +23,9 @@ public interface UserCouponsMapper {
     * */
     List<UserCoupons> selectListByUserId(Integer userId);
 
+    /*
+    * 优惠券id查询
+    * */
+    UserCoupons selectByCouponsId(Integer couponsId);
+
 }

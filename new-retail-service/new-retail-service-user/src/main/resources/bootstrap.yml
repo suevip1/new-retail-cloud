@@ -25,6 +25,15 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null
+  rabbitmq:
+    host: 192.168.43.2
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

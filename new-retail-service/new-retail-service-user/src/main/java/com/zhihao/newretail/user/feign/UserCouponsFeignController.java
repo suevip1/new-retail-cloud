@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.feign;
 
+import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
 import com.zhihao.newretail.security.UserLoginContext;
@@ -23,6 +24,11 @@ public class UserCouponsFeignController implements UserCouponsFeignService {
         List<UserCouponsApiVO> userCouponsApiVOList = userCouponsService.listUserCouponsApiVOs(userId);
         UserLoginContext.clean();
         return userCouponsApiVOList;
+    }
+
+    @Override
+    public int consumeCoupons(UserCouponsApiDTO userCouponsApiDTO) {
+        return userCouponsService.updateUserCoupons(userCouponsApiDTO);
     }
 
 }

@@ -104,4 +104,11 @@
     from tb_user_coupons
     where user_id = #{userId,jdbcType=INTEGER}
   </select>
+
+  <select id="selectByCouponsId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_coupons
+    where coupons_id = #{couponsId,jdbcType=INTEGER}
+  </select>
 </mapper>

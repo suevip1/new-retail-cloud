@@ -6,6 +6,7 @@ import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SkuStockLockMapper;
 import com.zhihao.newretail.product.dao.SkuStockMapper;
 import com.zhihao.newretail.product.enums.SkuStockLockEnum;
+import com.zhihao.newretail.product.enums.SkuStockTypeEnum;
 import com.zhihao.newretail.product.pojo.SkuStock;
 import com.zhihao.newretail.product.pojo.SkuStockLock;
 import com.zhihao.newretail.product.service.StockService;
@@ -86,6 +87,39 @@ public class StockServiceImpl implements StockService {
         return updateBatchRow;
     }
 
+    @Override
+    public List<SkuStockLock> listSkuStockLocks(Long orderId) {
+        return skuStockLockMapper.selectListByOrderId(orderId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStockByType(List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum) {
+        Set<Integer> skuIdSet = getSkuIdSet(skuStockLockList);
+        Map<Integer, SkuStockLock> skuStockLockMap = buildSkuStockLockMap(skuStockLockList);
+
+        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
+        List<SkuStock> skuStocks = new ArrayList<>();
+
+        if (SkuStockTypeEnum.UN_LOCK.getCode().equals(skuStockTypeEnum.getCode())) {
+            for (SkuStock skuStock : skuStockList) {
+                SkuStockLock skuStockLock = skuStockLockMap.get(skuStock.getSkuId());
+                skuStock.setLockStock(skuStock.getLockStock() - skuStockLock.getCount());
+                skuStock.setStock(skuStock.getStock() + skuStockLock.getCount());
+                skuStocks.add(skuStock);
+            }
+        } else {
+            for (SkuStock skuStock : skuStockList) {
+                SkuStockLock skuStockLock = skuStockLockMap.get(skuStock.getSkuId());
+                skuStock.setActualStock(skuStock.getActualStock() - skuStockLock.getCount());
+                skuStock.setLockStock(skuStock.getLockStock() - skuStockLock.getCount());
+                skuStocks.add(skuStock);
+            }
+        }
+        skuStockMapper.updateBatch(skuStocks);
+        skuStockLockMapper.updateBatch(skuStockLockList);
+    }
+
     private void buildSkuStock(SkuStock skuStock, SkuStockLockApiDTO skuStockLockApiDTO) {
         if (skuStock.getLockStock() == 0) {
             skuStock.setStock(skuStock.getActualStock() - skuStockLockApiDTO.getCount());
@@ -93,6 +127,14 @@ public class StockServiceImpl implements StockService {
             skuStock.setStock(skuStock.getActualStock() - (skuStock.getLockStock() + skuStockLockApiDTO.getCount()));
         }
         skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
+    }
+
+    private Set<Integer> getSkuIdSet(List<SkuStockLock> skuStockLockList) {
+        return skuStockLockList.stream().map(SkuStockLock::getSkuId).collect(Collectors.toSet());
+    }
+
+    private Map<Integer, SkuStockLock> buildSkuStockLockMap(List<SkuStockLock> skuStockLockList) {
+        return skuStockLockList.stream().collect(Collectors.toMap(SkuStockLock::getSkuId, skuStockLock -> skuStockLock));
     }
 
 }

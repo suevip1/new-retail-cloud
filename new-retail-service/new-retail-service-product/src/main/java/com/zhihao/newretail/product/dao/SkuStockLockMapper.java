@@ -24,4 +24,14 @@ public interface SkuStockLockMapper {
     * */
     int insertBatch(@Param("skuStockLockList") List<SkuStockLock> skuStockLockList);
 
+    /*
+    * 订单号查询
+    * */
+    List<SkuStockLock> selectListByOrderId(Long orderId);
+
+    /*
+    * 批量更新
+    * */
+    int updateBatch(@Param("skuStockLockList") List<SkuStockLock> skuStockLockList);
+
 }

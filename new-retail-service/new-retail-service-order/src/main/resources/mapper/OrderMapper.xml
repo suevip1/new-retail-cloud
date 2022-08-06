@@ -225,5 +225,6 @@
     <if test="status != null">
       and status = #{status,jdbcType=TINYINT}
     </if>
+    and is_delete = 0
   </select>
 </mapper>

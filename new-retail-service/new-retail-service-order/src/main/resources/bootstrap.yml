@@ -26,9 +26,21 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null
   redis:
-    host: localhost
+    host: 192.168.43.2
     port: 6379
     database: 2
+  rabbitmq:
+    host: 192.168.43.2
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: manual
 mybatis:
   configuration:
     map-underscore-to-camel-case: true

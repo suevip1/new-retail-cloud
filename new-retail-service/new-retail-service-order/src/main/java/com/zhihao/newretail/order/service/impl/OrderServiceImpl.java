@@ -393,6 +393,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public void updateOrder(Integer userId, Long orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (ObjectUtils.isEmpty(order)
+                || !userId.equals(order.getUserId())
+                || !OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())
+                || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
+        }
+        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
+        orderCloseMQDTO.setOrderNo(order.getId());
+        orderCloseMQDTO.setCouponsId(order.getCouponsId());
+        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        rabbitTemplate.convertAndSend(
+                RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME,
+                RabbitMQConst.ORDER_DELAYED_ROUTING_KEY,
+                GsonUtil.obj2Json(orderCloseMQDTO)
+        );
+    }
+
+    @Override
     public List<OrderVO> listOrderVOs(Integer userId, Integer status) {
         List<Order> orderList = orderMapper.selectListByUserIdAndStatus(userId, status);
 

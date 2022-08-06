@@ -26,6 +26,11 @@ public interface OrderService {
     OrderVO getOrderVO(Integer userId, Long orderId) throws ExecutionException, InterruptedException;
 
     /*
+    * 用户取消订单
+    * */
+    void updateOrder(Integer userId, Long orderId);
+
+    /*
     * 获取订单列表
     * */
     List<OrderVO> listOrderVOs(Integer userId, Integer status);

@@ -52,6 +52,16 @@ public class OrderController {
     }
 
     @RequiresLogin
+    @PutMapping("/order/{orderId}")
+    public R orderCancel(@PathVariable Long orderId) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        orderService.updateOrder(userId, orderId);
+        UserLoginContext.clean();
+
+        return R.ok();
+    }
+
+    @RequiresLogin
     @GetMapping("/order/list")
     public R orderList(@RequestParam(name = "status", required = false) Integer status) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();

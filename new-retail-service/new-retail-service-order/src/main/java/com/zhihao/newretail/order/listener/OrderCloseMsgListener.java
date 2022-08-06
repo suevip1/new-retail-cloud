@@ -45,15 +45,17 @@ public class OrderCloseMsgListener {
         /*
         * 关闭未支付的订单
         * */
-        if (!ObjectUtils.isEmpty(order) && OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())) {
+        if (!ObjectUtils.isEmpty(order)
+                && OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())
+                && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
             AtomicInteger atomicInteger = new AtomicInteger(order.getMqVersion());
             if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
                 order.setIsDelete(DeleteEnum.DELETE.getCode());
                 order.setMqVersion(atomicInteger.get());
                 orderService.updateOrder(order);
                 /*
-                * 发送消息解锁库存
-                * */
+                 * 发送消息解锁库存
+                 * */
                 StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
                 stockUnLockMQDTO.setOrderNo(order.getId());
                 stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
@@ -63,8 +65,8 @@ public class OrderCloseMsgListener {
                         GsonUtil.obj2Json(stockUnLockMQDTO)
                 );
                 /*
-                * 发送消息回滚优惠券
-                * */
+                 * 发送消息回滚优惠券
+                 * */
                 if (!ObjectUtils.isEmpty(order.getCouponsId())) {
                     CouponsUnSubMQDTO couponsUnSubMQDTO = new CouponsUnSubMQDTO();
                     couponsUnSubMQDTO.setCouponsId(order.getCouponsId());

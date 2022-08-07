@@ -40,8 +40,13 @@ public class OrderNotifyMsgListener {
             if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
                 userCoupons.setQuantity(userCoupons.getQuantity() + couponsUnSubMQDTO.getQuantity());
                 userCoupons.setMqVersion(atomicInteger.get());
-                userCouponsService.updateUserCoupons(userCoupons);
-                log.info("当前时间:{},优惠券id:{},回退优惠券", new Date(), couponsUnSubMQDTO.getCouponsId());
+                try {
+                    userCouponsService.updateUserCoupons(userCoupons);
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                    log.info("当前时间:{},优惠券id:{},回退优惠券", new Date(), couponsUnSubMQDTO.getCouponsId());
+                } catch (Exception e) {
+                    channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                }
             }
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

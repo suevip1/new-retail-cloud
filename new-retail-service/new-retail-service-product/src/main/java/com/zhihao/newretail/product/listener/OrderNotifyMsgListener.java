@@ -45,9 +45,13 @@ public class OrderNotifyMsgListener {
 
         List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
         List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
-        stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.UN_LOCK);
-        log.info("当前时间:{},订单号:{},解锁库存", new Date(), orderNo);
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        try {
+            stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.UN_LOCK);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            log.info("当前时间:{},订单号:{},解锁库存", new Date(), orderNo);
+        } catch (Exception e) {
+            channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+        }
     }
 
     /*
@@ -61,9 +65,13 @@ public class OrderNotifyMsgListener {
 
         List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
         List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
-        stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.SUB);
-        log.info("当前时间:{},订单号:{},删减库存", new Date(), orderNo);
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+        try {
+            stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.SUB);
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            log.info("当前时间:{},订单号:{},删减库存", new Date(), orderNo);
+        } catch (Exception e) {
+            channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+        }
     }
 
     private List<SkuStockLock> buildSkuStockLockList(List<SkuStockLock> skuStockLockList, Integer version) {

@@ -86,6 +86,7 @@ public class OrderCloseMsgListener {
                 log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
             }
         }
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

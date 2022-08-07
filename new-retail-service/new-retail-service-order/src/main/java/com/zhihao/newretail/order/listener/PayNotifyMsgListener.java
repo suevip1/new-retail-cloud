@@ -52,7 +52,12 @@ public class PayNotifyMsgListener {
                 order.setPaymentType(payNotifyMQDTO.getPayPlatform());
                 order.setStatus(payNotifyMQDTO.getStatus());
                 order.setMqVersion(atomicInteger.get());
-                orderService.updateOrder(order);
+                try {
+                    orderService.updateOrder(order);
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                } catch (Exception e) {
+                    channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                }
 
                 /* 通知删减库存 */
                 StockSubLockMQDTO stockSubLockMQDTO = new StockSubLockMQDTO();
@@ -66,7 +71,6 @@ public class PayNotifyMsgListener {
                 log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
             }
         }
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

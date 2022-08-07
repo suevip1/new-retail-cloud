@@ -166,7 +166,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertOrder(Integer userId, String uuid, OrderSubmitForm form) throws ExecutionException, InterruptedException {
+    public Long insertOrder(Integer userId, String uuid, OrderSubmitForm form) throws ExecutionException, InterruptedException {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         /*
         * 防止重复下单
@@ -343,6 +343,7 @@ public class OrderServiceImpl implements OrderService {
                     return message;
                 }
         );
+        return orderNo;
     }
 
     @Override

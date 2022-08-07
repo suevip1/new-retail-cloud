@@ -35,10 +35,10 @@ public class OrderController {
     public R orderSubmit(@Valid @RequestBody OrderSubmitForm form) throws ExecutionException, InterruptedException {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         String uuid = UserLoginContext.getUserLoginInfo().getUuid();
-        orderService.insertOrder(userId, uuid, form);
+        Long orderNo = orderService.insertOrder(userId, uuid, form);
         UserLoginContext.clean();
 
-        return R.ok();
+        return R.ok().put("data", orderNo);
     }
 
     @RequiresLogin

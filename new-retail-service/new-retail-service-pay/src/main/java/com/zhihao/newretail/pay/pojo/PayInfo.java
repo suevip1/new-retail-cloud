@@ -3,7 +3,11 @@ package com.zhihao.newretail.pay.pojo;
 import java.math.BigDecimal;
 import java.util.Date;
 
-public class PayInfo extends PayInfoKey {
+public class PayInfo {
+
+    private Long orderId;
+
+    private Integer userId;
 
     private Integer payInfoIndex;
 
@@ -24,6 +28,22 @@ public class PayInfo extends PayInfoKey {
     private Date createTime;
 
     private Date updateTime;
+
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
     public Integer getPayInfoIndex() {
         return payInfoIndex;
@@ -62,7 +82,7 @@ public class PayInfo extends PayInfoKey {
     }
 
     public void setPlatformNumber(String platformNumber) {
-        this.platformNumber = platformNumber == null ? null : platformNumber.trim();
+        this.platformNumber = platformNumber;
     }
 
     public Integer getIsDelete() {
@@ -108,7 +128,9 @@ public class PayInfo extends PayInfoKey {
     @Override
     public String toString() {
         return "PayInfo{" +
-                "payInfoIndex=" + payInfoIndex +
+                "orderId=" + orderId +
+                ", userId=" + userId +
+                ", payInfoIndex=" + payInfoIndex +
                 ", payAmount=" + payAmount +
                 ", payPlatform=" + payPlatform +
                 ", status=" + status +

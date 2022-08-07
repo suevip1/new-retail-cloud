@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * */
 @Slf4j
 @Component
-public class UserCouponsMsgListener {
+public class OrderNotifyMsgListener {
 
     @Autowired
     private UserCouponsService userCouponsService;

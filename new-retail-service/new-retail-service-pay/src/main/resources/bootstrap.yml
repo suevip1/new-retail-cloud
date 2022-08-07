@@ -12,6 +12,8 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         file-extension: yml
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/new_retail_pay?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
@@ -23,7 +25,27 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null
+  rabbitmq:
+    host: 192.168.43.2
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-returns: true
+    template:
+      mandatory: true
+    listener:
+      simple:
+        acknowledge-mode: manual
 mybatis:
   configuration:
     map-underscore-to-camel-case: true
   mapper-locations: classpath*:mapper/*.xml
+alipay:
+  pc:
+    gateway: gatewayUrl
+    return-url: returnUrl
+    notify-url: notifyUrl
+    app-id: yourAppId
+    private-key: yourPrivateKey
+    alipay-public-key: yourAlipayPublicKey

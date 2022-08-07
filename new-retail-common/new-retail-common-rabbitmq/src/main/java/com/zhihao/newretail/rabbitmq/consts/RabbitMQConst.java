@@ -22,8 +22,11 @@ public class RabbitMQConst {
     /* 订单延迟队列名 */
     public static final String ORDER_DELAYED_QUEUE_NAME = "order.close.queue";
 
-    /* 订单异步通知交换机 */
+    /* 订单通知交换机 */
     public static final String ORDER_NOTIFY_EXCHANGE_NAME = "order.notify";
+
+    /* 支付成功通知交换机 */
+    public static final String PAY_NOTIFY_EXCHANGE_NAME = "pay.notify";
 
     /* 订单删减库存路由key */
     public static final String ORDER_NOTIFY_STOCK_SUB_ROUTING_KEY = "order.notify.stock.sub";
@@ -34,6 +37,9 @@ public class RabbitMQConst {
     /* 订单回滚优惠券路由key */
     public static final String ORDER_NOTIFY_COUPONS_UNSUB_ROUTING_KEY = "order.notify.coupons.unsub";
 
+    /* 支付成功路由key */
+    public static final String PAY_NOTIFY_ROUTING_KEY = "pay.notify.success";
+
     /* 订单删减库存队列 */
     public static final String ORDER_NOTIFY_STOCK_SUB_QUEUE_NAME = "order.notify.stock.sub.queue";
 
@@ -42,5 +48,8 @@ public class RabbitMQConst {
 
     /* 订单回滚优惠券队列 */
     public static final String ORDER_NOTIFY_COUPONS_UNSUB_QUEUE_NAME = "order.notify.coupons.unsub.queue";
+
+    /* 支付成功通知队列 */
+    public static final String PAY_NOTIFY_QUEUE_NAME = "pay.notify.queue";
 
 }

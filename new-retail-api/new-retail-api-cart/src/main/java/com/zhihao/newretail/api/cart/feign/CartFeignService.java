@@ -10,7 +10,7 @@ import java.util.List;
 @FeignClient(name = "new-retail-cart", path = "/cart")
 public interface CartFeignService {
 
-    @GetMapping("/api/cart")
+    @GetMapping("/api/cart/list")
     List<CartApiVO> listCartApiVOs();
 
     @PutMapping("/api/cart")

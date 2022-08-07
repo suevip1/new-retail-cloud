@@ -17,7 +17,7 @@ public class ProductController {
     private ProductService productService;
 
     @GetMapping("/detail/{spuId}")
-    public R getProductDetailVO(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
+    public R productDetail(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
         ProductDetailVO productDetailVO = productService.getProductDetailVO(spuId);
         return R.ok().put("data", productDetailVO);
     }

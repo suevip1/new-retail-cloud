@@ -12,7 +12,7 @@ import java.util.List;
 @FeignClient(name = "new-retail-user", path = "/user")
 public interface UserCouponsFeignService {
 
-    @GetMapping("/api/listUserCoupons")
+    @GetMapping("/api/userCoupons/list")
     List<UserCouponsApiVO> listUserCouponsApiVOs();
 
     @PutMapping("/api/userCoupons")

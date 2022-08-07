@@ -69,8 +69,8 @@ public class CartController {
     }
 
     @RequiresLogin
-    @PutMapping("/cart/notSelectedAll")
-    public R updateCartNotSelectedAll() {
+    @PutMapping("/cart/unSelectedAll")
+    public R updateCartUnSelectedAll() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.updateCartNotSelectedAll(userId);
         UserLoginContext.clean();
@@ -80,7 +80,7 @@ public class CartController {
 
     @RequiresLogin
     @GetMapping("/cart/quantity")
-    public R getQuantity() {
+    public R cartQuantity() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         Integer quantity = cartService.getQuantity(userId);
         UserLoginContext.clean();

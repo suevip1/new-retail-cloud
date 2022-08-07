@@ -5,6 +5,7 @@ import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
@@ -434,6 +435,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateOrder(Order order) {
         orderMapper.updateByPrimaryKeySelective(order);
+    }
+
+    @Override
+    public OrderApiVO getOrderApiVO(Long orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        OrderApiVO orderApiVO = new OrderApiVO();
+        BeanUtils.copyProperties(order, orderApiVO);
+        return orderApiVO;
     }
 
     /*

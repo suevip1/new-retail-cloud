@@ -43,7 +43,8 @@ public class PayNotifyMsgListener {
         Order order = orderService.getOrder(payNotifyMQDTO.getOrderNo());
         if (!ObjectUtils.isEmpty(order)
                 && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())
-                && payNotifyMQDTO.getUserId().equals(order.getUserId())) {
+                && payNotifyMQDTO.getUserId().equals(order.getUserId())
+                && payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
             AtomicInteger atomicInteger = new AtomicInteger(order.getMqVersion());
             if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
                 /* 更新订单状态 */

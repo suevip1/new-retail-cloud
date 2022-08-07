@@ -71,6 +71,7 @@ public class PayNotifyMsgListener {
                 log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
             }
         }
+        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

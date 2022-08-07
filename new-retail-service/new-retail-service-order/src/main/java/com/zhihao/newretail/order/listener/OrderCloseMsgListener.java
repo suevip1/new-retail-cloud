@@ -52,7 +52,12 @@ public class OrderCloseMsgListener {
             if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
                 order.setIsDelete(DeleteEnum.DELETE.getCode());
                 order.setMqVersion(atomicInteger.get());
-                orderService.updateOrder(order);
+                try {
+                    orderService.updateOrder(order);
+                    channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                } catch (Exception e) {
+                    channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                }
                 /*
                  * 发送消息解锁库存
                  * */
@@ -81,7 +86,6 @@ public class OrderCloseMsgListener {
                 log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
             }
         }
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

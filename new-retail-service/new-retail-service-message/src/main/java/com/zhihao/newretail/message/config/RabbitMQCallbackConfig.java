@@ -52,7 +52,7 @@ public class RabbitMQCallbackConfig {
             String replyText = returnedMessage.getReplyText();
             String exchange = returnedMessage.getExchange();
             String routingKey = returnedMessage.getRoutingKey();
-            log.info("time{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
+            log.info("time:{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
         });
     }
 

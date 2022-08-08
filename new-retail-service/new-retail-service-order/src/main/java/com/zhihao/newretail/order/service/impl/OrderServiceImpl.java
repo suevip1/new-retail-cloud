@@ -5,6 +5,8 @@ import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.api.message.dto.DelayedMessageDTO;
+import com.zhihao.newretail.api.message.feign.MessageFeignService;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockBatchApiDTO;
@@ -79,6 +81,8 @@ public class OrderServiceImpl implements OrderService {
     private MyRedisUtil redisUtil;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MessageFeignService messageFeignService;
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -334,21 +338,17 @@ public class OrderServiceImpl implements OrderService {
         /*
          * 发送消息到延迟队列，30分钟未支付关闭订单
          * */
-        CorrelationData correlationData = new CorrelationData(String.valueOf(orderNo));
         OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
         orderCloseMQDTO.setOrderNo(orderNo);
         orderCloseMQDTO.setCouponsId(orderCouponsVO.getId());
         orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-        rabbitTemplate.convertAndSend(
-                RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME,
-                RabbitMQConst.ORDER_DELAYED_ROUTING_KEY,
-                GsonUtil.obj2Json(orderCloseMQDTO),
-                message -> {
-                    message.getMessageProperties().setDelay(1800000); // 30分钟
-                    return message;
-                },
-                correlationData
-        );
+        DelayedMessageDTO delayedMessageDTO = new DelayedMessageDTO();
+        delayedMessageDTO.setContent(GsonUtil.obj2Json(orderCloseMQDTO));
+        delayedMessageDTO.setExchange(RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME);
+        delayedMessageDTO.setRoutingKey(RabbitMQConst.ORDER_DELAYED_ROUTING_KEY);
+        delayedMessageDTO.setDelayedTime(1800000);  // 30分钟
+        messageFeignService.sendDelayedMessage(delayedMessageDTO);
+
         return orderNo;
     }
 

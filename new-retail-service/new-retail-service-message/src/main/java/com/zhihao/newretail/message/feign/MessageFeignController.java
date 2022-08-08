@@ -25,7 +25,7 @@ public class MessageFeignController implements MessageFeignService {
     private MQLogService mqLogService;
 
     @Override
-    public void sendDelayedMessage(DelayedMessageDTO delayedMessageDTO) {
+    public Long sendDelayedMessage(DelayedMessageDTO delayedMessageDTO) {
         String content = delayedMessageDTO.getContent();
         String exchange = delayedMessageDTO.getExchange();
         String routingKey = delayedMessageDTO.getRoutingKey();
@@ -38,10 +38,11 @@ public class MessageFeignController implements MessageFeignService {
             message.getMessageProperties().setDelay(delayedTime);
             return message;
         }, correlationData);
+        return messageId;
     }
 
     @Override
-    public void sendNotifyMessage(NotifyMessageDTO notifyMessageDTO) {
+    public Long sendNotifyMessage(NotifyMessageDTO notifyMessageDTO) {
         String content = notifyMessageDTO.getContent();
         String exchange = notifyMessageDTO.getExchange();
         String routingKey = notifyMessageDTO.getRoutingKey();
@@ -49,6 +50,7 @@ public class MessageFeignController implements MessageFeignService {
         mqLogService.insetMessage(messageId, content, exchange, routingKey);
         CorrelationData correlationData = new CorrelationData(String.valueOf(messageId));
         rabbitTemplate.convertAndSend(exchange, routingKey, content, correlationData);
+        return messageId;
     }
 
     /*

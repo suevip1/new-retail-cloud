@@ -570,7 +570,7 @@ public class OrderServiceImpl implements OrderService {
         delayedMessageDTO.setContent(GsonUtil.obj2Json(orderCloseMQDTO));
         delayedMessageDTO.setExchange(RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME);
         delayedMessageDTO.setRoutingKey(RabbitMQConst.ORDER_DELAYED_ROUTING_KEY);
-        delayedMessageDTO.setDelayedTime(1800000);  // 30分钟
+        delayedMessageDTO.setDelayedTime(20000);  // 30分钟 1800000
         messageFeignService.sendDelayedMessage(delayedMessageDTO);
     }
 

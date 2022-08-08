@@ -18,12 +18,12 @@ public interface MessageFeignService {
     * 发送延迟消息
     * */
     @PostMapping("/api/send/delayed")
-    void sendDelayedMessage(@RequestBody DelayedMessageDTO delayedMessageDTO);
+    Long sendDelayedMessage(@RequestBody DelayedMessageDTO delayedMessageDTO);
 
     /*
     * 发送通知消息
     * */
     @PostMapping("/api/send/notify")
-    void sendNotifyMessage(@RequestBody NotifyMessageDTO notifyMessageDTO);
+    Long sendNotifyMessage(@RequestBody NotifyMessageDTO notifyMessageDTO);
 
 }

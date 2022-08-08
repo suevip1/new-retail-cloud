@@ -6,6 +6,7 @@ import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.message.dto.DelayedMessageDTO;
+import com.zhihao.newretail.api.message.dto.NotifyMessageDTO;
 import com.zhihao.newretail.api.message.feign.MessageFeignService;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
@@ -44,8 +45,6 @@ import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -76,13 +75,11 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private CouponsFeignService couponsFeignService;
     @Autowired
+    private MessageFeignService messageFeignService;
+    @Autowired
     private ThreadPoolExecutor executor;
     @Autowired
     private MyRedisUtil redisUtil;
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-    @Autowired
-    private MessageFeignService messageFeignService;
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -286,14 +283,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new ServiceException("库存锁定失败");
             }
         } catch (Exception e) {
-            StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
-            stockUnLockMQDTO.setOrderNo(order.getId());
-            stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
-                    RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY,
-                    GsonUtil.obj2Json(stockUnLockMQDTO)
-            );
+            sendStockUnLockMessage(orderNo);    // 发送库存解锁消息
             e.printStackTrace();
             throw e;
         }
@@ -312,43 +302,14 @@ public class OrderServiceImpl implements OrderService {
                     throw new ServiceException("优惠券扣除异常");
                 }
             } catch (Exception e) {
-                StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
-                stockUnLockMQDTO.setOrderNo(order.getId());
-                stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
-                        RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY,
-                        GsonUtil.obj2Json(stockUnLockMQDTO)
-                );
-                CouponsUnSubMQDTO couponsUnSubMQDTO = new CouponsUnSubMQDTO();
-                couponsUnSubMQDTO.setCouponsId(order.getCouponsId());
-                couponsUnSubMQDTO.setQuantity(1);
-                couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
-                        RabbitMQConst.ORDER_NOTIFY_COUPONS_UNSUB_ROUTING_KEY,
-                        GsonUtil.obj2Json(couponsUnSubMQDTO)
-                );
+                sendStockUnLockMessage(orderNo);                    // 发送库存解锁消息
+                sendCouponsUnSubMessage(order.getCouponsId());      // 发送优惠券回退消息
                 e.printStackTrace();
                 throw e;
             }
         }
-        /* 下单成功删除购物车商品 */
-        cartFeignService.deleteCartBySelected();
-        /*
-         * 发送消息到延迟队列，30分钟未支付关闭订单
-         * */
-        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
-        orderCloseMQDTO.setOrderNo(orderNo);
-        orderCloseMQDTO.setCouponsId(orderCouponsVO.getId());
-        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-        DelayedMessageDTO delayedMessageDTO = new DelayedMessageDTO();
-        delayedMessageDTO.setContent(GsonUtil.obj2Json(orderCloseMQDTO));
-        delayedMessageDTO.setExchange(RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME);
-        delayedMessageDTO.setRoutingKey(RabbitMQConst.ORDER_DELAYED_ROUTING_KEY);
-        delayedMessageDTO.setDelayedTime(1800000);  // 30分钟
-        messageFeignService.sendDelayedMessage(delayedMessageDTO);
-
+        cartFeignService.deleteCartBySelected();                    // 下单成功删除购物车商品
+        sendOrderCloseMessage(orderNo, orderCouponsVO.getId());     // 发送消息到延迟队列，30分钟未支付关闭订单
         return orderNo;
     }
 
@@ -409,15 +370,7 @@ public class OrderServiceImpl implements OrderService {
                 || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
         }
-        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
-        orderCloseMQDTO.setOrderNo(order.getId());
-        orderCloseMQDTO.setCouponsId(order.getCouponsId());
-        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-        rabbitTemplate.convertAndSend(
-                RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME,
-                RabbitMQConst.ORDER_DELAYED_ROUTING_KEY,
-                GsonUtil.obj2Json(orderCloseMQDTO)
-        );
+        sendOrderCancelMessage(order.getId(), order.getCouponsId());
     }
 
     @Override
@@ -571,6 +524,70 @@ public class OrderServiceImpl implements OrderService {
         String str2 = StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 6);
         String str3 = str1 + str2;
         return Long.valueOf(str3);
+    }
+
+    /*
+    * 发送库存解锁消息
+    * */
+    private void sendStockUnLockMessage(Long orderNo) {
+        StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
+        stockUnLockMQDTO.setOrderNo(orderNo);
+        stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        /* 发送消息 */
+        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
+        notifyMessageDTO.setContent(GsonUtil.obj2Json(stockUnLockMQDTO));
+        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME);
+        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY);
+        messageFeignService.sendNotifyMessage(notifyMessageDTO);
+    }
+
+    /*
+    * 发送优惠券回退消息
+    * */
+    private void sendCouponsUnSubMessage(Integer couponsId) {
+        CouponsUnSubMQDTO couponsUnSubMQDTO = new CouponsUnSubMQDTO();
+        couponsUnSubMQDTO.setCouponsId(couponsId);
+        couponsUnSubMQDTO.setQuantity(1);
+        couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        /* 发送消息 */
+        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
+        notifyMessageDTO.setContent(GsonUtil.obj2Json(couponsUnSubMQDTO));
+        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME);
+        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY);
+        messageFeignService.sendNotifyMessage(notifyMessageDTO);
+    }
+
+    /*
+    * 发送订单定时关闭消息
+    * */
+    private void sendOrderCloseMessage(Long orderNo, Integer couponsId) {
+        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
+        orderCloseMQDTO.setOrderNo(orderNo);
+        orderCloseMQDTO.setCouponsId(couponsId);
+        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        /* 发送消息 */
+        DelayedMessageDTO delayedMessageDTO = new DelayedMessageDTO();
+        delayedMessageDTO.setContent(GsonUtil.obj2Json(orderCloseMQDTO));
+        delayedMessageDTO.setExchange(RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME);
+        delayedMessageDTO.setRoutingKey(RabbitMQConst.ORDER_DELAYED_ROUTING_KEY);
+        delayedMessageDTO.setDelayedTime(1800000);  // 30分钟
+        messageFeignService.sendDelayedMessage(delayedMessageDTO);
+    }
+
+    /*
+    * 发送取消订单消息
+    * */
+    private void sendOrderCancelMessage(Long orderNo, Integer couponsId) {
+        OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
+        orderCloseMQDTO.setOrderNo(orderNo);
+        orderCloseMQDTO.setCouponsId(couponsId);
+        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        /* 发送消息 */
+        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
+        notifyMessageDTO.setContent(GsonUtil.obj2Json(orderCloseMQDTO));
+        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_DELAYED_EXCHANGE_NAME);
+        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_DELAYED_ROUTING_KEY);
+        messageFeignService.sendNotifyMessage(notifyMessageDTO);
     }
 
 }

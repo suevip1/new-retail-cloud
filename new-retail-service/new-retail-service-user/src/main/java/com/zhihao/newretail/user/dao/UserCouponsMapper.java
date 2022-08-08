@@ -6,13 +6,13 @@ import java.util.List;
 
 public interface UserCouponsMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByUserId(Integer userId);
 
     int insert(UserCoupons record);
 
     int insertSelective(UserCoupons record);
 
-    UserCoupons selectByPrimaryKey(Integer id);
+    UserCoupons selectByUserId(Integer userId);
 
     int updateByPrimaryKeySelective(UserCoupons record);
 

@@ -39,9 +39,7 @@ public class UserAddressServiceImpl implements UserAddressService {
     public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
 
-        if (ObjectUtils.isEmpty(userAddress)
-                || !userId.equals(userAddress.getUserId())
-                || DeleteEnum.DELETE.getCode().equals(userAddress.getIsDelete())) {
+        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
         }
         UserAddressVO userAddressVO = new UserAddressVO();
@@ -81,11 +79,8 @@ public class UserAddressServiceImpl implements UserAddressService {
         if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
         }
-        /* 使用逻辑删除 */
-        userAddress.setIsDelete(DeleteEnum.DELETE.getCode());
-        int deleteUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
-
-        if (deleteUserAddressRow <= 0) {
+        int deleteRow = userAddressMapper.deleteByPrimaryKey(addressId);
+        if (deleteRow <= 0) {
             throw new ServiceException("删除收货地址失败");
         }
     }

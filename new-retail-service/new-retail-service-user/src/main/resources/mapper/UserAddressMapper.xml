@@ -9,11 +9,10 @@
     <result column="address" jdbcType="VARCHAR" property="address" />
     <result column="address_detail" jdbcType="VARCHAR" property="addressDetail" />
     <result column="is_prime" jdbcType="TINYINT" property="isPrime" />
-    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
   </resultMap>
 
   <sql id="Base_Column_List">
-    id, user_id, name, tel, address, address_detail, is_prime, is_delete
+    id, user_id, name, tel, address, address_detail, is_prime
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -31,10 +30,10 @@
   <insert id="insert" parameterType="com.zhihao.newretail.user.pojo.UserAddress">
     insert into tb_user_address (id, user_id, name, 
       tel, address, address_detail, 
-      is_prime, is_delete)
+      is_prime)
     values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, 
       #{tel,jdbcType=CHAR}, #{address,jdbcType=VARCHAR}, #{addressDetail,jdbcType=VARCHAR}, 
-      #{isPrime,jdbcType=TINYINT}, #{isDelete,jdbcType=TINYINT})
+      #{isPrime,jdbcType=TINYINT})
   </insert>
 
   <insert id="insertSelective" parameterType="com.zhihao.newretail.user.pojo.UserAddress" useGeneratedKeys="true" keyProperty="id">
@@ -61,9 +60,6 @@
       <if test="isPrime != null">
         is_prime,
       </if>
-      <if test="isDelete != null">
-        is_delete,
-      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -86,9 +82,6 @@
       </if>
       <if test="isPrime != null">
         #{isPrime,jdbcType=TINYINT},
-      </if>
-      <if test="isDelete != null">
-        #{isDelete,jdbcType=TINYINT},
       </if>
     </trim>
   </insert>
@@ -114,9 +107,6 @@
       <if test="isPrime != null">
         is_prime = #{isPrime,jdbcType=TINYINT},
       </if>
-      <if test="isDelete != null">
-        is_delete = #{isDelete,jdbcType=TINYINT},
-      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -128,8 +118,7 @@
       tel = #{tel,jdbcType=CHAR},
       address = #{address,jdbcType=VARCHAR},
       address_detail = #{addressDetail,jdbcType=VARCHAR},
-      is_prime = #{isPrime,jdbcType=TINYINT},
-      is_delete = #{isDelete,jdbcType=TINYINT}
+      is_prime = #{isPrime,jdbcType=TINYINT}
     where id = #{id,jdbcType=INTEGER}
   </update>
 
@@ -137,6 +126,6 @@
     select
     <include refid="Base_Column_List" />
     from tb_user_address
-    where user_id = #{userId,jdbcType=INTEGER} and is_delete = 0;
+    where user_id = #{userId,jdbcType=INTEGER}
   </select>
 </mapper>

@@ -16,8 +16,6 @@ public class UserAddress {
 
     private Integer isPrime;
 
-    private Integer isDelete;
-
     public Integer getId() {
         return id;
     }
@@ -39,7 +37,7 @@ public class UserAddress {
     }
 
     public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+        this.name = name;
     }
 
     public String getTel() {
@@ -47,7 +45,7 @@ public class UserAddress {
     }
 
     public void setTel(String tel) {
-        this.tel = tel == null ? null : tel.trim();
+        this.tel = tel;
     }
 
     public String getAddress() {
@@ -55,7 +53,7 @@ public class UserAddress {
     }
 
     public void setAddress(String address) {
-        this.address = address == null ? null : address.trim();
+        this.address = address;
     }
 
     public String getAddressDetail() {
@@ -63,7 +61,7 @@ public class UserAddress {
     }
 
     public void setAddressDetail(String addressDetail) {
-        this.addressDetail = addressDetail == null ? null : addressDetail.trim();
+        this.addressDetail = addressDetail;
     }
 
     public Integer getIsPrime() {
@@ -72,14 +70,6 @@ public class UserAddress {
 
     public void setIsPrime(Integer isPrime) {
         this.isPrime = isPrime;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
     }
 
     @Override
@@ -92,7 +82,6 @@ public class UserAddress {
                 ", address='" + address + '\'' +
                 ", addressDetail='" + addressDetail + '\'' +
                 ", isPrime=" + isPrime +
-                ", isDelete=" + isDelete +
                 '}';
     }
 

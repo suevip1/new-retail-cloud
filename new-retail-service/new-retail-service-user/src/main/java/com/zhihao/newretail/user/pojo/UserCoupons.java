@@ -2,8 +2,6 @@ package com.zhihao.newretail.user.pojo;
 
 public class UserCoupons {
 
-    private Integer id;
-
     private Integer userId;
 
     private Integer couponsId;
@@ -11,14 +9,6 @@ public class UserCoupons {
     private Integer quantity;
 
     private Integer mqVersion;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public Integer getUserId() {
         return userId;
@@ -55,8 +45,7 @@ public class UserCoupons {
     @Override
     public String toString() {
         return "UserCoupons{" +
-                "id=" + id +
-                ", userId=" + userId +
+                "userId=" + userId +
                 ", couponsId=" + couponsId +
                 ", quantity=" + quantity +
                 ", mqVersion=" + mqVersion +

@@ -1,6 +1,7 @@
 package com.zhihao.newretail.api.message.feign;
 
 import com.zhihao.newretail.api.message.dto.DelayedMessageDTO;
+import com.zhihao.newretail.api.message.dto.NotifyMessageDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,5 +19,11 @@ public interface MessageFeignService {
     * */
     @PostMapping("/api/send/delayed")
     void sendDelayedMessage(@RequestBody DelayedMessageDTO delayedMessageDTO);
+
+    /*
+    * 发送通知消息
+    * */
+    @PostMapping("/api/send/notify")
+    void sendNotifyMessage(@RequestBody NotifyMessageDTO notifyMessageDTO);
 
 }

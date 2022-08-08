@@ -47,14 +47,4 @@ public class DelayedMessageDTO {
         this.delayedTime = delayedTime;
     }
 
-    @Override
-    public String toString() {
-        return "DelayedMessageDTO{" +
-                "content='" + content + '\'' +
-                ", exchange='" + exchange + '\'' +
-                ", routingKey='" + routingKey + '\'' +
-                ", delayedTime=" + delayedTime +
-                '}';
-    }
-
 }

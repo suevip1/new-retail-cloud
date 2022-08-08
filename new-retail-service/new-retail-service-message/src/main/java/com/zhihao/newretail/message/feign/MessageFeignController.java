@@ -1,11 +1,10 @@
 package com.zhihao.newretail.message.feign;
 
 import com.zhihao.newretail.api.message.dto.DelayedMessageDTO;
+import com.zhihao.newretail.api.message.dto.NotifyMessageDTO;
 import com.zhihao.newretail.api.message.feign.MessageFeignService;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
-import com.zhihao.newretail.message.pojo.MQLog;
 import com.zhihao.newretail.message.service.MQLogService;
-import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,21 +31,24 @@ public class MessageFeignController implements MessageFeignService {
         String routingKey = delayedMessageDTO.getRoutingKey();
         Integer delayedTime = delayedMessageDTO.getDelayedTime();
         Long messageId = getMessageId();
-
         /* 发送消息前持久化，保证消息可靠性投递 */
-        MQLog mqLog = new MQLog();
-        mqLog.setMessageId(messageId);
-        mqLog.setContent(content);
-        mqLog.setExchange(exchange);
-        mqLog.setRoutingKey(routingKey);
-        mqLog.setStatus(MessageStatusEnum.NEW_MESSAGE.getCode());
-        mqLogService.insetMessage(mqLog);
-
+        mqLogService.insetMessage(messageId, content, exchange, routingKey);
         CorrelationData correlationData = new CorrelationData(String.valueOf(messageId));
         rabbitTemplate.convertAndSend(exchange, routingKey, content, message -> {
             message.getMessageProperties().setDelay(delayedTime);
             return message;
         }, correlationData);
+    }
+
+    @Override
+    public void sendNotifyMessage(NotifyMessageDTO notifyMessageDTO) {
+        String content = notifyMessageDTO.getContent();
+        String exchange = notifyMessageDTO.getExchange();
+        String routingKey = notifyMessageDTO.getRoutingKey();
+        Long messageId = getMessageId();
+        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        CorrelationData correlationData = new CorrelationData(String.valueOf(messageId));
+        rabbitTemplate.convertAndSend(exchange, routingKey, content, correlationData);
     }
 
     /*

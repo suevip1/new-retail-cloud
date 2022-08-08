@@ -3,6 +3,7 @@ package com.zhihao.newretail.message.service.impl;
 import com.zhihao.newretail.message.dao.MQLogMapper;
 import com.zhihao.newretail.message.pojo.MQLog;
 import com.zhihao.newretail.message.service.MQLogService;
+import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,13 @@ public class MQLogServiceImpl implements MQLogService {
     private MQLogMapper mqLogMapper;
 
     @Override
-    public void insetMessage(MQLog mqLog) {
+    public void insetMessage(Long messageId, String content, String exchange, String routingKey) {
+        MQLog mqLog = new MQLog();
+        mqLog.setMessageId(messageId);
+        mqLog.setContent(content);
+        mqLog.setExchange(exchange);
+        mqLog.setRoutingKey(routingKey);
+        mqLog.setStatus(MessageStatusEnum.NEW_MESSAGE.getCode());
         mqLogMapper.insertSelective(mqLog);
     }
 

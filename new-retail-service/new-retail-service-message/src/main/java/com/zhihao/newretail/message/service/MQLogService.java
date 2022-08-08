@@ -12,7 +12,7 @@ public interface MQLogService {
     /*
      * 保存消息
      * */
-    void insetMessage(MQLog mqLog);
+    void insetMessage(Long messageId, String content, String exchange, String routingKey);
 
     /*
      * 更新消息

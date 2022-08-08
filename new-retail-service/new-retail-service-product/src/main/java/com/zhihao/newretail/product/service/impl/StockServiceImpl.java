@@ -31,11 +31,6 @@ public class StockServiceImpl implements StockService {
     private SkuStockLockMapper skuStockLockMapper;
 
     @Override
-    public SkuStock getSkuStock(Integer skuId) {
-        return skuStockMapper.selectBySkuId(skuId);
-    }
-
-    @Override
     public List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         return skuStockList.stream()
@@ -94,8 +89,8 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateStockByType(List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum) {
-        Set<Integer> skuIdSet = getSkuIdSet(skuStockLockList);
+    public void updateStockByType(Long orderId, List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum) {
+        Set<Integer> skuIdSet = skuStockLockListGetSkuIdSet(skuStockLockList);
         Map<Integer, SkuStockLock> skuStockLockMap = buildSkuStockLockMap(skuStockLockList);
 
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
@@ -117,7 +112,7 @@ public class StockServiceImpl implements StockService {
             }
         }
         skuStockMapper.updateBatch(skuStocks);
-        skuStockLockMapper.updateBatch(skuStockLockList);
+        skuStockLockMapper.deleteByOrderId(orderId);
     }
 
     private void buildSkuStock(SkuStock skuStock, SkuStockLockApiDTO skuStockLockApiDTO) {
@@ -129,7 +124,7 @@ public class StockServiceImpl implements StockService {
         skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
     }
 
-    private Set<Integer> getSkuIdSet(List<SkuStockLock> skuStockLockList) {
+    private Set<Integer> skuStockLockListGetSkuIdSet(List<SkuStockLock> skuStockLockList) {
         return skuStockLockList.stream().map(SkuStockLock::getSkuId).collect(Collectors.toSet());
     }
 

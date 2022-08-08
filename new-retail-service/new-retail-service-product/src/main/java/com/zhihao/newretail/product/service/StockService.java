@@ -12,11 +12,6 @@ import java.util.Set;
 public interface StockService {
 
     /*
-    * 获取商品库存信息
-    * */
-    SkuStock getSkuStock(Integer skuId);
-
-    /*
      * 批量获取商品库存信息
      * */
     List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet);
@@ -39,6 +34,6 @@ public interface StockService {
     /*
     * 解锁库存 删减库存
     * */
-    void updateStockByType(List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum);
+    void updateStockByType(Long orderId, List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum);
 
 }

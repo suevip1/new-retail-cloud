@@ -4,13 +4,11 @@ import java.util.Date;
 
 public class SkuStockLock {
 
-    private Integer id;
-
-    private Integer spuId;
+    private Long orderId;
 
     private Integer skuId;
 
-    private Long orderId;
+    private Integer spuId;
 
     private Integer count;
 
@@ -18,26 +16,16 @@ public class SkuStockLock {
 
     private Integer mqVersion;
 
-    private Integer isDelete;
-
     private Date createTime;
 
     private Date updateTime;
 
-    public Integer getId() {
-        return id;
+    public Long getOrderId() {
+        return orderId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Integer getSpuId() {
-        return spuId;
-    }
-
-    public void setSpuId(Integer spuId) {
-        this.spuId = spuId;
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
     }
 
     public Integer getSkuId() {
@@ -48,12 +36,12 @@ public class SkuStockLock {
         this.skuId = skuId;
     }
 
-    public Long getOrderId() {
-        return orderId;
+    public Integer getSpuId() {
+        return spuId;
     }
 
-    public void setOrderId(Long orderId) {
-        this.orderId = orderId;
+    public void setSpuId(Integer spuId) {
+        this.spuId = spuId;
     }
 
     public Integer getCount() {
@@ -80,14 +68,6 @@ public class SkuStockLock {
         this.mqVersion = mqVersion;
     }
 
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
-    }
-
     public Date getCreateTime() {
         return createTime;
     }
@@ -107,14 +87,12 @@ public class SkuStockLock {
     @Override
     public String toString() {
         return "SkuStockLock{" +
-                "id=" + id +
-                ", spuId=" + spuId +
+                "orderId=" + orderId +
                 ", skuId=" + skuId +
-                ", orderId=" + orderId +
+                ", spuId=" + spuId +
                 ", count=" + count +
                 ", status=" + status +
                 ", mqVersion=" + mqVersion +
-                ", isDelete=" + isDelete +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 '}';

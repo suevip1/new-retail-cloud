@@ -7,13 +7,13 @@ import java.util.List;
 
 public interface SkuStockLockMapper {
 
-    int deleteByPrimaryKey(Integer id);
+    int deleteByOrderId(Long orderId);
 
     int insert(SkuStockLock record);
 
     int insertSelective(SkuStockLock record);
 
-    SkuStockLock selectByPrimaryKey(Integer id);
+    SkuStockLock selectByOrderId(Long orderId);
 
     int updateByPrimaryKeySelective(SkuStockLock record);
 

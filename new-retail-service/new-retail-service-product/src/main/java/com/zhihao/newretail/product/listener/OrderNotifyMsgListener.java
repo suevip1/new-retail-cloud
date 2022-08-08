@@ -46,7 +46,7 @@ public class OrderNotifyMsgListener {
         List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
         List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
         try {
-            stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.UN_LOCK);
+            stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.UN_LOCK);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             log.info("当前时间:{},订单号:{},解锁库存", new Date(), orderNo);
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class OrderNotifyMsgListener {
         List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
         List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
         try {
-            stockService.updateStockByType(skuStockLocks, SkuStockTypeEnum.SUB);
+            stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.SUB);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             log.info("当前时间:{},订单号:{},删减库存", new Date(), orderNo);
         } catch (Exception e) {
@@ -80,7 +80,6 @@ public class OrderNotifyMsgListener {
             for (SkuStockLock skuStockLock : skuStockLockList) {
                 AtomicInteger atomicInteger = new AtomicInteger(skuStockLock.getMqVersion());
                 if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
-                    skuStockLock.setIsDelete(DeleteEnum.DELETE.getCode());
                     skuStockLock.setMqVersion(atomicInteger.get());
                     skuStockLocks.add(skuStockLock);
                 }

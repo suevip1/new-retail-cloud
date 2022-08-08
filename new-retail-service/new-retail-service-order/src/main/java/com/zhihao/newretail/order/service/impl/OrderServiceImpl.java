@@ -42,6 +42,7 @@ import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,6 +190,9 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> orderAddressFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             UserAddressApiVO userAddressApiVO = userAddressFeignService.getUserAddressApiVO(form.getAddressId());
+            if (ObjectUtils.isEmpty(userAddressApiVO.getId())) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+            }
             BeanUtils.copyProperties(userAddressApiVO, orderAddress);
             orderAddress.setOrderId(orderNo);
         }, executor);
@@ -330,6 +334,7 @@ public class OrderServiceImpl implements OrderService {
         /*
          * 发送消息到延迟队列，30分钟未支付关闭订单
          * */
+        CorrelationData correlationData = new CorrelationData(String.valueOf(orderNo));
         OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
         orderCloseMQDTO.setOrderNo(orderNo);
         orderCloseMQDTO.setCouponsId(orderCouponsVO.getId());
@@ -341,7 +346,8 @@ public class OrderServiceImpl implements OrderService {
                 message -> {
                     message.getMessageProperties().setDelay(1800000); // 30分钟
                     return message;
-                }
+                },
+                correlationData
         );
         return orderNo;
     }

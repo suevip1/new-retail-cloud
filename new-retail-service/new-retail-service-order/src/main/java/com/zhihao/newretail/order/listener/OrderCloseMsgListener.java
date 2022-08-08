@@ -1,6 +1,8 @@
 package com.zhihao.newretail.order.listener;
 
 import com.rabbitmq.client.Channel;
+import com.zhihao.newretail.api.message.dto.NotifyMessageDTO;
+import com.zhihao.newretail.api.message.feign.MessageFeignService;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.order.enums.OrderStatusEnum;
@@ -13,7 +15,6 @@ import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -35,7 +36,7 @@ public class OrderCloseMsgListener {
     private OrderService orderService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private MessageFeignService messageFeignService;
 
     @RabbitListener(queues = RabbitMQConst.ORDER_DELAYED_QUEUE_NAME)
     public void orderCloseQueue(String msgStr, Message message, Channel channel) throws IOException {
@@ -64,11 +65,7 @@ public class OrderCloseMsgListener {
                 StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
                 stockUnLockMQDTO.setOrderNo(order.getId());
                 stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
-                        RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY,
-                        GsonUtil.obj2Json(stockUnLockMQDTO)
-                );
+                sendStockUnLockNotifyMessage(GsonUtil.obj2Json(stockUnLockMQDTO));
                 /*
                  * 发送消息回滚优惠券
                  * */
@@ -77,16 +74,28 @@ public class OrderCloseMsgListener {
                     couponsUnSubMQDTO.setCouponsId(order.getCouponsId());
                     couponsUnSubMQDTO.setQuantity(1);
                     couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-                    rabbitTemplate.convertAndSend(
-                            RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME,
-                            RabbitMQConst.ORDER_NOTIFY_COUPONS_UNSUB_ROUTING_KEY,
-                            GsonUtil.obj2Json(couponsUnSubMQDTO)
-                    );
+                    sendCouponsUnSubNotifyMessage(GsonUtil.obj2Json(couponsUnSubMQDTO));
                 }
                 log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
             }
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+    }
+
+    private void sendStockUnLockNotifyMessage(String content) {
+        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
+        notifyMessageDTO.setContent(GsonUtil.obj2Json(content));
+        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME);
+        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_ROUTING_KEY);
+        messageFeignService.sendNotifyMessage(notifyMessageDTO);
+    }
+
+    private void sendCouponsUnSubNotifyMessage(String content) {
+        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
+        notifyMessageDTO.setContent(GsonUtil.obj2Json(content));
+        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME);
+        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_NOTIFY_COUPONS_UNSUB_ROUTING_KEY);
+        messageFeignService.sendNotifyMessage(notifyMessageDTO);
     }
 
 }

@@ -17,7 +17,6 @@
         <module>new-retail-api-coupons</module>
         <module>new-retail-api-cart</module>
         <module>new-retail-api-order</module>
-        <module>new-retail-api-message</module>
     </modules>
 
     <properties>

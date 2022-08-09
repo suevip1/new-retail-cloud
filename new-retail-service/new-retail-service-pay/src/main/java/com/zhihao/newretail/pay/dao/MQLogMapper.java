@@ -1,6 +1,6 @@
-package com.zhihao.newretail.message.dao;
+package com.zhihao.newretail.pay.dao;
 
-import com.zhihao.newretail.message.pojo.MQLog;
+import com.zhihao.newretail.pay.pojo.MQLog;
 
 public interface MQLogMapper {
 

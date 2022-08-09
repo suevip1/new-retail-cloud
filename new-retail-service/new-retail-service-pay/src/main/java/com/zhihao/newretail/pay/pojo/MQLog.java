@@ -1,4 +1,4 @@
-package com.zhihao.newretail.message.pojo;
+package com.zhihao.newretail.pay.pojo;
 
 import java.util.Date;
 

@@ -1,7 +1,6 @@
 package com.zhihao.newretail.product.listener;
 
 import com.rabbitmq.client.Channel;
-import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.product.enums.SkuStockTypeEnum;
 import com.zhihao.newretail.product.pojo.SkuStockLock;
@@ -37,7 +36,7 @@ public class OrderNotifyMsgListener {
     /*
     * 订单关闭、分布式事务解锁库存
     * */
-    @RabbitListener(queues = RabbitMQConst.ORDER_NOTIFY_STOCK_UNLOCK_QUEUE_NAME)
+    @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_UNLOCK_QUEUE)
     public void stockUnLockQueue(String msgStr, Message message, Channel channel) throws IOException {
         StockUnLockMQDTO stockUnLockMQDTO = GsonUtil.json2Obj(msgStr, StockUnLockMQDTO.class);
         Long orderNo = stockUnLockMQDTO.getOrderNo();
@@ -57,7 +56,7 @@ public class OrderNotifyMsgListener {
     /*
     * 订单支付成功，删减库存
     * */
-    @RabbitListener(queues = RabbitMQConst.ORDER_NOTIFY_STOCK_SUB_QUEUE_NAME)
+    @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_SUB_QUEUE)
     public void stockSubQueue(String msgStr, Message message, Channel channel) throws IOException {
         StockSubLockMQDTO stockSubLockMQDTO = GsonUtil.json2Obj(msgStr, StockSubLockMQDTO.class);
         Long orderNo = stockSubLockMQDTO.getOrderNo();
@@ -78,9 +77,9 @@ public class OrderNotifyMsgListener {
         List<SkuStockLock> skuStockLocks = new ArrayList<>();
         if (!CollectionUtils.isEmpty(skuStockLockList)) {
             for (SkuStockLock skuStockLock : skuStockLockList) {
-                AtomicInteger atomicInteger = new AtomicInteger(skuStockLock.getMqVersion());
-                if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
-                    skuStockLock.setMqVersion(atomicInteger.get());
+                AtomicInteger skuStockVersion = new AtomicInteger(skuStockLock.getMqVersion());
+                if (skuStockVersion.compareAndSet(version, skuStockVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
+                    skuStockLock.setMqVersion(skuStockVersion.get());
                     skuStockLocks.add(skuStockLock);
                 }
             }

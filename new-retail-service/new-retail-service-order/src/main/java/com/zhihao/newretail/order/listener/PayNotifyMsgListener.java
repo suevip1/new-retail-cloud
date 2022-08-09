@@ -1,18 +1,19 @@
 package com.zhihao.newretail.order.listener;
 
 import com.rabbitmq.client.Channel;
-import com.zhihao.newretail.api.message.dto.NotifyMessageDTO;
-import com.zhihao.newretail.api.message.feign.MessageFeignService;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.order.pojo.Order;
+import com.zhihao.newretail.order.service.MQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockSubLockMQDTO;
+import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -34,9 +35,12 @@ public class PayNotifyMsgListener {
     private OrderService orderService;
 
     @Autowired
-    private MessageFeignService messageFeignService;
+    private MQLogService mqLogService;
 
-    @RabbitListener(queues = RabbitMQConst.PAY_NOTIFY_QUEUE_NAME)
+    @Autowired
+    private MyRabbitMQUtil rabbitMQUtil;
+
+    @RabbitListener(queues = RabbitMQConst.PAY_SUCCESS_QUEUE)
     public void payNotifyQueue(String msgStr, Message message, Channel channel) throws IOException {
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
         Integer version = payNotifyMQDTO.getMqVersion();
@@ -46,36 +50,41 @@ public class PayNotifyMsgListener {
                 && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())
                 && payNotifyMQDTO.getUserId().equals(order.getUserId())
                 && payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
-            AtomicInteger atomicInteger = new AtomicInteger(order.getMqVersion());
-            if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
+            AtomicInteger orderVersion = new AtomicInteger(order.getMqVersion());
+            if (orderVersion.compareAndSet(version, orderVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
                 /* 更新订单状态 */
                 order.setOrderCode(payNotifyMQDTO.getPlatformNumber());
                 order.setPaymentType(payNotifyMQDTO.getPayPlatform());
                 order.setStatus(payNotifyMQDTO.getStatus());
-                order.setMqVersion(atomicInteger.get());
+                order.setMqVersion(orderVersion.get());
                 try {
                     orderService.updateOrder(order);
+                    /* 通知删减库存 */
+                    String content = stockSubLockMessageContent(order.getId());
+                    sendStockSubLockNotifyMessage(content);
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                    log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 }
-                /* 通知删减库存 */
-                StockSubLockMQDTO stockSubLockMQDTO = new StockSubLockMQDTO();
-                stockSubLockMQDTO.setOrderNo(order.getId());
-                stockSubLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-                sendStockSubLockNotifyMessage(GsonUtil.obj2Json(stockSubLockMQDTO));
-                log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
             }
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
     private void sendStockSubLockNotifyMessage(String content) {
-        NotifyMessageDTO notifyMessageDTO = new NotifyMessageDTO();
-        notifyMessageDTO.setContent(content);
-        notifyMessageDTO.setExchange(RabbitMQConst.ORDER_NOTIFY_EXCHANGE_NAME);
-        notifyMessageDTO.setRoutingKey(RabbitMQConst.ORDER_NOTIFY_STOCK_SUB_ROUTING_KEY);
-        messageFeignService.sendNotifyMessage(notifyMessageDTO);
+        String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
+        String routingKey = RabbitMQConst.ORDER_STOCK_SUB_ROUTING_KEY;
+        Long messageId = mqLogService.getMessageId();
+        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+    }
+
+    private String stockSubLockMessageContent(Long orderNo) {
+        StockSubLockMQDTO stockSubLockMQDTO = new StockSubLockMQDTO();
+        stockSubLockMQDTO.setOrderNo(orderNo);
+        stockSubLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        return GsonUtil.obj2Json(stockSubLockMQDTO);
     }
 
 }

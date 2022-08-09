@@ -18,10 +18,13 @@ import com.zhihao.newretail.pay.dao.PayInfoMapper;
 import com.zhihao.newretail.pay.enums.OrderStatusEnum;
 import com.zhihao.newretail.pay.enums.PayPlatformEnum;
 import com.zhihao.newretail.pay.pojo.PayInfo;
+import com.zhihao.newretail.pay.service.MQLogService;
 import com.zhihao.newretail.pay.service.PayService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
+import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import org.apache.http.HttpStatus;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,10 +50,13 @@ public class PayServiceImpl implements PayService {
     private OrderFeignService orderFeignService;
 
     @Autowired
+    private MQLogService mqLogService;
+
+    @Autowired
     private PayInfoMapper payInfoMapper;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private MyRabbitMQUtil rabbitMQUtil;
 
     private static final String PAY_SUCCESS = "TRADE_SUCCESS";
 
@@ -127,11 +133,12 @@ public class PayServiceImpl implements PayService {
 
             /* 发送消息，更新订单状态 */
             PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConst.PAY_NOTIFY_EXCHANGE_NAME,
-                    RabbitMQConst.PAY_NOTIFY_ROUTING_KEY,
-                    GsonUtil.obj2Json(payNotifyMQDTO)
-            );
+            String content = GsonUtil.obj2Json(payNotifyMQDTO);
+            Long messageId = mqLogService.getMessageId();
+            String exchange = RabbitMQConst.PAY_NOTIFY_EXCHANGE;
+            String routingKey = RabbitMQConst.PAY_SUCCESS_ROUTING_KEY;
+            mqLogService.insetMessage(messageId, content, exchange, routingKey);
+            sendPaySuccessMessage(exchange, routingKey, content, messageId);
         }
     }
 
@@ -155,6 +162,10 @@ public class PayServiceImpl implements PayService {
         payNotifyMQDTO.setStatus(payInfo.getStatus());
         payNotifyMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
         return payNotifyMQDTO;
+    }
+
+    private void sendPaySuccessMessage(String exchange, String routingKey, String content, Long messageId) {
+        rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 
 }

@@ -29,17 +29,17 @@ public class OrderNotifyMsgListener {
     @Autowired
     private UserCouponsService userCouponsService;
 
-    @RabbitListener(queues = RabbitMQConst.ORDER_NOTIFY_COUPONS_UNSUB_QUEUE_NAME)
+    @RabbitListener(queues = RabbitMQConst.ORDER_COUPONS_UNSUB_QUEUE)
     public void couponsUnSubQueue(String msgStr, Message message, Channel channel) throws IOException {
         CouponsUnSubMQDTO couponsUnSubMQDTO = GsonUtil.json2Obj(msgStr, CouponsUnSubMQDTO.class);
         Integer version = couponsUnSubMQDTO.getMqVersion();
         UserCoupons userCoupons = userCouponsService.getUserCouponsByCouponsId(couponsUnSubMQDTO.getCouponsId());
 
         if (!ObjectUtils.isEmpty(userCoupons)) {
-            AtomicInteger atomicInteger = new AtomicInteger(userCoupons.getMqVersion());
-            if (atomicInteger.compareAndSet(version, atomicInteger.get() + RabbitMQConst.CONSUME_VERSION)) {
+            AtomicInteger userCouponsVersion = new AtomicInteger(userCoupons.getMqVersion());
+            if (userCouponsVersion.compareAndSet(version, userCouponsVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
                 userCoupons.setQuantity(userCoupons.getQuantity() + couponsUnSubMQDTO.getQuantity());
-                userCoupons.setMqVersion(atomicInteger.get());
+                userCoupons.setMqVersion(userCouponsVersion.get());
                 try {
                     userCouponsService.updateUserCoupons(userCoupons);
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -49,6 +49,5 @@ public class OrderNotifyMsgListener {
                 }
             }
         }
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 }

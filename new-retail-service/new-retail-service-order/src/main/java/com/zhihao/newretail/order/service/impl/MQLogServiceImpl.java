@@ -1,8 +1,9 @@
-package com.zhihao.newretail.message.service.impl;
+package com.zhihao.newretail.order.service.impl;
 
-import com.zhihao.newretail.message.dao.MQLogMapper;
-import com.zhihao.newretail.message.pojo.MQLog;
-import com.zhihao.newretail.message.service.MQLogService;
+import com.zhihao.newretail.core.util.SnowflakeIdWorker;
+import com.zhihao.newretail.order.dao.MQLogMapper;
+import com.zhihao.newretail.order.pojo.MQLog;
+import com.zhihao.newretail.order.service.MQLogService;
 import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,12 @@ public class MQLogServiceImpl implements MQLogService {
     @Override
     public MQLog getMQLog(Long messageId) {
         return mqLogMapper.selectByPrimaryKey(messageId);
+    }
+
+    @Override
+    public Long getMessageId() {
+        SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 2);
+        return snowflakeIdWorker.nextId();
     }
 
 }

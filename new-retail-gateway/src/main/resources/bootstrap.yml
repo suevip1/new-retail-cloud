@@ -51,8 +51,3 @@ spring:
           uri: lb://new-retail-rbac
           predicates:
             - Path=/rbac/**
-
-        - id: new-retail-message
-          uri: lb://new-retail-message
-          predicates:
-            - Path=/message/**

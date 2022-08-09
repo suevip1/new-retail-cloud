@@ -1,6 +1,6 @@
-package com.zhihao.newretail.message.service;
+package com.zhihao.newretail.pay.service;
 
-import com.zhihao.newretail.message.pojo.MQLog;
+import com.zhihao.newretail.pay.pojo.MQLog;
 
 /*
  * @Project: NewRetail-Cloud
@@ -28,5 +28,10 @@ public interface MQLogService {
      * 获取消息信息
      * */
     MQLog getMQLog(Long messageId);
+
+    /*
+     * 获取消息唯一id
+     * */
+    Long getMessageId();
 
 }

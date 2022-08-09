@@ -1,7 +1,7 @@
-package com.zhihao.newretail.message.config;
+package com.zhihao.newretail.pay.config;
 
-import com.zhihao.newretail.message.pojo.MQLog;
-import com.zhihao.newretail.message.service.MQLogService;
+import com.zhihao.newretail.pay.pojo.MQLog;
+import com.zhihao.newretail.pay.service.MQLogService;
 import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ReturnedMessage;
@@ -20,7 +20,7 @@ import java.util.Date;
  * */
 @Slf4j
 @Configuration
-public class RabbitMQCallbackConfig {
+public class PayMessageCallbackConfig {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -47,6 +47,7 @@ public class RabbitMQCallbackConfig {
             }
         });
 
+        /* 回退消息 */
         rabbitTemplate.setReturnsCallback((ReturnedMessage returnedMessage) -> {
             String message = new String(returnedMessage.getMessage().getBody());
             String replyText = returnedMessage.getReplyText();

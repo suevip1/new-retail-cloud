@@ -10,6 +10,7 @@ import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
+import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -60,6 +61,7 @@ public class OrderNotifyMsgListener {
                 try {
                     orderService.updateOrder(order);
                     sendStockUnLockNotifyMessage(order.getId());    // 发送消息解锁库存
+                    sendPayCloseNotifyMessage(order);               // 发送消息关闭支付通道
                     if (!ObjectUtils.isEmpty(order.getCouponsId())) {
                         sendCouponsUnSubNotifyMessage(order.getCouponsId());    // 发送消息回滚优惠券
                     }
@@ -97,6 +99,18 @@ public class OrderNotifyMsgListener {
         rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 
+    /*
+    * 发送关闭支付通道消息
+    * */
+    private void sendPayCloseNotifyMessage(Order order) {
+        String content = getPayCloseMessage(order);
+        String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
+        String routingKey = RabbitMQConst.ORDER_CLOSE_PAY_ROUTING_KEY;
+        Long messageId = mqLogService.getMessageId();
+        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+    }
+
     private String getStockUnLockMessage(Long orderNo) {
         StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
         stockUnLockMQDTO.setOrderNo(orderNo);
@@ -110,6 +124,14 @@ public class OrderNotifyMsgListener {
         couponsUnSubMQDTO.setQuantity(1);
         couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
         return GsonUtil.obj2Json(couponsUnSubMQDTO);
+    }
+
+    private String getPayCloseMessage(Order order) {
+        PayNotifyMQDTO payNotifyMQDTO = new PayNotifyMQDTO();
+        payNotifyMQDTO.setOrderNo(order.getId());
+        payNotifyMQDTO.setUserId(order.getUserId());
+        payNotifyMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        return GsonUtil.obj2Json(payNotifyMQDTO);
     }
 
 }

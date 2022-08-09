@@ -31,6 +31,9 @@ public class RabbitMQConst {
     /* 订单回滚优惠券路由key */
     public static final String ORDER_COUPONS_UNSUB_ROUTING_KEY = "order.coupons.unsub";
 
+    /* 订单关闭支付路由key */
+    public static final String ORDER_CLOSE_PAY_ROUTING_KEY = "order.close.pay";
+
     /* 支付成功路由key */
     public static final String PAY_SUCCESS_ROUTING_KEY = "pay.success";
 
@@ -45,6 +48,9 @@ public class RabbitMQConst {
 
     /* 订单回滚优惠券队列 */
     public static final String ORDER_COUPONS_UNSUB_QUEUE = "order.coupons.unsub.queue";
+
+    /* 订单关闭支付消息队列 */
+    public static final String ORDER_CLOSE_PAY_QUEUE = "order.close.pay.queue";
 
     /* 支付成功通知队列 */
     public static final String PAY_SUCCESS_QUEUE = "pay.success.queue";

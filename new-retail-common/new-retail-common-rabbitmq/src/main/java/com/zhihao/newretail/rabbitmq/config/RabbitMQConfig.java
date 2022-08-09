@@ -62,6 +62,12 @@ public class RabbitMQConfig {
         return new Queue(RabbitMQConst.ORDER_COUPONS_UNSUB_QUEUE);
     }
 
+    /* 订单关闭支付消息队列 */
+    @Bean(name = "orderClosePayQueue")
+    public Queue orderClosePayQueue() {
+        return new Queue(RabbitMQConst.ORDER_CLOSE_PAY_QUEUE);
+    }
+
     /* 支付异步通知消息队列 */
     @Bean(name = "paySuccessQueue")
     public Queue paySuccessQueue() {
@@ -94,6 +100,13 @@ public class RabbitMQConfig {
     public Binding couponsUnsubQueueBindOrderNotifyExchange(@Qualifier("couponsUnSubQueue") Queue couponsUnSubQueue,
                                                             @Qualifier("orderNotifyExchange") CustomExchange orderNotifyExchange) {
         return BindingBuilder.bind(couponsUnSubQueue).to(orderNotifyExchange).with(RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY).noargs();
+    }
+
+    /* 订单关闭支付消息队列绑定订单异步通知交换机 */
+    @Bean(name = "orderClosePayQueueBindOrderNotifyExchange")
+    public Binding orderClosePayQueueBindOrderNotifyExchange(@Qualifier("orderClosePayQueue") Queue orderClosePayQueue,
+                                                             @Qualifier("orderNotifyExchange") CustomExchange orderNotifyExchange) {
+        return BindingBuilder.bind(orderClosePayQueue).to(orderNotifyExchange).with(RabbitMQConst.ORDER_CLOSE_PAY_ROUTING_KEY).noargs();
     }
 
     /* 支付异步通知消息队列绑定支付异步通知交换机 */

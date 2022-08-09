@@ -14,18 +14,17 @@ import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.pay.config.AliPayPCPramConfig;
-import com.zhihao.newretail.pay.dao.PayInfoMapper;
 import com.zhihao.newretail.pay.enums.OrderStatusEnum;
 import com.zhihao.newretail.pay.enums.PayPlatformEnum;
 import com.zhihao.newretail.pay.pojo.PayInfo;
 import com.zhihao.newretail.pay.service.MQLogService;
+import com.zhihao.newretail.pay.service.PayInfoService;
 import com.zhihao.newretail.pay.service.PayService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
 import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import org.apache.http.HttpStatus;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -33,7 +32,6 @@ import org.springframework.util.ObjectUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 
 /*
  * @Project: NewRetail-Cloud
@@ -50,10 +48,10 @@ public class PayServiceImpl implements PayService {
     private OrderFeignService orderFeignService;
 
     @Autowired
-    private MQLogService mqLogService;
+    private PayInfoService payInfoService;
 
     @Autowired
-    private PayInfoMapper payInfoMapper;
+    private MQLogService mqLogService;
 
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
@@ -92,10 +90,11 @@ public class PayServiceImpl implements PayService {
         AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
 
         if (response.isSuccess()) {
-            PayInfo payInfo = payInfoMapper.selectByOrderId(orderId);
+
+            PayInfo payInfo = payInfoService.getPayInfo(orderId);
             if (ObjectUtils.isEmpty(payInfo)) {
                 payInfo = buildPayInfo(orderApiVO);
-                payInfoMapper.insertSelective(payInfo);
+                payInfoService.insertPayInfo(payInfo);
             }
             return response.getBody();
         } else {
@@ -126,10 +125,10 @@ public class PayServiceImpl implements PayService {
 
         if (PAY_SUCCESS.equals(tradeStatus)) {
             /* 支付成功，更新数据库支付信息 */
-            PayInfo payInfo = payInfoMapper.selectByOrderId(Long.valueOf(outTradeNo));
+            PayInfo payInfo = payInfoService.getPayInfo(Long.valueOf(outTradeNo));
             payInfo.setStatus(OrderStatusEnum.PAY_SUCCEED.getCode());
             payInfo.setPlatformNumber(tradeNo);
-            payInfoMapper.updateByPrimaryKeySelective(payInfo);
+            payInfoService.updatePayInfo(payInfo);
 
             /* 发送消息，更新订单状态 */
             PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);

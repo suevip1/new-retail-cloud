@@ -268,10 +268,7 @@ public class OrderServiceImpl implements OrderService {
 
         /* 优惠券存在，扣除优惠券 */
         if (!ObjectUtils.isEmpty(orderCouponsVO.getId())) {
-            UserCouponsApiDTO userCouponsApiDTO = new UserCouponsApiDTO();
-            userCouponsApiDTO.setCouponsId(orderCouponsVO.getId());
-            userCouponsApiDTO.setQuantity(1);
-            userCouponsApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+            UserCouponsApiDTO userCouponsApiDTO = buildUserCouponsApiDTO(orderCouponsVO.getId());
             try {
                 int consumeCouponsRow = userCouponsFeignService.consumeCoupons(userCouponsApiDTO);
                 if (consumeCouponsRow <= 0) {
@@ -513,6 +510,17 @@ public class OrderServiceImpl implements OrderService {
         skuStockLockApiDTO.setCount(quantity);
         skuStockLockApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
         return skuStockLockApiDTO;
+    }
+
+    /*
+    * 构造优惠券删减信息
+    * */
+    private UserCouponsApiDTO buildUserCouponsApiDTO(Integer couponsId) {
+        UserCouponsApiDTO userCouponsApiDTO = new UserCouponsApiDTO();
+        userCouponsApiDTO.setCouponsId(couponsId);
+        userCouponsApiDTO.setQuantity(1);
+        userCouponsApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        return userCouponsApiDTO;
     }
 
     /*

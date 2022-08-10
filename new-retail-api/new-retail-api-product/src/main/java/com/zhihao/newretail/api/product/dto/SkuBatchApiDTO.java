@@ -6,19 +6,19 @@ public class SkuBatchApiDTO {
 
     private Set<Integer> idSet;
 
+    public SkuBatchApiDTO() {
+    }
+
+    public SkuBatchApiDTO(Set<Integer> idSet) {
+        this.idSet = idSet;
+    }
+
     public Set<Integer> getIdSet() {
         return idSet;
     }
 
     public void setIdSet(Set<Integer> idSet) {
         this.idSet = idSet;
-    }
-
-    @Override
-    public String toString() {
-        return "SkuBatchApiDTO{" +
-                "idSet=" + idSet +
-                '}';
     }
 
 }

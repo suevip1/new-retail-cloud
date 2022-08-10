@@ -11,19 +11,19 @@ public class SkuStockLockBatchApiDTO {
 
     private List<SkuStockLockApiDTO> skuStockLockApiDTOList;
 
+    public SkuStockLockBatchApiDTO() {
+    }
+
+    public SkuStockLockBatchApiDTO(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+        this.skuStockLockApiDTOList = skuStockLockApiDTOList;
+    }
+
     public List<SkuStockLockApiDTO> getSkuStockLockApiDTOList() {
         return skuStockLockApiDTOList;
     }
 
     public void setSkuStockLockApiDTOList(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
         this.skuStockLockApiDTOList = skuStockLockApiDTOList;
-    }
-
-    @Override
-    public String toString() {
-        return "SkuStockLockBatchApiDTO{" +
-                "skuStockLockApiDTOList=" + skuStockLockApiDTOList +
-                '}';
     }
 
 }

@@ -2,7 +2,7 @@ package com.zhihao.newretail.pay.pojo;
 
 import java.util.Date;
 
-public class MQLog {
+public class PayInfoMQLog {
 
     private Long messageId;
 

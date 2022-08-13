@@ -17,7 +17,7 @@ import com.zhihao.newretail.pay.config.AliPayPCPramConfig;
 import com.zhihao.newretail.pay.enums.OrderStatusEnum;
 import com.zhihao.newretail.pay.enums.PayPlatformEnum;
 import com.zhihao.newretail.pay.pojo.PayInfo;
-import com.zhihao.newretail.pay.service.MQLogService;
+import com.zhihao.newretail.pay.service.PayInfoMQLogService;
 import com.zhihao.newretail.pay.service.PayInfoService;
 import com.zhihao.newretail.pay.service.PayService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
@@ -51,7 +51,7 @@ public class PayServiceImpl implements PayService {
     private PayInfoService payInfoService;
 
     @Autowired
-    private MQLogService mqLogService;
+    private PayInfoMQLogService payInfoMqLogService;
 
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
@@ -133,10 +133,10 @@ public class PayServiceImpl implements PayService {
             /* 发送消息，更新订单状态 */
             PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);
             String content = GsonUtil.obj2Json(payNotifyMQDTO);
-            Long messageId = mqLogService.getMessageId();
+            Long messageId = payInfoMqLogService.getMessageId();
             String exchange = RabbitMQConst.PAY_NOTIFY_EXCHANGE;
             String routingKey = RabbitMQConst.PAY_SUCCESS_ROUTING_KEY;
-            mqLogService.insetMessage(messageId, content, exchange, routingKey);
+            payInfoMqLogService.insetMessage(messageId, content, exchange, routingKey);
             sendPaySuccessMessage(exchange, routingKey, content, messageId);
         }
     }

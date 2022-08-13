@@ -1,7 +1,7 @@
 package com.zhihao.newretail.pay.config;
 
-import com.zhihao.newretail.pay.pojo.MQLog;
-import com.zhihao.newretail.pay.service.MQLogService;
+import com.zhihao.newretail.pay.pojo.PayInfoMQLog;
+import com.zhihao.newretail.pay.service.PayInfoMQLogService;
 import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ReturnedMessage;
@@ -26,7 +26,7 @@ public class PayMessageCallbackConfig {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private MQLogService mqLogService;
+    private PayInfoMQLogService payInfoMqLogService;
 
     @PostConstruct
     public void initRabbitTemplate() {
@@ -34,16 +34,16 @@ public class PayMessageCallbackConfig {
         rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
             assert correlationData != null;
             Long messageId = Long.valueOf(correlationData.getId());
-            MQLog mqLog = mqLogService.getMQLog(messageId);
+            PayInfoMQLog payInfoMqLog = payInfoMqLogService.getMQLog(messageId);
             if (ack) {
-                mqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
-                mqLogService.updateMessage(mqLog);
-                log.info("messageId:{},messageContent:{},消息发送成功", messageId, mqLog.getContent());
+                payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
+                payInfoMqLogService.updateMessage(payInfoMqLog);
+                log.info("messageId:{},messageContent:{},消息发送成功", messageId, payInfoMqLog.getContent());
             } else {
                 /* 发送失败，重新发送 */
-                mqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                mqLogService.updateMessage(mqLog);
-                rabbitTemplate.convertAndSend(mqLog.getExchange(), mqLog.getRoutingKey(), mqLog.getContent());
+                payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
+                payInfoMqLogService.updateMessage(payInfoMqLog);
+                rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
             }
         });
 

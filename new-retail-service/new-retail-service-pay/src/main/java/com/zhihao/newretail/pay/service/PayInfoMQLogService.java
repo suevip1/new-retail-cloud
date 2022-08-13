@@ -1,13 +1,13 @@
 package com.zhihao.newretail.pay.service;
 
-import com.zhihao.newretail.pay.pojo.MQLog;
+import com.zhihao.newretail.pay.pojo.PayInfoMQLog;
 
 /*
  * @Project: NewRetail-Cloud
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
-public interface MQLogService {
+public interface PayInfoMQLogService {
 
     /*
      * 保存消息
@@ -17,7 +17,7 @@ public interface MQLogService {
     /*
      * 更新消息
      * */
-    void updateMessage(MQLog mqLog);
+    void updateMessage(PayInfoMQLog payInfoMqLog);
 
     /*
      * 删除消息
@@ -27,7 +27,7 @@ public interface MQLogService {
     /*
      * 获取消息信息
      * */
-    MQLog getMQLog(Long messageId);
+    PayInfoMQLog getMQLog(Long messageId);
 
     /*
      * 获取消息唯一id

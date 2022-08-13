@@ -16,7 +16,7 @@ spring:
     allow-bean-definition-overriding: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/new_retail_product?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false&allowMultiQueries=true
+    url: jdbc:mysql://192.168.43.2:3306/new_retail_product?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false&allowMultiQueries=true
     username: root
     password: root
     hikari:

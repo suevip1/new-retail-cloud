@@ -14,14 +14,35 @@ spring:
         file-extension: yml
   main:
     allow-bean-definition-overriding: true
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.43.2:3306/new_retail_order?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
-    username: root
-    password: root
-    hikari:
-      minimum-idle: 12
-      maximum-pool-size: 24
+  shardingsphere:
+    datasource:
+      names: master,slave-01
+      master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.43.2:3306/new_retail_order?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
+        username: root
+        password: root
+      slave-01:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://192.168.43.2:3306/new_retail_order?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false
+        username: root
+        password: root
+    rules:
+      readwrite-splitting:
+        data-sources:
+          readwrite01:
+            type: Static
+            props:
+              write-data-source-name: master
+              read-data-source-names: slave-01
+              load-balancer-name: readwrite-lb
+        load-balancers:
+          readwrite-lb:
+            type: ROUND_ROBIN
+    props:
+      sql-show: true
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null

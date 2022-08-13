@@ -1,7 +1,7 @@
 package com.zhihao.newretail.order.config;
 
-import com.zhihao.newretail.order.pojo.MQLog;
-import com.zhihao.newretail.order.service.MQLogService;
+import com.zhihao.newretail.order.pojo.OrderMQLog;
+import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.ReturnedMessage;
@@ -26,7 +26,7 @@ public class OrderMessageCallbackConfig {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private MQLogService mqLogService;
+    private OrderMQLogService orderMqLogService;
 
     @PostConstruct
     public void initRabbitTemplate() {
@@ -34,16 +34,16 @@ public class OrderMessageCallbackConfig {
         rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
             assert correlationData != null;
             Long messageId = Long.valueOf(correlationData.getId());
-            MQLog mqLog = mqLogService.getMQLog(messageId);
+            OrderMQLog orderMqLog = orderMqLogService.getMQLog(messageId);
             if (ack) {
-                mqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
-                mqLogService.updateMessage(mqLog);
-                log.info("messageId:{},messageContent:{},消息发送成功", messageId, mqLog.getContent());
+                orderMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
+                orderMqLogService.updateMessage(orderMqLog);
+                log.info("messageId:{},messageContent:{},消息发送成功", messageId, orderMqLog.getContent());
             } else {
                 /* 发送失败，重新发送 */
-                mqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                mqLogService.updateMessage(mqLog);
-                rabbitTemplate.convertAndSend(mqLog.getExchange(), mqLog.getRoutingKey(), mqLog.getContent());
+                orderMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
+                orderMqLogService.updateMessage(orderMqLog);
+                rabbitTemplate.convertAndSend(orderMqLog.getExchange(), orderMqLog.getRoutingKey(), orderMqLog.getContent());
             }
         });
 

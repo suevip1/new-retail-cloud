@@ -2,7 +2,7 @@ package com.zhihao.newretail.order.pojo;
 
 import java.util.Date;
 
-public class MQLog {
+public class OrderMQLog {
 
     private Long messageId;
 

@@ -34,7 +34,7 @@ import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.OrderAddress;
 import com.zhihao.newretail.order.pojo.OrderItem;
 import com.zhihao.newretail.order.pojo.vo.*;
-import com.zhihao.newretail.order.service.MQLogService;
+import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
@@ -75,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private CouponsFeignService couponsFeignService;
     @Autowired
-    private MQLogService mqLogService;
+    private OrderMQLogService orderMqLogService;
     @Autowired
     private ThreadPoolExecutor executor;
     @Autowired
@@ -571,9 +571,9 @@ public class OrderServiceImpl implements OrderService {
     * 发送延迟消息
     * */
     private void sendDelayMessage(String content, Integer delay) {
-        Long messageId = mqLogService.getMessageId();       // 消息唯一id
+        Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
         /* 发送消息之前持久化，保证可靠性投递 */
-        mqLogService.insetMessage(
+        orderMqLogService.insetMessage(
                 messageId,
                 content,
                 RabbitMQConst.ORDER_NOTIFY_EXCHANGE,
@@ -592,8 +592,8 @@ public class OrderServiceImpl implements OrderService {
     * 发送普通消息
     * */
     private void sendDirectMessage(String routingKey, String content) {
-        Long messageId = mqLogService.getMessageId();
-        mqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey);
+        Long messageId = orderMqLogService.getMessageId();
+        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey);
         rabbitMQUtil.sendMessage(
                 RabbitMQConst.ORDER_NOTIFY_EXCHANGE,
                 routingKey,

@@ -5,7 +5,7 @@ import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.order.enums.OrderStatusEnum;
 import com.zhihao.newretail.order.pojo.Order;
-import com.zhihao.newretail.order.service.MQLogService;
+import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
@@ -38,7 +38,7 @@ public class OrderNotifyMsgListener {
     private OrderService orderService;
 
     @Autowired
-    private MQLogService mqLogService;
+    private OrderMQLogService orderMqLogService;
 
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
@@ -82,8 +82,8 @@ public class OrderNotifyMsgListener {
         String content = getStockUnLockMessage(orderNo);
         String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
         String routingKey = RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY;
-        Long messageId = mqLogService.getMessageId();
-        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        Long messageId = orderMqLogService.getMessageId();
+        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 
@@ -94,8 +94,8 @@ public class OrderNotifyMsgListener {
         String content = getCouponsUnSubMessage(couponsId);
         String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
         String routingKey = RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY;
-        Long messageId = mqLogService.getMessageId();
-        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        Long messageId = orderMqLogService.getMessageId();
+        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 
@@ -106,8 +106,8 @@ public class OrderNotifyMsgListener {
         String content = getPayCloseMessage(order);
         String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
         String routingKey = RabbitMQConst.ORDER_CLOSE_PAY_ROUTING_KEY;
-        Long messageId = mqLogService.getMessageId();
-        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        Long messageId = orderMqLogService.getMessageId();
+        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 

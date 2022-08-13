@@ -4,7 +4,7 @@ import com.rabbitmq.client.Channel;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.order.pojo.Order;
-import com.zhihao.newretail.order.service.MQLogService;
+import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
@@ -35,7 +35,7 @@ public class PayNotifyMsgListener {
     private OrderService orderService;
 
     @Autowired
-    private MQLogService mqLogService;
+    private OrderMQLogService orderMqLogService;
 
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
@@ -75,8 +75,8 @@ public class PayNotifyMsgListener {
     private void sendStockSubLockNotifyMessage(String content) {
         String exchange = RabbitMQConst.ORDER_NOTIFY_EXCHANGE;
         String routingKey = RabbitMQConst.ORDER_STOCK_SUB_ROUTING_KEY;
-        Long messageId = mqLogService.getMessageId();
-        mqLogService.insetMessage(messageId, content, exchange, routingKey);
+        Long messageId = orderMqLogService.getMessageId();
+        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 

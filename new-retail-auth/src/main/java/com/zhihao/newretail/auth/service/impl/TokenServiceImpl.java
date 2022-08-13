@@ -43,8 +43,10 @@ public class TokenServiceImpl implements TokenService {
         try {
             /* token 有效，直接返回 */
             JwtUtil.verifierToken(token);
-            refreshCacheUserInfo(userId);
-            return R.ok().put("token", token);
+            if (redisUtil.isExist(String.valueOf(userId))) {
+                return R.ok().put("token", token);
+            }
+            return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", null);
         } catch (TokenExpiredException e) {
             if (redisUtil.isExist(String.valueOf(userId))) {
                 refreshCacheUserInfo(userId);

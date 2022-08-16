@@ -77,6 +77,21 @@ public class SysRoleServiceImpl implements SysRoleService {
         return updateRow;
     }
 
+    @Override
+    public int deleteRole(Integer roleId) {
+        SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
+        if (ObjectUtils.isEmpty(sysRole) || DeleteEnum.DELETE.getCode().equals(sysRole.getIsDelete())) {
+            throw new ServiceException("角色不存在");
+        }
+        sysRole.setIsDelete(DeleteEnum.DELETE.getCode());   // 使用逻辑删除
+        int updateRow = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
+
+        if (updateRow <= 0) {
+            throw new ServiceException("删除角色失败");
+        }
+        return updateRow;
+    }
+
     private SysRoleVO sysRole2SysRoleVO(SysRole sysRole) {
         SysRoleVO sysRoleVO = new SysRoleVO();
         BeanUtils.copyProperties(sysRole, sysRoleVO);

@@ -33,4 +33,9 @@ public interface SysRoleService {
     * */
     int updateRole(Integer roleId, SysRoleUpdateDTO roleUpdateDTO);
 
+    /*
+    * 删除角色
+    * */
+    int deleteRole(Integer roleId);
+
 }

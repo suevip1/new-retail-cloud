@@ -61,4 +61,13 @@ public class SysRoleController {
         return R.ok("更新角色成功");
     }
 
+    @DeleteMapping("/role/{roleId}")
+    public R roleDelete(@PathVariable Integer roleId) {
+        int deleteRow = sysRoleService.deleteRole(roleId);
+        if (deleteRow <= 0) {
+            return R.error("删除角色失败");
+        }
+        return R.ok("删除角色成功");
+    }
+
 }

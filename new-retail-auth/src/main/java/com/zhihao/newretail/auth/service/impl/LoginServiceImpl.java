@@ -1,5 +1,8 @@
 package com.zhihao.newretail.auth.service.impl;
 
+import com.zhihao.newretail.api.rbac.dto.SysUserApiDTO;
+import com.zhihao.newretail.api.rbac.feign.SysUserFeignService;
+import com.zhihao.newretail.api.rbac.vo.SysUserApiVO;
 import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
@@ -24,6 +27,9 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private UserFeignService userFeignService;
+
+    @Autowired
+    private SysUserFeignService sysUserFeignService;
 
     @Override
     public R login(UserLoginForm form) {
@@ -53,6 +59,22 @@ public class LoginServiceImpl implements LoginService {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
         }
         throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+    }
+
+    @Override
+    public R loginAdmin(UserLoginForm form) {
+        SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
+        String username = sysUserApiVO.getUsername();
+        String password = form.getPassword();
+        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
+        if (ObjectUtils.isEmpty(sysUserApiVO.getId())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+        } else if (!secretPassword.equals(sysUserApiVO.getPassword())) {
+            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
+        } else {
+
+        }
+        return null;
     }
 
 }

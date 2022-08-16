@@ -17,4 +17,11 @@ public class SysUserApiDTO {
         this.username = username;
     }
 
+    public SysUserApiDTO() {
+    }
+
+    public SysUserApiDTO(String username) {
+        this.username = username;
+    }
+
 }

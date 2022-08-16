@@ -10,4 +10,9 @@ public interface LoginService {
     * */
     R login(UserLoginForm form);
 
+    /*
+    * 后台管理系统用户登录
+    * */
+    R loginAdmin(UserLoginForm form);
+
 }

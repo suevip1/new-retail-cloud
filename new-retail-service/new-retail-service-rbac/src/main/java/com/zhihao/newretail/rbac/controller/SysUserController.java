@@ -51,4 +51,13 @@ public class SysUserController {
         return R.ok("修改成功");
     }
 
+    @DeleteMapping("/user/{userId}")
+    public R userDelete(@PathVariable Integer userId) {
+        int deleteRow = sysUserService.deleteSysUser(userId);
+        if (deleteRow <= 0) {
+            return R.error("删除失败");
+        }
+        return R.ok("删除成功");
+    }
+
 }

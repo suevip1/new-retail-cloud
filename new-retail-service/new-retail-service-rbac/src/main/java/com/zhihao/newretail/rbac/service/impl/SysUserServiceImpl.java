@@ -97,6 +97,20 @@ public class SysUserServiceImpl implements SysUserService {
         return updateRow;
     }
 
+    @Override
+    public int deleteSysUser(Integer userId) {
+        SysUser sysUser = sysUserMapper.selectByPrimaryKey(userId);
+        if (ObjectUtils.isEmpty(sysUser) || DeleteEnum.DELETE.getCode().equals(sysUser.getIsDelete())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+        }
+        sysUser.setIsDelete(DeleteEnum.DELETE.getCode());   // 逻辑删除
+        int updateRow = sysUserMapper.updateByPrimaryKeySelective(sysUser);
+        if (updateRow <= 0) {
+            throw new ServiceException("删除用户失败");
+        }
+        return updateRow;
+    }
+
     /*
     * 用户角色关联
     * */

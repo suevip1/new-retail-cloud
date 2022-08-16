@@ -28,4 +28,9 @@ public interface SysUserService {
     * */
     int updateSysUser(Integer userId, SysUserUpdateDTO userUpdateDTO);
 
+    /*
+    * 删除系统用户
+    * */
+    int deleteSysUser(Integer userId);
+
 }

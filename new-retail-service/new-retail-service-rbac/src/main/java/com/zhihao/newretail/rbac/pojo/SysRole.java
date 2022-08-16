@@ -12,6 +12,8 @@ public class SysRole {
 
     private Integer scope;
 
+    private Integer sort;
+
     private Integer isDelete;
 
     private Date createTime;
@@ -31,7 +33,7 @@ public class SysRole {
     }
 
     public void setName(String name) {
-        this.name = name == null ? null : name.trim();
+        this.name = name;
     }
 
     public String getKey() {
@@ -39,7 +41,7 @@ public class SysRole {
     }
 
     public void setKey(String key) {
-        this.key = key == null ? null : key.trim();
+        this.key = key;
     }
 
     public Integer getScope() {
@@ -48,6 +50,14 @@ public class SysRole {
 
     public void setScope(Integer scope) {
         this.scope = scope;
+    }
+
+    public Integer getSort() {
+        return sort;
+    }
+
+    public void setSort(Integer sort) {
+        this.sort = sort;
     }
 
     public Integer getIsDelete() {
@@ -81,6 +91,7 @@ public class SysRole {
                 ", name='" + name + '\'' +
                 ", key='" + key + '\'' +
                 ", scope=" + scope +
+                ", sort=" + sort +
                 ", isDelete=" + isDelete +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +

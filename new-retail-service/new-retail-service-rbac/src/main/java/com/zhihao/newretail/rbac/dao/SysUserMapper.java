@@ -16,4 +16,6 @@ public interface SysUserMapper {
 
     int updateByPrimaryKey(SysUser record);
 
+    int countByUsername(String username);
+
 }

@@ -21,8 +21,8 @@ public class SysUserController {
     @Autowired
     private SysUserService sysUserService;
 
-    @PostMapping("/createUser")
-    public R createSysUser(@Valid @RequestBody SysUserAddDTO userAddDTO) {
+    @PostMapping("/user")
+    public R userCreate(@Valid @RequestBody SysUserAddDTO userAddDTO) {
         int insertRow = sysUserService.insertSysUser(userAddDTO);
         if (insertRow <= 0) {
             return R.error("创建失败");

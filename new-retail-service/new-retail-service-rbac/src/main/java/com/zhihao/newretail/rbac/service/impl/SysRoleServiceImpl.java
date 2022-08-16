@@ -3,6 +3,7 @@ package com.zhihao.newretail.rbac.service.impl;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.rbac.dao.SysRoleMapper;
 import com.zhihao.newretail.rbac.pojo.SysRole;
+import com.zhihao.newretail.rbac.pojo.dto.SysRoleAddDTO;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.service.SysRoleService;
 import org.apache.http.HttpStatus;
@@ -41,6 +42,20 @@ public class SysRoleServiceImpl implements SysRoleService {
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "角色不存在");
         }
         return sysRole2SysRoleVO(sysRole);
+    }
+
+    @Override
+    public int insertRole(SysRoleAddDTO roleAddDTO) {
+        SysRole sysRole = new SysRole();
+        sysRole.setName(roleAddDTO.getName());
+        sysRole.setKey(roleAddDTO.getKey());
+        sysRole.setScope(roleAddDTO.getScope());
+        int insertRow = sysRoleMapper.insertSelective(sysRole);
+
+        if (insertRow <= 0) {
+            throw new ServiceException("新增角色失败");
+        }
+        return insertRow;
     }
 
     private SysRoleVO sysRole2SysRoleVO(SysRole sysRole) {

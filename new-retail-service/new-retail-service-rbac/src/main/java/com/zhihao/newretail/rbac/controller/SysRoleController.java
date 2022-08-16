@@ -1,16 +1,16 @@
 package com.zhihao.newretail.rbac.controller;
 
 import com.zhihao.newretail.core.util.R;
+import com.zhihao.newretail.rbac.pojo.dto.SysRoleAddDTO;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.service.SysRoleService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /*
@@ -40,6 +40,15 @@ public class SysRoleController {
             return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", sysRoleVO);
         }
         return R.ok().put("data", sysRoleVO);
+    }
+
+    @PostMapping("/role")
+    public R roleAdd(@Valid @RequestBody SysRoleAddDTO roleAddDTO) {
+        int insertRow = sysRoleService.insertRole(roleAddDTO);
+        if (insertRow <= 0) {
+            return R.error("新增角色失败");
+        }
+        return R.ok("新增角色成功");
     }
 
 }

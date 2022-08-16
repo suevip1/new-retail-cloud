@@ -1,6 +1,9 @@
 package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
+import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
+
+import java.util.List;
 
 /*
  * @Project: NewRetail-Cloud
@@ -8,6 +11,11 @@ import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
  * @Email: cafebabe0508@163.com
  * */
 public interface SysUserService {
+
+    /*
+    * 系统用户列表
+    * */
+    List<SysUserVO> listSysUserVOs();
 
     /*
     * 新增系统用户

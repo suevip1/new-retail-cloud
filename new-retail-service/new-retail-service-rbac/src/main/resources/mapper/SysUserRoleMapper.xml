@@ -36,4 +36,11 @@
       </if>
     </trim>
   </insert>
+
+  <update id="updateRoleIdByUserId" parameterType="java.lang.Integer">
+    UPDATE sys_user_role
+    SET role_id = #{roleId,jdbcType=INTEGER}
+    WHERE
+      user_id = #{userId,jdbcType=INTEGER}
+  </update>
 </mapper>

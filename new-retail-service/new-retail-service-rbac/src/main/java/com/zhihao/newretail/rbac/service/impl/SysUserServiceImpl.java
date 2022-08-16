@@ -1,5 +1,6 @@
 package com.zhihao.newretail.rbac.service.impl;
 
+import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.rbac.dao.SysUserMapper;
@@ -8,6 +9,7 @@ import com.zhihao.newretail.rbac.pojo.SysRole;
 import com.zhihao.newretail.rbac.pojo.SysUser;
 import com.zhihao.newretail.rbac.pojo.SysUserRoleKey;
 import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
+import com.zhihao.newretail.rbac.pojo.dto.SysUserUpdateDTO;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
 import com.zhihao.newretail.rbac.service.SysUserService;
@@ -16,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -71,6 +74,29 @@ public class SysUserServiceImpl implements SysUserService {
         return insertRow;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateSysUser(Integer userId, SysUserUpdateDTO userUpdateDTO) {
+        String username = userUpdateDTO.getUsername();
+        String password = userUpdateDTO.getPassword();
+        Integer roleId = userUpdateDTO.getRoleId();
+
+        SysUser sysUser = sysUserMapper.selectByPrimaryKey(userId);
+        if (ObjectUtils.isEmpty(sysUser) || DeleteEnum.DELETE.getCode().equals(sysUser.getIsDelete())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+        }
+        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
+        sysUser.setUsername(username);
+        sysUser.setPassword(secretPassword);
+        int updateRow = sysUserMapper.updateByPrimaryKeySelective(sysUser);
+        updateUserRole(userId, roleId);
+
+        if (updateRow <= 0) {
+            throw new ServiceException("修改用户失败");
+        }
+        return updateRow;
+    }
+
     /*
     * 用户角色关联
     * */
@@ -79,6 +105,13 @@ public class SysUserServiceImpl implements SysUserService {
         userRole.setUserId(userId);
         userRole.setRoleId(roleId);
         sysUserRoleMapper.insertSelective(userRole);
+    }
+
+    /*
+    * 更新用户角色关联
+    * */
+    private void updateUserRole(Integer userId, Integer roleId) {
+        sysUserRoleMapper.updateRoleIdByUserId(userId, roleId);
     }
 
     /*

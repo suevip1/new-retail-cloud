@@ -1,5 +1,6 @@
 package com.zhihao.newretail.rbac.service.impl;
 
+import com.zhihao.newretail.api.rbac.vo.SysUserApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
@@ -109,6 +110,17 @@ public class SysUserServiceImpl implements SysUserService {
             throw new ServiceException("删除用户失败");
         }
         return updateRow;
+    }
+
+    @Override
+    public SysUserApiVO getSysUserApiVO(String username) {
+        SysUser sysUser = sysUserMapper.selectUserRoleByUsername(username);
+        SysUserApiVO sysUserApiVO = new SysUserApiVO();
+        BeanUtils.copyProperties(sysUser, sysUserApiVO);
+        sysUserApiVO.setName(sysUser.getSysRole().getName());
+        sysUserApiVO.setKey(sysUser.getSysRole().getKey());
+        sysUserApiVO.setScope(sysUser.getSysRole().getScope());
+        return sysUserApiVO;
     }
 
     /*

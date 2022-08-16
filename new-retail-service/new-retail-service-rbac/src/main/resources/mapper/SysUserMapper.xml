@@ -153,4 +153,9 @@
   <select id="selectListByAll" resultMap="UserRoleMap">
     <include refid="User_Role_List" />
   </select>
+
+  <select id="selectUserRoleByUsername" parameterType="java.lang.String" resultMap="UserRoleMap">
+    <include refid="User_Role_List" />
+    and username = #{username,jdbcType=VARCHAR}
+  </select>
 </mapper>

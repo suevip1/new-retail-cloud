@@ -22,4 +22,6 @@ public interface SysUserMapper {
 
     List<SysUser> selectListByAll();
 
+    SysUser selectUserRoleByUsername(String username);
+
 }

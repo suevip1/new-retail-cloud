@@ -16,4 +16,9 @@ public interface SysRoleService {
     * */
     List<SysRoleVO> listSysRoleVOs();
 
+    /*
+    * 查看角色详情信息
+    * */
+    SysRoleVO getSysRoleVO(Integer roleId);
+
 }

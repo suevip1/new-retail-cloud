@@ -1,12 +1,15 @@
 package com.zhihao.newretail.rbac.service.impl;
 
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.rbac.dao.SysRoleMapper;
 import com.zhihao.newretail.rbac.pojo.SysRole;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.service.SysRoleService;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.util.Comparator;
 import java.util.List;
@@ -29,6 +32,15 @@ public class SysRoleServiceImpl implements SysRoleService {
         return sysRoleList.stream()
                 .sorted(Comparator.comparing(SysRole::getSort))
                 .map(this::sysRole2SysRoleVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public SysRoleVO getSysRoleVO(Integer roleId) {
+        SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
+        if (ObjectUtils.isEmpty(sysRole)) {
+            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "角色不存在");
+        }
+        return sysRole2SysRoleVO(sysRole);
     }
 
     private SysRoleVO sysRole2SysRoleVO(SysRole sysRole) {

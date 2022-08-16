@@ -1,9 +1,11 @@
 package com.zhihao.newretail.rbac.service.impl;
 
+import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.rbac.dao.SysRoleMapper;
 import com.zhihao.newretail.rbac.pojo.SysRole;
 import com.zhihao.newretail.rbac.pojo.dto.SysRoleAddDTO;
+import com.zhihao.newretail.rbac.pojo.dto.SysRoleUpdateDTO;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.service.SysRoleService;
 import org.apache.http.HttpStatus;
@@ -56,6 +58,23 @@ public class SysRoleServiceImpl implements SysRoleService {
             throw new ServiceException("新增角色失败");
         }
         return insertRow;
+    }
+
+    @Override
+    public int updateRole(Integer roleId, SysRoleUpdateDTO roleUpdateDTO) {
+        SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
+        if (ObjectUtils.isEmpty(sysRole) || DeleteEnum.DELETE.getCode().equals(sysRole.getIsDelete())) {
+            throw new ServiceException("角色不存在");
+        }
+        sysRole.setName(roleUpdateDTO.getName());
+        sysRole.setKey(roleUpdateDTO.getKey());
+        sysRole.setScope(roleUpdateDTO.getScope());
+        int updateRow = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
+
+        if (updateRow <= 0) {
+            throw new ServiceException("更新角色失败");
+        }
+        return updateRow;
     }
 
     private SysRoleVO sysRole2SysRoleVO(SysRole sysRole) {

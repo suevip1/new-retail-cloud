@@ -43,19 +43,18 @@ public class CartServiceImpl implements CartService {
         BigDecimal cartTotalPrice = BigDecimal.ZERO;    // 总金额
         List<CartProductVO> cartProductVOList = new ArrayList<>();  // 购物车商品列表
 
+        /* 获取redis内容 */
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Map<Object, Object> redisMap = redisUtil.getMap(redisKey);
-        Set<Integer> skuIdSet = new HashSet<>();    // 获取skuId集合
-        redisMap.forEach((k, v) -> {
-            skuIdSet.add((Integer) k);
-        });
 
-        if (CollectionUtils.isEmpty(skuIdSet))
+        /* 获取skuId集合 */
+        Set<Integer> skuIdSet = new HashSet<>();
+        redisMap.forEach((k, v) -> {skuIdSet.add((Integer) k);});
+        if (CollectionUtils.isEmpty(skuIdSet)) {
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "购物车为空");
-
-        SkuBatchApiDTO skuBatchApiDTO = new SkuBatchApiDTO();
-        skuBatchApiDTO.setIdSet(skuIdSet);
-        List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(skuBatchApiDTO);
+        }
+        /* 获取购物车商品 */
+        List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
 
         for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
             Cart cart = (Cart) entry.getValue();
@@ -85,13 +84,12 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO addCart(Integer userId, CartAddForm form) {
         SkuApiVO skuApiVO = productFeignService.getSkuApiVO(form.getSkuId());
-
-        if (ObjectUtils.isEmpty(skuApiVO) || ObjectUtils.isEmpty(skuApiVO.getId()))
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "库存不足");
+        if (ObjectUtils.isEmpty(skuApiVO.getId())) {
+            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "库存不足");
+        }
 
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuApiVO.getId());
-
         if (ObjectUtils.isEmpty(cart)) {
             cart = new Cart(
                     skuApiVO.getSpuId(),

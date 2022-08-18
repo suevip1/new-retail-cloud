@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
+import com.zhihao.newretail.api.product.dto.CategoryDTO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
@@ -34,6 +35,14 @@ public class CategoryServiceImpl implements CategoryService {
             return categoryVOList;
         }
         throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+    }
+
+    @Override
+    public void insertCategory(CategoryDTO categoryDTO) {
+        Category category = new Category();
+        category.setName(categoryDTO.getName());
+        category.setParentId(categoryDTO.getParentId());
+        categoryMapper.insertSelective(category);
     }
 
     private void findSubCategoryVOList(List<Category> categoryList, List<CategoryVO> categoryVOList) {

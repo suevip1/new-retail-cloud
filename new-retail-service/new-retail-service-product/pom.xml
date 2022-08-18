@@ -31,6 +31,22 @@
 
         <dependency>
             <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-common-security</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.zhihao</groupId>
+                    <artifactId>new-retail-common-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.zhihao</groupId>
+                    <artifactId>new-retail-common-redis</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-product</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

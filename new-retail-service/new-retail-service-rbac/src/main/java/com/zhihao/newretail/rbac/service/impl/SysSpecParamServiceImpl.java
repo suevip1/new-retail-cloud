@@ -36,4 +36,10 @@ public class SysSpecParamServiceImpl implements SysSpecParamService {
         specParamFeignService.updateSpecParam(specParamId, specParamUpdateApiDTO);
     }
 
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public void deleteSpecParam(Integer specParamId) {
+        specParamFeignService.deleteSpecParam(specParamId);
+    }
+
 }

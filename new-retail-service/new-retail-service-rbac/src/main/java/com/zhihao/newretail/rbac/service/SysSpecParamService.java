@@ -23,4 +23,9 @@ public interface SysSpecParamService {
     * */
     void updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
+    /*
+    * 删除分类参数
+    * */
+    void deleteSpecParam(Integer specParamId);
+
 }

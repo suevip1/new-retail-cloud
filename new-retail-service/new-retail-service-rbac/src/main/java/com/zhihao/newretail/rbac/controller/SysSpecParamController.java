@@ -58,4 +58,14 @@ public class SysSpecParamController {
         return R.ok();
     }
 
+    @RequiresLogin
+    @DeleteMapping("/specParam/{specParamId}")
+    public R specParamDelete(@PathVariable Integer specParamId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        specParamService.deleteSpecParam(specParamId);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
 }

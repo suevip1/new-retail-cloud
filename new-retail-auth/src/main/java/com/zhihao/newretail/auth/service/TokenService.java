@@ -1,5 +1,6 @@
 package com.zhihao.newretail.auth.service;
 
+import com.zhihao.newretail.auth.controller.enums.TokenTypeEnum;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
@@ -19,6 +20,6 @@ public interface TokenService {
     /*
     * 验证token有效性、刷新token
     * */
-    R verifierToken(String token);
+    R verifierToken(String token, TokenTypeEnum tokenTypeEnum);
 
 }

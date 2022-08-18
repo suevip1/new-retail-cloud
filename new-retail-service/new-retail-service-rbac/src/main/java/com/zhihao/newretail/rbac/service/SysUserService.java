@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.api.rbac.vo.SysUserApiVO;
+import com.zhihao.newretail.rbac.pojo.SysUser;
 import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
 import com.zhihao.newretail.rbac.pojo.dto.SysUserUpdateDTO;
 import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
@@ -38,5 +39,10 @@ public interface SysUserService {
     * 获取系统用户信息
     * */
     SysUserApiVO getSysUserApiVO(String username);
+
+    /*
+    * 获取系统用户信息、权限信息
+    * */
+    SysUser getSysUser(Integer userId);
 
 }

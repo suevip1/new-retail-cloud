@@ -11,6 +11,7 @@ import com.zhihao.newretail.auth.service.LoginService;
 import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
+import com.zhihao.newretail.core.util.MyUUIDUtil;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
@@ -76,7 +77,10 @@ public class LoginServiceImpl implements LoginService {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
         } else {
             SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
-            BeanUtils.copyProperties(sysUserApiVO, sysUserLoginVO);
+            sysUserLoginVO.setUserToken(MyUUIDUtil.getUUID());
+            sysUserLoginVO.setId(sysUserApiVO.getId());
+            sysUserLoginVO.setUsername(sysUserApiVO.getUsername());
+            sysUserLoginVO.setName(sysUserApiVO.getName());
             String token = tokenService.getToken(sysUserLoginVO);
             if (!StringUtils.isEmpty(token)) {
                 return R.ok("登录成功").put("token", token);

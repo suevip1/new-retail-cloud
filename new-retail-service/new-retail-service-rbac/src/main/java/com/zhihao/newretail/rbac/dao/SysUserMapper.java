@@ -24,4 +24,6 @@ public interface SysUserMapper {
 
     SysUser selectUserRoleByUsername(String username);
 
+    SysUser selectUserRoleByUserId(Integer id);
+
 }

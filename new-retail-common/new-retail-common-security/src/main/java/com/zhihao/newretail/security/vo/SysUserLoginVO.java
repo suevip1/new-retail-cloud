@@ -4,15 +4,21 @@ import java.io.Serializable;
 
 public class SysUserLoginVO implements Serializable {
 
+    private String userToken;
+
     private Integer id;
 
     private String username;
 
     private String name;
 
-    private String key;
+    public String getUserToken() {
+        return userToken;
+    }
 
-    private Integer scope;
+    public void setUserToken(String userToken) {
+        this.userToken = userToken;
+    }
 
     public Integer getId() {
         return id;
@@ -38,30 +44,13 @@ public class SysUserLoginVO implements Serializable {
         this.name = name;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public Integer getScope() {
-        return scope;
-    }
-
-    public void setScope(Integer scope) {
-        this.scope = scope;
-    }
-
     @Override
     public String toString() {
         return "SysUserLoginVO{" +
-                "id=" + id +
+                "userToken='" + userToken + '\'' +
+                ", id=" + id +
                 ", username='" + username + '\'' +
                 ", name='" + name + '\'' +
-                ", key='" + key + '\'' +
-                ", scope=" + scope +
                 '}';
     }
 

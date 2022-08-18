@@ -2,7 +2,7 @@ package com.zhihao.newretail.user.controller;
 
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.service.UserCouponsService;
 import org.springframework.beans.factory.annotation.Autowired;

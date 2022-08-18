@@ -1,4 +1,4 @@
-package com.zhihao.newretail.security;
+package com.zhihao.newretail.security.context;
 
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;

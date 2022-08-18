@@ -158,4 +158,9 @@
     <include refid="User_Role_List" />
     and username = #{username,jdbcType=VARCHAR}
   </select>
+
+  <select id="selectUserRoleByUserId" parameterType="java.lang.Integer" resultMap="UserRoleMap">
+    <include refid="User_Role_List" />
+    and id = #{id,jdbcType=INTEGER}
+  </select>
 </mapper>

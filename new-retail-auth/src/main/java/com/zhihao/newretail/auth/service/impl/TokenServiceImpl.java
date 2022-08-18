@@ -6,7 +6,6 @@ import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
-import com.zhihao.newretail.security.consts.SysUserConst;
 import com.zhihao.newretail.security.util.JwtUtil;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
@@ -39,9 +38,8 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public String getToken(SysUserLoginVO sysUserLoginVO) {
         if (!ObjectUtils.isEmpty(sysUserLoginVO)) {
-            String redisKey = String.format(SysUserConst.SYS_USER_ID, sysUserLoginVO.getId());
-            cacheSysUserInfo(redisKey, sysUserLoginVO);
-            return JwtUtil.createToken(sysUserLoginVO.getId());
+            cacheSysUserInfo(sysUserLoginVO.getUserToken(), sysUserLoginVO);
+            return JwtUtil.createToken(sysUserLoginVO.getUserToken());
         }
         throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
     }
@@ -100,20 +98,19 @@ public class TokenServiceImpl implements TokenService {
     * 验证后台系统用户token
     * */
     private String sysUserToken(String token) {
-        Integer userId = JwtUtil.getUserId(token);
-        String redisKey = String.format(SysUserConst.SYS_USER_ID, userId);
+        String userToken = JwtUtil.getUserToken(token);
 
         try {
             /* token 有效，直接返回 */
             JwtUtil.verifierToken(token);
-            if (redisUtil.isExist(redisKey)) {
+            if (redisUtil.isExist(userToken)) {
                 return token;
             }
             return null;
         } catch (TokenExpiredException e) {
             /* token 失效，重新生成 token */
-            if (redisUtil.isExist(String.valueOf(userId))) {
-                return JwtUtil.createToken(userId);
+            if (redisUtil.isExist(userToken)) {
+                return JwtUtil.createToken(userToken);
             }
             return null;
         }

@@ -5,7 +5,7 @@ import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 import com.zhihao.newretail.order.service.OrderService;
-import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

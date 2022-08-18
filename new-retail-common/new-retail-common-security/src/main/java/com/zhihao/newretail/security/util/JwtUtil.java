@@ -36,15 +36,27 @@ public class JwtUtil {
                 .sign(algorithm);
     }
 
+    public static String createToken(String userToken) {
+        DateTime time = DateUtil.offset(new Date(), DateField.DAY_OF_YEAR, EXPIRE); // 获取日期偏移量，1天后的时间
+        Algorithm algorithm = Algorithm.HMAC256(SECRET);
+        JWTCreator.Builder builder = JWT.create();
+        return builder.withClaim("userToken", userToken).withExpiresAt(time).sign(algorithm);
+    }
+
     /* 解析获取 token 内容 */
     public static Integer getUserId(String token) {
         DecodedJWT jwt = JWT.decode(token);
         return jwt.getClaim("userId").asInt();
     }
 
-    public static String getUuid(String uuid) {
-        DecodedJWT jwt = JWT.decode(uuid);
+    public static String getUuid(String token) {
+        DecodedJWT jwt = JWT.decode(token);
         return jwt.getClaim("uuid").asString();
+    }
+
+    public static String getUserToken(String token) {
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getClaim("userToken").asString();
     }
 
     /* 验证 token 是否过期 */

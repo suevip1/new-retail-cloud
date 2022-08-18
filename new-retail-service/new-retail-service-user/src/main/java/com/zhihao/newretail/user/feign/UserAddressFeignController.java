@@ -2,7 +2,7 @@ package com.zhihao.newretail.user.feign;
 
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
-import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.service.UserAddressService;
 import org.springframework.beans.factory.annotation.Autowired;

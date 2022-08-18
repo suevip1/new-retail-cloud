@@ -2,8 +2,9 @@ package com.zhihao.newretail.security.aspect;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zhihao.newretail.core.exception.ServiceException;
-import com.zhihao.newretail.security.UserLoginContext;
+import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.util.JwtUtil;
+import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -35,16 +36,22 @@ public class RequiresLoginAspect {
         assert requestAttributes != null;
         HttpServletRequest request = requestAttributes.getRequest();
         String token = request.getHeader("token");
-
-        if (StringUtils.isEmpty(token))
+        if (StringUtils.isEmpty(token)) {
             throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "请登录后再操作");
-
+        }
         try {
             JwtUtil.verifierToken(token);
-            UserLoginVO userLoginVO = new UserLoginVO();
-            userLoginVO.setUserId(JwtUtil.getUserId(token));
-            userLoginVO.setUuid(JwtUtil.getUuid(token));
-            UserLoginContext.setUserLoginInfo(userLoginVO);
+            String userToken = JwtUtil.getUserToken(token);     // 只有后台系统的用户存在user token
+            if (StringUtils.isEmpty(userToken)) {
+                UserLoginVO userLoginVO = new UserLoginVO();
+                userLoginVO.setUserId(JwtUtil.getUserId(token));
+                userLoginVO.setUuid(JwtUtil.getUuid(token));
+                UserLoginContext.setUserLoginInfo(userLoginVO);
+            } else {
+                SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
+                sysUserLoginVO.setUserToken(userToken);
+                UserLoginContext.setSysUserLoginVO(sysUserLoginVO);
+            }
         } catch (TokenExpiredException e) {
             throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "令牌已失效");
         }

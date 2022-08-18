@@ -123,6 +123,11 @@ public class SysUserServiceImpl implements SysUserService {
         return sysUserApiVO;
     }
 
+    @Override
+    public SysUser getSysUser(Integer userId) {
+        return sysUserMapper.selectUserRoleByUserId(userId);
+    }
+
     /*
     * 用户角色关联
     * */

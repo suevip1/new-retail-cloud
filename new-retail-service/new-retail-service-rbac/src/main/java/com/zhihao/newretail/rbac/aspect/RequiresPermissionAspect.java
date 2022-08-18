@@ -42,17 +42,17 @@ public class RequiresPermissionAspect {
     private void handleScope(String scope, String userScope) {
         if (AuthorizationConst.ROOT.equals(scope) && !AuthorizationConst.ROOT.equals(userScope)) {
             throw new ServiceException(HttpStatus.SC_FORBIDDEN, "您不具备该权限");
-        } else if (AuthorizationConst.ADMIN.equals(scope)
+        }
+        if (AuthorizationConst.ADMIN.equals(scope)
                 && !AuthorizationConst.ROOT.equals(userScope)
                 && !AuthorizationConst.ADMIN.equals(userScope)) {
             throw new ServiceException(HttpStatus.SC_FORBIDDEN, "您不具备该权限");
-        } else if (AuthorizationConst.COMMON.equals(scope)
+        }
+        if (AuthorizationConst.COMMON.equals(scope)
                 && !AuthorizationConst.ROOT.equals(userScope)
                 && !AuthorizationConst.ADMIN.equals(userScope)
                 && !AuthorizationConst.COMMON.equals(userScope)) {
             throw new ServiceException(HttpStatus.SC_FORBIDDEN, "您不具备该权限");
-        } else {
-            throw new ServiceException(HttpStatus.SC_FORBIDDEN, "您不是系统用户");
         }
     }
 

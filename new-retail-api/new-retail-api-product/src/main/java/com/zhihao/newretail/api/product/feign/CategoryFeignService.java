@@ -5,6 +5,8 @@ import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface CategoryFeignService {
 
@@ -12,14 +14,14 @@ public interface CategoryFeignService {
     * 新增商品分类
     * */
     @PostMapping("/api/category")
-    void addCategory(@RequestBody CategoryAddApiDTO categoryAddApiDTO);
+    void addCategory(@Valid @RequestBody CategoryAddApiDTO categoryAddApiDTO);
 
     /*
     * 修改商品分类
     * */
     @PutMapping("/api/category/{categoryId}")
     void updateCategory(@PathVariable Integer categoryId,
-                        @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO);
+                        @Valid @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO);
 
     /*
     * 删除商品分类

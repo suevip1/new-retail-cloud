@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.controller;
 
 import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SpecParamUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
@@ -42,6 +43,17 @@ public class SysSpecParamController {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         specParamService.addSpecParam(specParamAddApiDTO);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
+    @RequiresLogin
+    @PutMapping("/specParam/{specParamId}")
+    public R specParamUpdate(@PathVariable Integer specParamId,
+                             @Valid @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        specParamService.updateSpecParam(specParamId, specParamUpdateApiDTO);
         UserLoginContext.sysClean();
         return R.ok();
     }

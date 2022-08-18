@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SpecParamUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SpecParamFeignService;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
@@ -27,6 +28,12 @@ public class SysSpecParamServiceImpl implements SysSpecParamService {
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
     public void addSpecParam(SpecParamAddApiDTO specParamAddApiDTO) {
         specParamFeignService.addSpecParam(specParamAddApiDTO);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public void updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO) {
+        specParamFeignService.updateSpecParam(specParamId, specParamUpdateApiDTO);
     }
 
 }

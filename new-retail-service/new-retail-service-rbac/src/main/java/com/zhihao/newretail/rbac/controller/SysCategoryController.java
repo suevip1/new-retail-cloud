@@ -37,4 +37,14 @@ public class SysCategoryController {
         return R.ok();
     }
 
+    @RequiresLogin
+    @DeleteMapping("/category/{categoryId}")
+    public R deleteCategory(@PathVariable Integer categoryId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        categoryService.deleteCategory(categoryId);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
 }

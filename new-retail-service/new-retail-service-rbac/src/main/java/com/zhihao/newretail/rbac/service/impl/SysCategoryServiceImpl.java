@@ -49,4 +49,10 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         categoryFeignService.updateCategory(categoryId, categoryUpdateApiDTO);
     }
 
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public void deleteCategory(Integer categoryId) {
+        categoryFeignService.deleteCategory(categoryId);
+    }
+
 }

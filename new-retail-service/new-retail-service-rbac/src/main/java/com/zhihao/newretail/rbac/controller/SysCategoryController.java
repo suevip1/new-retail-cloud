@@ -10,6 +10,8 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/admin")
 public class SysCategoryController {
@@ -19,7 +21,7 @@ public class SysCategoryController {
 
     @RequiresLogin
     @PostMapping("/category")
-    public R addCategory(@RequestBody CategoryAddApiDTO categoryAddApiDTO) {
+    public R addCategory(@Valid @RequestBody CategoryAddApiDTO categoryAddApiDTO) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         categoryService.addCategory(categoryAddApiDTO);
@@ -29,7 +31,7 @@ public class SysCategoryController {
 
     @RequiresLogin
     @PutMapping("/category/{categoryId}")
-    public R updateCategory(@PathVariable Integer categoryId, @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO) {
+    public R updateCategory(@PathVariable Integer categoryId, @Valid @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         categoryService.updateCategory(categoryId, categoryUpdateApiDTO);

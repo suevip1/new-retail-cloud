@@ -1,0 +1,27 @@
+package com.zhihao.newretail.product.feign;
+
+import com.zhihao.newretail.api.product.feign.SpecParamFeignService;
+import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
+import com.zhihao.newretail.product.service.SpecParamService;
+import com.zhihao.newretail.security.annotation.RequiresLogin;
+import com.zhihao.newretail.security.context.UserLoginContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
+@RestController
+public class SpecParamFeignController implements SpecParamFeignService {
+
+    @Autowired
+    private SpecParamService specParamService;
+
+    @Override
+    @RequiresLogin
+    public List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId) {
+        List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOs(categoryId);
+        UserLoginContext.sysClean();
+        return specParamApiVOList;
+    }
+
+}

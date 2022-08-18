@@ -86,4 +86,11 @@
       is_delete = #{isDelete,jdbcType=TINYINT}
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectListByCategoryId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_spec_param_key
+    where category_id = #{categoryId,jdbcType=INTEGER}
+  </select>
 </mapper>

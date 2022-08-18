@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.service.impl;
 
-import com.zhihao.newretail.api.product.dto.CategoryDTO;
+import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
+import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
@@ -38,11 +39,20 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void insertCategory(CategoryDTO categoryDTO) {
+    public void insertCategory(CategoryAddApiDTO categoryAddApiDTO) {
         Category category = new Category();
-        category.setName(categoryDTO.getName());
-        category.setParentId(categoryDTO.getParentId());
+        category.setName(categoryAddApiDTO.getName());
+        category.setParentId(categoryAddApiDTO.getParentId());
         categoryMapper.insertSelective(category);
+    }
+
+    @Override
+    public void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO) {
+        Category category = new Category();
+        category.setId(categoryId);
+        category.setName(categoryUpdateApiDTO.getName());
+        category.setParentId(categoryUpdateApiDTO.getParentId());
+        categoryMapper.updateByPrimaryKeySelective(category);
     }
 
     private void findSubCategoryVOList(List<Category> categoryList, List<CategoryVO> categoryVOList) {

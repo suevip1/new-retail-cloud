@@ -1,6 +1,6 @@
 package com.zhihao.newretail.api.product.dto;
 
-public class CategoryDTO {
+public class CategoryAddApiDTO {
 
     private String name;
 

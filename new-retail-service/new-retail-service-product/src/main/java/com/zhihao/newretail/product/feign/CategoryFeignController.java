@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.feign;
 
-import com.zhihao.newretail.api.product.dto.CategoryDTO;
+import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
+import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.CategoryFeignService;
 import com.zhihao.newretail.product.service.CategoryService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -14,10 +15,17 @@ public class CategoryFeignController implements CategoryFeignService {
     @Autowired
     private CategoryService categoryService;
 
-    @RequiresLogin
     @Override
-    public void addCategory(CategoryDTO categoryDTO) {
-        categoryService.insertCategory(categoryDTO);
+    @RequiresLogin
+    public void addCategory(CategoryAddApiDTO categoryAddApiDTO) {
+        categoryService.insertCategory(categoryAddApiDTO);
+        UserLoginContext.sysClean();
+    }
+
+    @Override
+    @RequiresLogin
+    public void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO) {
+        categoryService.updateCategory(categoryId, categoryUpdateApiDTO);
         UserLoginContext.sysClean();
     }
 

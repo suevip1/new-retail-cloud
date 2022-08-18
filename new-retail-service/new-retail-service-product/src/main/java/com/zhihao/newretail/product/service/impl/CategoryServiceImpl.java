@@ -55,6 +55,11 @@ public class CategoryServiceImpl implements CategoryService {
         categoryMapper.updateByPrimaryKeySelective(category);
     }
 
+    @Override
+    public void deleteCategory(Integer categoryId) {
+        categoryMapper.deleteByPrimaryKey(categoryId);
+    }
+
     private void findSubCategoryVOList(List<Category> categoryList, List<CategoryVO> categoryVOList) {
         categoryVOList.forEach(categoryVO -> {
             List<CategoryVO> subCategoryVOList = new ArrayList<>();

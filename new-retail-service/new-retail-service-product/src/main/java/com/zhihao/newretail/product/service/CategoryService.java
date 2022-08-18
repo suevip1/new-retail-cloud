@@ -23,4 +23,9 @@ public interface CategoryService {
     * */
     void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO);
 
+    /*
+    * 删除商品分类
+    * */
+    void deleteCategory(Integer categoryId);
+
 }

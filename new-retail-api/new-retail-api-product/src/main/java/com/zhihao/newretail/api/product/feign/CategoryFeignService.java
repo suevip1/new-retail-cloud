@@ -3,10 +3,7 @@ package com.zhihao.newretail.api.product.feign;
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface CategoryFeignService {
@@ -23,5 +20,11 @@ public interface CategoryFeignService {
     @PutMapping("/api/category/{categoryId}")
     void updateCategory(@PathVariable Integer categoryId,
                         @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO);
+
+    /*
+    * 删除商品分类
+    * */
+    @DeleteMapping("/api/category/{categoryId}")
+    void deleteCategory(@PathVariable Integer categoryId);
 
 }

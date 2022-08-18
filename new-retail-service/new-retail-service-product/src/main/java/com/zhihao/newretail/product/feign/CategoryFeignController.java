@@ -29,4 +29,11 @@ public class CategoryFeignController implements CategoryFeignService {
         UserLoginContext.sysClean();
     }
 
+    @Override
+    @RequiresLogin
+    public void deleteCategory(Integer categoryId) {
+        categoryService.deleteCategory(categoryId);
+        UserLoginContext.sysClean();
+    }
+
 }

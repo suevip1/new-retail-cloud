@@ -40,4 +40,11 @@ public class SpecParamFeignController implements SpecParamFeignService {
         UserLoginContext.sysClean();
     }
 
+    @Override
+    @RequiresLogin
+    public void deleteSpecParam(Integer specParamId) {
+        specParamService.deleteSpecParamKey(specParamId);
+        UserLoginContext.sysClean();
+    }
+
 }

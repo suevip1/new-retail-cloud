@@ -44,6 +44,11 @@ public class SpecParamServiceImpl implements SpecParamService {
         specParamKeyMapper.updateByPrimaryKeySelective(specParamKey);
     }
 
+    @Override
+    public void deleteSpecParamKey(Integer specParamId) {
+        specParamKeyMapper.deleteByPrimaryKey(specParamId);
+    }
+
     private SpecParamApiVO specParamKey2SpecParamApiVO(SpecParamKey specParamKey) {
         SpecParamApiVO specParamApiVO = new SpecParamApiVO();
         BeanUtils.copyProperties(specParamKey, specParamApiVO);

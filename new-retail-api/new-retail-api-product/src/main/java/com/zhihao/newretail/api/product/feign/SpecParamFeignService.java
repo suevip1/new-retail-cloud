@@ -31,4 +31,10 @@ public interface SpecParamFeignService {
     void updateSpecParam(@PathVariable Integer specParamId,
                          @Valid @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
+    /*
+    * 删除分类参数
+    * */
+    @DeleteMapping("/api/specParam/{specParamId}")
+    void deleteSpecParam(@PathVariable Integer specParamId);
+
 }

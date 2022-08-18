@@ -22,7 +22,7 @@ public class SysSpecParamController {
     private SysSpecParamService specParamService;
 
     @RequiresLogin
-    @GetMapping("/api/specParam/{categoryId}")
+    @GetMapping("/specParam/{categoryId}")
     public R specParamList(@PathVariable Integer categoryId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);

@@ -6,7 +6,9 @@ import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.service.SysSpecParamService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +30,11 @@ public class SysSpecParamController {
         SysUserTokenContext.setUserToken(userToken);
         List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOs(categoryId);
         UserLoginContext.sysClean();
-        return R.ok().put("data", specParamApiVOList);
+        if (!CollectionUtils.isEmpty(specParamApiVOList)) {
+            return R.ok().put("data", specParamApiVOList);
+        } else {
+            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", specParamApiVOList);
+        }
     }
 
 }

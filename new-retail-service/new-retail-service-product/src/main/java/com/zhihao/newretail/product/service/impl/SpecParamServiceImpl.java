@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
+import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import com.zhihao.newretail.product.dao.SpecParamKeyMapper;
 import com.zhihao.newretail.product.dao.SpecParamValueMapper;
@@ -25,6 +26,13 @@ public class SpecParamServiceImpl implements SpecParamService {
     public List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId) {
         List<SpecParamKey> specParamKeyList = specParamKeyMapper.selectListByCategoryId(categoryId);
         return specParamKeyList.stream().map(this::specParamKey2SpecParamApiVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public void insertSpecParamKey(SpecParamAddApiDTO specParamAddApiDTO) {
+        SpecParamKey specParamKey = new SpecParamKey();
+        BeanUtils.copyProperties(specParamAddApiDTO, specParamKey);
+        specParamKeyMapper.insertSelective(specParamKey);
     }
 
     private SpecParamApiVO specParamKey2SpecParamApiVO(SpecParamKey specParamKey) {

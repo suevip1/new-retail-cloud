@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.feign;
 
+import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
 import com.zhihao.newretail.api.product.feign.SpecParamFeignService;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import com.zhihao.newretail.product.service.SpecParamService;
@@ -22,6 +23,13 @@ public class SpecParamFeignController implements SpecParamFeignService {
         List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOs(categoryId);
         UserLoginContext.sysClean();
         return specParamApiVOList;
+    }
+
+    @Override
+    @RequiresLogin
+    public void addSpecParam(SpecParamAddApiDTO specParamAddApiDTO) {
+        specParamService.insertSpecParamKey(specParamAddApiDTO);
+        UserLoginContext.sysClean();
     }
 
 }

@@ -1,5 +1,6 @@
 package com.zhihao.newretail.rbac.controller;
 
+import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
@@ -9,11 +10,9 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -35,6 +34,16 @@ public class SysSpecParamController {
         } else {
             return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", specParamApiVOList);
         }
+    }
+
+    @RequiresLogin
+    @PostMapping("/specParam")
+    public R specParamAdd(@Valid @RequestBody SpecParamAddApiDTO specParamAddApiDTO) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        specParamService.addSpecParam(specParamAddApiDTO);
+        UserLoginContext.sysClean();
+        return R.ok();
     }
 
 }

@@ -12,9 +12,11 @@ import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.R;
+import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -67,14 +69,20 @@ public class LoginServiceImpl implements LoginService {
         String username = sysUserApiVO.getUsername();
         String password = form.getPassword();
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
+
         if (ObjectUtils.isEmpty(sysUserApiVO.getId())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
         } else if (!secretPassword.equals(sysUserApiVO.getPassword())) {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
         } else {
-
+            SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
+            BeanUtils.copyProperties(sysUserApiVO, sysUserLoginVO);
+            String token = tokenService.getToken(sysUserLoginVO);
+            if (!StringUtils.isEmpty(token)) {
+                return R.ok("登录成功").put("token", token);
+            }
+            throw new ServiceException("登录失败");
         }
-        return null;
     }
 
 }

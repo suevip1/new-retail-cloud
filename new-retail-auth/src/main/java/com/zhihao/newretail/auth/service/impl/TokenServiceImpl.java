@@ -5,7 +5,9 @@ import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
+import com.zhihao.newretail.security.consts.SysUserConst;
 import com.zhihao.newretail.security.util.JwtUtil;
+import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -29,6 +31,16 @@ public class TokenServiceImpl implements TokenService {
             String uuid = userLoginVO.getUuid();
             cacheUserInfo(userId, userLoginVO);
             return JwtUtil.createToken(userId, uuid);
+        }
+        throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
+    }
+
+    @Override
+    public String getToken(SysUserLoginVO sysUserLoginVO) {
+        if (!ObjectUtils.isEmpty(sysUserLoginVO)) {
+            String redisKey = String.format(SysUserConst.SYS_USER_ID, sysUserLoginVO.getId());
+            cacheSysUserInfo(redisKey, sysUserLoginVO);
+            return JwtUtil.createToken(sysUserLoginVO.getId());
         }
         throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
     }
@@ -71,6 +83,13 @@ public class TokenServiceImpl implements TokenService {
         UserLoginVO userLoginVO = (UserLoginVO) redisUtil.getObject(String.valueOf(userId));
         redisUtil.deleteObject(String.valueOf(userId));
         cacheUserInfo(userId, userLoginVO);
+    }
+
+    /*
+    * 缓存后台系统用户信息
+    * */
+    private void cacheSysUserInfo(String redisKey, SysUserLoginVO sysUserLoginVO) {
+        redisUtil.setObject(redisKey, sysUserLoginVO, CACHE_EXPIRE_TIMEOUT);
     }
 
 }

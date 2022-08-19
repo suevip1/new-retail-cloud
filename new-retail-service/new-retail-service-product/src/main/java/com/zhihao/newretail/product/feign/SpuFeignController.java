@@ -3,6 +3,7 @@ package com.zhihao.newretail.product.feign;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
@@ -14,6 +15,14 @@ public class SpuFeignController implements SpuFeignService {
 
     @Autowired
     private SpuService spuService;
+
+    @Override
+    @RequiresLogin
+    public SpuApiVO getSpuApiVO(Integer spuId) {
+        SpuApiVO spuApiVO = spuService.getSpuApiVO(spuId);
+        UserLoginContext.sysClean();
+        return spuApiVO;
+    }
 
     @Override
     @RequiresLogin

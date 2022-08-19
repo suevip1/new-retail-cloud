@@ -20,6 +20,8 @@ public class Spu {
 
     private Date updateTime;
 
+    private SpuInfo spuInfo;
+
     public Integer getId() {
         return id;
     }
@@ -41,7 +43,7 @@ public class Spu {
     }
 
     public void setTitle(String title) {
-        this.title = title == null ? null : title.trim();
+        this.title = title;
     }
 
     public String getSubTitle() {
@@ -49,7 +51,7 @@ public class Spu {
     }
 
     public void setSubTitle(String subTitle) {
-        this.subTitle = subTitle == null ? null : subTitle.trim();
+        this.subTitle = subTitle;
     }
 
     public Integer getIsSaleable() {
@@ -84,6 +86,14 @@ public class Spu {
         this.updateTime = updateTime;
     }
 
+    public SpuInfo getSpuInfo() {
+        return spuInfo;
+    }
+
+    public void setSpuInfo(SpuInfo spuInfo) {
+        this.spuInfo = spuInfo;
+    }
+
     @Override
     public String toString() {
         return "Spu{" +
@@ -95,6 +105,7 @@ public class Spu {
                 ", isDelete=" + isDelete +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
+                ", spuInfo=" + spuInfo +
                 '}';
     }
 

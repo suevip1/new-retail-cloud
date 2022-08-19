@@ -2,6 +2,8 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
+import com.zhihao.newretail.api.product.vo.SpuInfoApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SpuInfoMapper;
@@ -10,6 +12,7 @@ import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.SpuInfo;
 import com.zhihao.newretail.product.service.SpuService;
 import org.apache.http.HttpStatus;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,12 @@ public class SpuServiceImpl implements SpuService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Override
+    public SpuApiVO getSpuApiVO(Integer spuId) {
+        Spu spu = spuMapper.selectSpuSpuInfoByPrimaryKey(spuId);
+        return spu2SpuApiVO(spu);
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -72,6 +81,15 @@ public class SpuServiceImpl implements SpuService {
         } else {
             throw new ServiceException("删除商品失败");
         }
+    }
+
+    private SpuApiVO spu2SpuApiVO(Spu spu) {
+        SpuApiVO spuApiVO = new SpuApiVO();
+        SpuInfoApiVO spuInfoApiVO = new SpuInfoApiVO();
+        BeanUtils.copyProperties(spu, spuApiVO);
+        BeanUtils.copyProperties(spu.getSpuInfo(), spuInfoApiVO);
+        spuApiVO.setSpuInfoApiVO(spuInfoApiVO);
+        return spuApiVO;
     }
 
     private Spu buildSpu(SpuAddApiDTO spuAddApiDTO) {

@@ -2,8 +2,14 @@ package com.zhihao.newretail.product.service;
 
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
 
 public interface SpuService {
+
+    /*
+    * 商品信息
+    * */
+    SpuApiVO getSpuApiVO(Integer spuId);
 
     /*
     * 新增商品

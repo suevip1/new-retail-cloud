@@ -25,4 +25,6 @@ public interface SpuMapper {
     * */
     List<Spu> selectListByIdSet(@Param("idSet") Set<Integer> idSet);
 
+    Spu selectSpuSpuInfoByPrimaryKey(Integer id);
+
 }

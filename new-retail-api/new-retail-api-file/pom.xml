@@ -3,27 +3,31 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>new-retail-cloud</artifactId>
+        <artifactId>new-retail-api</artifactId>
         <groupId>com.zhihao</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>new-retail-api</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>new-retail-api-user</module>
-        <module>new-retail-api-product</module>
-        <module>new-retail-api-coupons</module>
-        <module>new-retail-api-cart</module>
-        <module>new-retail-api-order</module>
-        <module>new-retail-api-rbac</module>
-        <module>new-retail-api-file</module>
-    </modules>
+    <artifactId>new-retail-api-file</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.openfeign.form</groupId>
+            <artifactId>feign-form</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.openfeign.form</groupId>
+            <artifactId>feign-form-spring</artifactId>
+            <version>3.8.0</version>
+        </dependency>
+    </dependencies>
 
 </project>

@@ -16,6 +16,7 @@
         <module>new-retail-common-security</module>
         <module>new-retail-common-core</module>
         <module>new-retail-common-rabbitmq</module>
+        <module>new-retail-common-file</module>
     </modules>
 
     <properties>

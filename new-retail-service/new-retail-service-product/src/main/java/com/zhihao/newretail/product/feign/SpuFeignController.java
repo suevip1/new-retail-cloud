@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -18,6 +19,13 @@ public class SpuFeignController implements SpuFeignService {
     @RequiresLogin
     public void addSpu(SpuAddApiDTO spuAddApiDTO) {
         spuService.insertSpu(spuAddApiDTO);
+        UserLoginContext.sysClean();
+    }
+
+    @Override
+    @RequiresLogin
+    public void updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO) {
+        spuService.updateSpu(spuId, spuUpdateApiDTO);
         UserLoginContext.sysClean();
     }
 

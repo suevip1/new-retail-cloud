@@ -19,6 +19,7 @@
         <module>new-retail-service-pay</module>
         <module>new-retail-service-coupons</module>
         <module>new-retail-service-rbac</module>
+        <module>new-retail-service-file</module>
     </modules>
 
     <properties>

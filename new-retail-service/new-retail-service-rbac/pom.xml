@@ -47,6 +47,12 @@
 
         <dependency>
             <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-common-file</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-rbac</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -61,6 +67,12 @@
                     <artifactId>new-retail-common-core</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-file</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency>

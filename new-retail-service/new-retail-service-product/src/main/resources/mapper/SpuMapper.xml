@@ -37,7 +37,7 @@
       #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP})
   </insert>
 
-  <insert id="insertSelective" parameterType="com.zhihao.newretail.product.pojo.Spu">
+  <insert id="insertSelective" parameterType="com.zhihao.newretail.product.pojo.Spu" useGeneratedKeys="true" keyProperty="id">
     insert into tb_spu
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">

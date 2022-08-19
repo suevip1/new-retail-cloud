@@ -21,4 +21,6 @@ public interface SpuInfoMapper {
     * */
     SpuInfo selectBySpuId(Integer spuId);
 
+    int deleteBySpuId(Integer spuId);
+
 }

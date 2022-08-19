@@ -60,6 +60,20 @@ public class SpuServiceImpl implements SpuService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteSpu(Integer spuId) {
+        int deleteSpuRow = spuMapper.deleteByPrimaryKey(spuId);
+        if (deleteSpuRow > 0) {
+            int deleteSupInfoRow = spuInfoMapper.deleteBySpuId(spuId);
+            if (deleteSupInfoRow <= 0) {
+                throw new ServiceException("删除商品失败");
+            }
+        } else {
+            throw new ServiceException("删除商品失败");
+        }
+    }
+
     private Spu buildSpu(SpuAddApiDTO spuAddApiDTO) {
         Spu spu = new Spu();
         spu.setCategoryId(spuAddApiDTO.getCategoryId());

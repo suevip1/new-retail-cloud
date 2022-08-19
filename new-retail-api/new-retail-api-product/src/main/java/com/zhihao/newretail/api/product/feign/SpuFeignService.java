@@ -3,10 +3,7 @@ package com.zhihao.newretail.api.product.feign;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -18,5 +15,8 @@ public interface SpuFeignService {
 
     @PutMapping("/api/spu/{spuId}")
     void updateSpu(@PathVariable Integer spuId, @Valid @RequestBody SpuUpdateApiDTO spuUpdateApiDTO);
+
+    @DeleteMapping("/api/spu/{spuId}")
+    void deleteSpu(@PathVariable Integer spuId);
 
 }

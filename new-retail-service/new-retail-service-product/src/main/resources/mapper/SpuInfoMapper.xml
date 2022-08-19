@@ -139,4 +139,9 @@
     from tb_spu_info
     where spu_id = #{spuId,jdbcType=INTEGER} and is_delete = 0
   </select>
+
+  <delete id="deleteBySpuId" parameterType="java.lang.Integer">
+    delete from tb_spu_info
+    where spu_id = #{spuId,jdbcType=INTEGER}
+  </delete>
 </mapper>

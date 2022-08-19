@@ -15,4 +15,9 @@ public interface SpuService {
     * */
     void updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO);
 
+    /*
+    * 删除商品
+    * */
+    void deleteSpu(Integer spuId);
+
 }

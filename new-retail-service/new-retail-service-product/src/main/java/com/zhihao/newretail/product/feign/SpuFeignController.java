@@ -29,4 +29,11 @@ public class SpuFeignController implements SpuFeignService {
         UserLoginContext.sysClean();
     }
 
+    @Override
+    @RequiresLogin
+    public void deleteSpu(Integer spuId) {
+        spuService.deleteSpu(spuId);
+        UserLoginContext.sysClean();
+    }
+
 }

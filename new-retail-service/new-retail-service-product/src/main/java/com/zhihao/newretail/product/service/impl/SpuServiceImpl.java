@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
+import java.util.List;
+
 @Service
 public class SpuServiceImpl implements SpuService {
 
@@ -81,6 +83,11 @@ public class SpuServiceImpl implements SpuService {
         } else {
             throw new ServiceException("删除商品失败");
         }
+    }
+
+    @Override
+    public List<Spu> listSpuS(Integer categoryId) {
+        return spuMapper.selectSpuSpuInfoListByCategoryId(categoryId);
     }
 
     private SpuApiVO spu2SpuApiVO(Spu spu) {

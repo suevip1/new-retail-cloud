@@ -144,6 +144,13 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <select id="selectBySpuId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sku
+    where spu_id = #{spuId,jdbcType=INTEGER} and is_delete = 0
+  </select>
+
   <select id="selectListBySpuId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

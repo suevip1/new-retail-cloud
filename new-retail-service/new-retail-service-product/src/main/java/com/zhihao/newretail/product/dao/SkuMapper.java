@@ -20,6 +20,8 @@ public interface SkuMapper {
 
     int updateByPrimaryKey(Sku record);
 
+    Sku selectBySpuId(Integer spuId);
+
     /*
     * spuId获取规格列表
     * */

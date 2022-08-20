@@ -173,6 +173,11 @@
     </foreach>
   </select>
 
+  <select id="selectSpuSpuInfoListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
+    <include refid="Spu_Spu_Info" />
+    where category_id = #{categoryId,jdbcType=INTEGER} and is_delete = 0
+  </select>
+
   <select id="selectSpuSpuInfoByPrimaryKey" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
     <include refid="Spu_Spu_Info" />
     where id = #{id,jdbcType=INTEGER}

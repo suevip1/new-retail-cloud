@@ -8,13 +8,14 @@ import com.zhihao.newretail.product.dao.SpuInfoMapper;
 import com.zhihao.newretail.product.dao.SpuMapper;
 import com.zhihao.newretail.product.enums.ProductEnum;
 import com.zhihao.newretail.product.pojo.Sku;
-import com.zhihao.newretail.product.pojo.SkuStock;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.SpuInfo;
+import com.zhihao.newretail.product.pojo.vo.GoodsVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.SkuVO;
-import com.zhihao.newretail.product.service.ProductService;
+import com.zhihao.newretail.product.service.GoodsService;
+import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.product.service.StockService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -31,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductServiceImpl implements ProductService {
+public class GoodsServiceImpl implements GoodsService {
 
     @Autowired
     private SpuMapper spuMapper;
@@ -41,6 +43,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Autowired
+    private SpuService spuService;
 
     @Autowired
     private StockService stockService;
@@ -130,6 +135,18 @@ public class ProductServiceImpl implements ProductService {
             BeanUtils.copyProperties(sku, skuApiVO);
             return skuApiVO;
         }
+    }
+
+    @Override
+    public List<GoodsVO> listGoodsVOS(Integer categoryId) {
+        List<Spu> spuList = spuService.listSpuS(categoryId);
+        return spuList.stream()
+                .map(spu -> {
+                    GoodsVO goodsVO = new GoodsVO();
+                    BeanUtils.copyProperties(spu, goodsVO);
+                    goodsVO.setShowImage(spu.getSpuInfo().getShowImage());
+                    return goodsVO;
+                }).collect(Collectors.toList());
     }
 
 }

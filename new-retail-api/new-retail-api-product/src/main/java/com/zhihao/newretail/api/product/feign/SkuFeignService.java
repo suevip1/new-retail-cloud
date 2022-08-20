@@ -3,10 +3,7 @@ package com.zhihao.newretail.api.product.feign;
 import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -18,5 +15,8 @@ public interface SkuFeignService {
 
     @PutMapping("/api/sku/{skuId}")
     void updateSku(@PathVariable Integer skuId, @Valid @RequestBody SkuUpdateApiDTO skuUpdateApiDTO);
+
+    @DeleteMapping("/api/sku/{skuId}")
+    void deleteSku(@PathVariable Integer skuId);
 
 }

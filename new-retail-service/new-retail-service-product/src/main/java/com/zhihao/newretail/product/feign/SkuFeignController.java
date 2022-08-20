@@ -29,4 +29,11 @@ public class SkuFeignController implements SkuFeignService {
         UserLoginContext.sysClean();
     }
 
+    @Override
+    @RequiresLogin
+    public void deleteSku(Integer skuId) {
+        skuService.deleteSku(skuId);
+        UserLoginContext.sysClean();
+    }
+
 }

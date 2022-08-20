@@ -21,7 +21,7 @@ public class SpecParamFeignController implements SpecParamFeignService {
     @Override
     @RequiresLogin
     public List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId) {
-        List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOs(categoryId);
+        List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOS(categoryId);
         UserLoginContext.sysClean();
         return specParamApiVOList;
     }

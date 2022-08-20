@@ -24,7 +24,7 @@ public class SpecParamServiceImpl implements SpecParamService {
     private SpecParamValueMapper specParamValueMapper;
 
     @Override
-    public List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId) {
+    public List<SpecParamApiVO> listSpecParamApiVOS(Integer categoryId) {
         List<SpecParamKey> specParamKeyList = specParamKeyMapper.selectListByCategoryId(categoryId);
         return specParamKeyList.stream().map(this::specParamKey2SpecParamApiVO).collect(Collectors.toList());
     }

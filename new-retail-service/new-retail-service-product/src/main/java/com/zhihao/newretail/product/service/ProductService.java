@@ -1,14 +1,14 @@
 package com.zhihao.newretail.product.service;
 
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
-import com.zhihao.newretail.product.pojo.vo.GoodsVO;
+import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
-public interface GoodsService {
+public interface ProductService {
 
     /*
     * 获取商品详情
@@ -28,6 +28,6 @@ public interface GoodsService {
     /*
     * 获取商品
     * */
-    List<GoodsVO> listGoodsVOS(Integer categoryId);
+    List<ProductVO> listProductVOS(Integer categoryId);
 
 }

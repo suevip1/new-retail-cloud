@@ -1,6 +1,6 @@
 package com.zhihao.newretail.product.pojo.vo;
 
-public class GoodsVO {
+public class ProductVO {
 
     private Integer id;
 

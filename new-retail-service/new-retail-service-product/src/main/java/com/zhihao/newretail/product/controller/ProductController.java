@@ -2,7 +2,7 @@ package com.zhihao.newretail.product.controller;
 
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
-import com.zhihao.newretail.product.service.GoodsService;
+import com.zhihao.newretail.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +14,11 @@ import java.util.concurrent.ExecutionException;
 public class ProductController {
 
     @Autowired
-    private GoodsService goodsService;
+    private ProductService productService;
 
     @GetMapping("/detail/{spuId}")
     public R productDetail(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
-        ProductDetailVO productDetailVO = goodsService.getProductDetailVO(spuId);
+        ProductDetailVO productDetailVO = productService.getProductDetailVO(spuId);
         return R.ok().put("data", productDetailVO);
     }
 

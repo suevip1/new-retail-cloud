@@ -10,11 +10,11 @@ import com.zhihao.newretail.product.enums.ProductEnum;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.SpuInfo;
-import com.zhihao.newretail.product.pojo.vo.GoodsVO;
+import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.SkuVO;
-import com.zhihao.newretail.product.service.GoodsService;
+import com.zhihao.newretail.product.service.ProductService;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.product.service.StockService;
 import org.apache.http.HttpStatus;
@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -33,7 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
-public class GoodsServiceImpl implements GoodsService {
+public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private SpuMapper spuMapper;
@@ -138,14 +137,14 @@ public class GoodsServiceImpl implements GoodsService {
     }
 
     @Override
-    public List<GoodsVO> listGoodsVOS(Integer categoryId) {
+    public List<ProductVO> listProductVOS(Integer categoryId) {
         List<Spu> spuList = spuService.listSpuS(categoryId);
         return spuList.stream()
                 .map(spu -> {
-                    GoodsVO goodsVO = new GoodsVO();
-                    BeanUtils.copyProperties(spu, goodsVO);
-                    goodsVO.setShowImage(spu.getSpuInfo().getShowImage());
-                    return goodsVO;
+                    ProductVO productVO = new ProductVO();
+                    BeanUtils.copyProperties(spu, productVO);
+                    productVO.setShowImage(spu.getSpuInfo().getShowImage());
+                    return productVO;
                 }).collect(Collectors.toList());
     }
 

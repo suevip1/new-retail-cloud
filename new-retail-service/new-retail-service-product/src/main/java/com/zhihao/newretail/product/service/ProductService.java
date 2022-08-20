@@ -26,7 +26,7 @@ public interface ProductService {
     SkuApiVO getSkuApiVO(Integer skuId);
 
     /*
-    * 获取商品
+    * 获取商品列表
     * */
     List<ProductVO> listProductVOS(Integer categoryId);
 

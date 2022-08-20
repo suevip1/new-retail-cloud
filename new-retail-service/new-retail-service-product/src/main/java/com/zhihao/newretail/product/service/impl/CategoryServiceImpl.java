@@ -39,6 +39,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public CategoryApiVO getCategoryApiVO(Integer categoryId) {
+        Category category = categoryMapper.selectByPrimaryKey(categoryId);
+        return category2CategoryApiVO(category);
+    }
+
+    @Override
     public void insertCategory(CategoryAddApiDTO categoryAddApiDTO) {
         Category category = new Category();
         category.setName(categoryAddApiDTO.getName());

@@ -27,6 +27,12 @@ public class SysCategoryServiceImpl implements SysCategoryService {
     }
 
     @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public CategoryApiVO getCategoryApiVO(Integer categoryId) {
+        return categoryFeignService.getCategoryApiVO(categoryId);
+    }
+
+    @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
     public void addCategory(CategoryAddApiDTO categoryAddApiDTO) {
         categoryFeignService.addCategory(categoryAddApiDTO);

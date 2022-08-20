@@ -14,6 +14,11 @@ public interface SysCategoryService {
     List<CategoryApiVO> listCategoryApiVOS();
 
     /*
+    * 商品分类信息
+    * */
+    CategoryApiVO getCategoryApiVO(Integer categoryId);
+
+    /*
     * 新增商品分类
     * */
     void addCategory(CategoryAddApiDTO categoryAddApiDTO);

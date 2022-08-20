@@ -38,6 +38,16 @@ public class SysCategoryController {
     }
 
     @RequiresLogin
+    @GetMapping("/category/{categoryId}")
+    public R categoryInfo(@PathVariable Integer categoryId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        CategoryApiVO categoryApiVO = categoryService.getCategoryApiVO(categoryId);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", categoryApiVO);
+    }
+
+    @RequiresLogin
     @PostMapping("/category")
     public R addCategory(@Valid @RequestBody CategoryAddApiDTO categoryAddApiDTO) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();

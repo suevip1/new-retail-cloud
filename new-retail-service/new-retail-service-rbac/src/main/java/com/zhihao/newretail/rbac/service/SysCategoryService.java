@@ -2,8 +2,16 @@ package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
+import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+
+import java.util.List;
 
 public interface SysCategoryService {
+
+    /*
+    * 商品分类列表
+    * */
+    List<CategoryApiVO> listCategoryApiVOS();
 
     /*
     * 新增商品分类

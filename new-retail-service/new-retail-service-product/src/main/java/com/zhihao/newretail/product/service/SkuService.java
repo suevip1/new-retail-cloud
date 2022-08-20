@@ -20,6 +20,11 @@ public interface SkuService {
     void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO);
 
     /*
+    * 删除sku
+    * */
+    void deleteSku(Integer skuId);
+
+    /*
     * 获取sku
     * */
     Sku getSku(Integer skuId);

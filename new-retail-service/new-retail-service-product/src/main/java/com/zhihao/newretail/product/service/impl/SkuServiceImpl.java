@@ -34,6 +34,11 @@ public class SkuServiceImpl implements SkuService {
     }
 
     @Override
+    public void deleteSku(Integer skuId) {
+        skuMapper.deleteByPrimaryKey(skuId);
+    }
+
+    @Override
     public Sku getSku(Integer skuId) {
         return skuMapper.selectByPrimaryKey(skuId);
     }

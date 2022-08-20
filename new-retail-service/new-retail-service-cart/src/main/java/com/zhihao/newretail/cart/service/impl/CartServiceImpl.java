@@ -1,9 +1,8 @@
 package com.zhihao.newretail.cart.service.impl;
 
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
-import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
-import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.form.CartUpdateForm;
 import com.zhihao.newretail.cart.pojo.Cart;
@@ -54,15 +53,15 @@ public class CartServiceImpl implements CartService {
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "购物车为空");
         }
         /* 获取购物车商品 */
-        List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+        List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
 
         for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
             Cart cart = (Cart) entry.getValue();
             CartProductVO cartProductVO = new CartProductVO();
-            skuApiVOList.stream()
-                    .filter(skuApiVO -> cart.getSkuId().equals(skuApiVO.getId()))
-                    .forEach(skuApiVO -> {
-                        buildCartProductVO(cart, skuApiVO, cartProductVO);
+            goodsApiVOList.stream()
+                    .filter(goodsApiVO -> cart.getSkuId().equals(goodsApiVO.getId()))
+                    .forEach(goodsApiVO -> {
+                        buildCartProductVO(cart, goodsApiVO, cartProductVO);
                         cartProductVOList.add(cartProductVO);
                     });
             if (!cart.getSelected()) {
@@ -83,24 +82,24 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartVO addCart(Integer userId, CartAddForm form) {
-        SkuApiVO skuApiVO = productFeignService.getSkuApiVO(form.getSkuId());
-        if (ObjectUtils.isEmpty(skuApiVO.getId())) {
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "库存不足");
+        GoodsApiVO goodsApiVO = productFeignService.getGoodsApiVO(form.getSkuId());
+        if (ObjectUtils.isEmpty(goodsApiVO.getId())) {
+            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品下架或删除");
         }
 
         String redisKey = String.format(CART_REDIS_KEY, userId);
-        Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuApiVO.getId());
+        Cart cart = (Cart) redisUtil.getMapValue(redisKey, goodsApiVO.getId());
         if (ObjectUtils.isEmpty(cart)) {
             cart = new Cart(
-                    skuApiVO.getSpuId(),
-                    skuApiVO.getId(),
+                    goodsApiVO.getSpuId(),
+                    goodsApiVO.getId(),
                     form.getQuantity(),
                     form.getSelected()
             );
         } else {
             cart.setQuantity(cart.getQuantity() + form.getQuantity());
         }
-        redisUtil.setHash(redisKey, skuApiVO.getId(), cart);
+        redisUtil.setHash(redisKey, goodsApiVO.getId(), cart);
         return getCartVO(userId);
     }
 
@@ -136,7 +135,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO updateCartSelectedAll(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
-        List<Cart> cartList = listCarts(userId);
+        List<Cart> cartList = listCartS(userId);
 
         if (!CollectionUtils.isEmpty(cartList)) {
             cartList.forEach(cart -> {
@@ -150,7 +149,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO updateCartNotSelectedAll(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
-        List<Cart> cartList = listCarts(userId);
+        List<Cart> cartList = listCartS(userId);
 
         if (!CollectionUtils.isEmpty(cartList)) {
             cartList.forEach(cart -> {
@@ -163,12 +162,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public Integer getQuantity(Integer userId) {
-        return listCarts(userId).stream().map(Cart::getQuantity).reduce(0, Integer::sum);
+        return listCartS(userId).stream().map(Cart::getQuantity).reduce(0, Integer::sum);
     }
 
     @Override
     public List<CartApiVO> listCartApiVOs(Integer userId) {
-        List<Cart> cartList = listCarts(userId);
+        List<Cart> cartList = listCartS(userId);
         return cartList.stream()
                 .filter(Cart::getSelected)
                 .map(cart -> {
@@ -181,7 +180,7 @@ public class CartServiceImpl implements CartService {
     @Override
     public void deleteCartBySelected(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
-        List<Cart> cartList = listCarts(userId);
+        List<Cart> cartList = listCartS(userId);
         for (Cart cart : cartList) {
             if (cart.getSelected()) {
                 redisUtil.deleteEntry(redisKey, cart.getSkuId());
@@ -189,7 +188,7 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    private List<Cart> listCarts(Integer userId) {
+    private List<Cart> listCartS(Integer userId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Map<Object, Object> redisMap = redisUtil.getMap(redisKey);
 
@@ -200,16 +199,16 @@ public class CartServiceImpl implements CartService {
         return cartList;
     }
 
-    private void buildCartProductVO(Cart cart, SkuApiVO skuApiVO, CartProductVO cartProductVO) {
-        cartProductVO.setSpuId(skuApiVO.getSpuId());    // 商品ID
-        cartProductVO.setSkuId(skuApiVO.getId());       // 商品规格ID
-        cartProductVO.setTitle(skuApiVO.getTitle());    // 商品标题
-        cartProductVO.setSkuImage(skuApiVO.getSkuImage());  // 商品图片地址
-        cartProductVO.setParam(skuApiVO.getParam());        // 商品规格参数
-        cartProductVO.setPrice(skuApiVO.getPrice());        // 单价
+    private void buildCartProductVO(Cart cart, GoodsApiVO goodsApiVO, CartProductVO cartProductVO) {
+        cartProductVO.setSpuId(goodsApiVO.getSpuId());    // 商品ID
+        cartProductVO.setSkuId(goodsApiVO.getId());       // 商品规格ID
+        cartProductVO.setTitle(goodsApiVO.getTitle());    // 商品标题
+        cartProductVO.setSkuImage(goodsApiVO.getSkuImage());  // 商品图片地址
+        cartProductVO.setParam(goodsApiVO.getParam());        // 商品规格参数
+        cartProductVO.setPrice(goodsApiVO.getPrice());        // 单价
         cartProductVO.setQuantity(cart.getQuantity());      // 数量
-        cartProductVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));  // 总价
-        cartProductVO.setIsSaleable(skuApiVO.getIsSaleable());  // 是否有效
+        cartProductVO.setTotalPrice(goodsApiVO.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));  // 总价
+        cartProductVO.setIsSaleable(goodsApiVO.getIsSaleable());  // 是否有效
         cartProductVO.setSelected(cart.getSelected());          // 是否选中
     }
 

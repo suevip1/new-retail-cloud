@@ -28,6 +28,14 @@ public class CategoryFeignController implements CategoryFeignService {
 
     @Override
     @RequiresLogin
+    public CategoryApiVO getCategoryApiVO(Integer categoryId) {
+        CategoryApiVO categoryApiVO = categoryService.getCategoryApiVO(categoryId);
+        UserLoginContext.sysClean();
+        return categoryApiVO;
+    }
+
+    @Override
+    @RequiresLogin
     public void addCategory(CategoryAddApiDTO categoryAddApiDTO) {
         categoryService.insertCategory(categoryAddApiDTO);
         UserLoginContext.sysClean();

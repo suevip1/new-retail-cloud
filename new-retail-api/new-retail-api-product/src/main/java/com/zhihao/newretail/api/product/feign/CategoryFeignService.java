@@ -19,6 +19,12 @@ public interface CategoryFeignService {
     List<CategoryApiVO> listCategoryApiVOS();
 
     /*
+    * 商品分类信息
+    * */
+    @GetMapping("/api/category/{categoryId}")
+    CategoryApiVO getCategoryApiVO(@PathVariable Integer categoryId);
+
+    /*
     * 新增商品分类
     * */
     @PostMapping("/api/category")

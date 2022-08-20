@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
+import com.zhihao.newretail.api.product.vo.CategoryApiVO;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
 import com.zhihao.newretail.product.pojo.Category;
@@ -29,6 +30,12 @@ public class CategoryServiceImpl implements CategoryService {
                 .map(this::Category2CategoryVO).collect(Collectors.toList());
         findSubCategoryVOList(categoryList, categoryVOList);
         return categoryVOList;
+    }
+
+    @Override
+    public List<CategoryApiVO> listCategoryApiVOS() {
+        List<Category> categoryList = categoryMapper.selectListByAll();
+        return categoryList.stream().map(this::category2CategoryApiVO).collect(Collectors.toList());
     }
 
     @Override
@@ -72,6 +79,12 @@ public class CategoryServiceImpl implements CategoryService {
         CategoryVO categoryVO = new CategoryVO();
         BeanUtils.copyProperties(category, categoryVO);
         return categoryVO;
+    }
+
+    private CategoryApiVO category2CategoryApiVO(Category category) {
+        CategoryApiVO categoryApiVO = new CategoryApiVO();
+        BeanUtils.copyProperties(category, categoryApiVO);
+        return categoryApiVO;
     }
 
 }

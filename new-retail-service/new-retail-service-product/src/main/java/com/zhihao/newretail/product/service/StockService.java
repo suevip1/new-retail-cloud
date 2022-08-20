@@ -3,7 +3,6 @@ package com.zhihao.newretail.product.service;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.product.enums.SkuStockTypeEnum;
-import com.zhihao.newretail.product.pojo.SkuStock;
 import com.zhihao.newretail.product.pojo.SkuStockLock;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public interface StockService {
     /*
      * 批量获取商品库存信息
      * */
-    List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet);
+    List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet);
 
     /*
     * 锁定商品库存

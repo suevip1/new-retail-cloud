@@ -1,6 +1,5 @@
 package com.zhihao.newretail.api.product.feign;
 
-import com.zhihao.newretail.api.product.dto.SkuStockBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
@@ -9,15 +8,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Set;
 
 @FeignClient(name = "new-retail-product", path = "/product")
-public interface ProductStockFeignService {
+public interface StockFeignService {
 
     /*
     * 获取库存信息
     * */
     @PostMapping("/api/skuStock/list")
-    List<SkuStockApiVO> listSkuStockApiVOs(@RequestBody SkuStockBatchApiDTO skuStockBatchApiDTO);
+    List<SkuStockApiVO> listSkuStockApiVOS(@RequestBody Set<Integer> skuIdSet);
 
     /*
     * 锁定商品库存

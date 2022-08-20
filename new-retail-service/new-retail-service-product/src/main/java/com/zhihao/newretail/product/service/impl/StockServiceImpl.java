@@ -31,7 +31,7 @@ public class StockServiceImpl implements StockService {
     private SkuStockLockMapper skuStockLockMapper;
 
     @Override
-    public List<SkuStockApiVO> listSkuStockApiVOs(Set<Integer> skuIdSet) {
+    public List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         return skuStockList.stream().map(this::skuStock2SkuStockApiVO).collect(Collectors.toList());
     }

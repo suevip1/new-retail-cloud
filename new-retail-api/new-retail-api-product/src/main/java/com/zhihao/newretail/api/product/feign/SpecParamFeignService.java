@@ -16,7 +16,7 @@ public interface SpecParamFeignService {
     * 分类通用参数列表
     * */
     @GetMapping("/api/specParam/{categoryId}")
-    List<SpecParamApiVO> listSpecParamApiVOs(@PathVariable Integer categoryId);
+    List<SpecParamApiVO> listSpecParamApiVOS(@PathVariable Integer categoryId);
 
     /*
     * 新增分类参数

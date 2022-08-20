@@ -11,7 +11,7 @@ public interface SysSpecParamService {
     /*
      * 分类通用参数列表
      * */
-    List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId);
+    List<SpecParamApiVO> listSpecParamApiVOS(Integer categoryId);
 
     /*
     * 新增分类参数

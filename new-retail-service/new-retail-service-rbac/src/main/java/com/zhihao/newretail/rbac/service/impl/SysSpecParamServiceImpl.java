@@ -20,8 +20,8 @@ public class SysSpecParamServiceImpl implements SysSpecParamService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.COMMON)
-    public List<SpecParamApiVO> listSpecParamApiVOs(Integer categoryId) {
-        return specParamFeignService.listSpecParamApiVOs(categoryId);
+    public List<SpecParamApiVO> listSpecParamApiVOS(Integer categoryId) {
+        return specParamFeignService.listSpecParamApiVOS(categoryId);
     }
 
     @Override

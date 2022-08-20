@@ -28,7 +28,7 @@ public class SysSpecParamController {
     public R specParamList(@PathVariable Integer categoryId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOs(categoryId);
+        List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOS(categoryId);
         UserLoginContext.sysClean();
         if (!CollectionUtils.isEmpty(specParamApiVOList)) {
             return R.ok().put("data", specParamApiVOList);

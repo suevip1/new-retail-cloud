@@ -11,7 +11,7 @@ public interface CategoryService {
     /*
     * 商品分类列表
     * */
-    List<CategoryVO> listCategoryVOs();
+    List<CategoryVO> listCategoryVOS();
 
     /*
     * 新增商品分类

@@ -8,7 +8,6 @@ public class CategoryAddApiDTO {
     @NotBlank(message = "分类名称不能为空")
     private String name;
 
-    @NotNull(message = "所属分类不能为空")
     private Integer parentId;
 
     public String getName() {

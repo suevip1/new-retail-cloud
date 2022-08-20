@@ -1,8 +1,10 @@
 package com.zhihao.newretail.product.service.impl;
 
+import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
 import com.zhihao.newretail.product.dao.SkuMapper;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.service.SkuService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +16,13 @@ public class SkuServiceImpl implements SkuService {
 
     @Autowired
     private SkuMapper skuMapper;
+
+    @Override
+    public void insertSku(SkuAddApiDTO skuAddApiDTO) {
+        Sku sku = new Sku();
+        BeanUtils.copyProperties(skuAddApiDTO, sku);
+        skuMapper.insertSelective(sku);
+    }
 
     @Override
     public Sku getSku(Integer skuId) {

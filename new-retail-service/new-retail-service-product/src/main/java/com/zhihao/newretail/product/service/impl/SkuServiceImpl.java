@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import com.zhihao.newretail.product.dao.SkuMapper;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.service.SkuService;
@@ -22,6 +23,14 @@ public class SkuServiceImpl implements SkuService {
         Sku sku = new Sku();
         BeanUtils.copyProperties(skuAddApiDTO, sku);
         skuMapper.insertSelective(sku);
+    }
+
+    @Override
+    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) {
+        Sku sku = new Sku();
+        BeanUtils.copyProperties(skuUpdateApiDTO, sku);
+        sku.setId(skuId);
+        skuMapper.updateByPrimaryKeySelective(sku);
     }
 
     @Override

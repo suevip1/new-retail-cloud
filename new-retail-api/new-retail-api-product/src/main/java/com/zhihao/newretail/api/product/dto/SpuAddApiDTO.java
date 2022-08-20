@@ -1,19 +1,13 @@
 package com.zhihao.newretail.api.product.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-
 public class SpuAddApiDTO {
 
-    @NotNull(message = "商品所属分类不能为空")
     private Integer categoryId;
 
-    @NotBlank(message = "商品标题不能为空")
     private String title;
 
     private String subTitle;
 
-    @NotBlank(message = "商品图片不能为空")
     private String showImage;
 
     private String sliderImage;
@@ -86,6 +80,20 @@ public class SpuAddApiDTO {
 
     public void setDetailImage(String detailImage) {
         this.detailImage = detailImage;
+    }
+
+    @Override
+    public String toString() {
+        return "SpuAddApiDTO{" +
+                "categoryId=" + categoryId +
+                ", title='" + title + '\'' +
+                ", subTitle='" + subTitle + '\'' +
+                ", showImage='" + showImage + '\'' +
+                ", sliderImage='" + sliderImage + '\'' +
+                ", detailTitle='" + detailTitle + '\'' +
+                ", detailPram='" + detailPram + '\'' +
+                ", detailImage='" + detailImage + '\'' +
+                '}';
     }
 
 }

@@ -61,18 +61,22 @@
             <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-product</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.zhihao</groupId>
-                    <artifactId>new-retail-common-core</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-file</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.github.openfeign.form</groupId>
+                    <artifactId>feign-form</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.github.openfeign.form</groupId>
+                    <artifactId>feign-form-spring</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

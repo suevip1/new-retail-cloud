@@ -6,7 +6,6 @@ import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @FeignClient(name = "new-retail-product", path = "/product")
@@ -22,14 +21,14 @@ public interface SpecParamFeignService {
     * 新增分类参数
     * */
     @PostMapping("/api/specParam")
-    void addSpecParam(@Valid @RequestBody SpecParamAddApiDTO specParamAddApiDTO);
+    void addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO);
 
     /*
     * 修改分类参数
     * */
     @PutMapping("/api/specParam/{specParamId}")
     void updateSpecParam(@PathVariable Integer specParamId,
-                         @Valid @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
+                         @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
     /*
     * 删除分类参数

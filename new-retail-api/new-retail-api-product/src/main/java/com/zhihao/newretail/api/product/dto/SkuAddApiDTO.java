@@ -1,21 +1,15 @@
 package com.zhihao.newretail.api.product.dto;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public class SkuAddApiDTO {
 
-    @NotNull(message = "请选择所属商品")
     private Integer spuId;
 
-    @NotBlank(message = "请添加图片")
     private String skuImage;
 
-    @NotBlank(message = "商品规格参数不能为空")
     private String param;
 
-    @NotNull(message = "价格不能为空")
     private BigDecimal price;
 
     public Integer getSpuId() {

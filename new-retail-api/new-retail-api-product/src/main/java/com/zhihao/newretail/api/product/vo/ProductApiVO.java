@@ -1,9 +1,8 @@
-package com.zhihao.newretail.product.pojo;
+package com.zhihao.newretail.api.product.vo;
 
-import java.util.Date;
 import java.util.List;
 
-public class Spu {
+public class ProductApiVO {
 
     private Integer id;
 
@@ -15,15 +14,9 @@ public class Spu {
 
     private Integer isSaleable;
 
-    private Integer isDelete;
+    private String showImage;
 
-    private Date createTime;
-
-    private Date updateTime;
-
-    private SpuInfo spuInfo;
-
-    private List<Sku> skuList;
+    private List<GoodsApiVO> goodsApiVOList;
 
     public Integer getId() {
         return id;
@@ -65,59 +58,32 @@ public class Spu {
         this.isSaleable = isSaleable;
     }
 
-    public Integer getIsDelete() {
-        return isDelete;
+    public String getShowImage() {
+        return showImage;
     }
 
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
+    public void setShowImage(String showImage) {
+        this.showImage = showImage;
     }
 
-    public Date getCreateTime() {
-        return createTime;
+    public List<GoodsApiVO> getGoodsApiVOList() {
+        return goodsApiVOList;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public SpuInfo getSpuInfo() {
-        return spuInfo;
-    }
-
-    public void setSpuInfo(SpuInfo spuInfo) {
-        this.spuInfo = spuInfo;
-    }
-
-    public List<Sku> getSkuList() {
-        return skuList;
-    }
-
-    public void setSkuList(List<Sku> skuList) {
-        this.skuList = skuList;
+    public void setGoodsApiVOList(List<GoodsApiVO> goodsApiVOList) {
+        this.goodsApiVOList = goodsApiVOList;
     }
 
     @Override
     public String toString() {
-        return "Spu{" +
+        return "ProductApiVO{" +
                 "id=" + id +
                 ", categoryId=" + categoryId +
                 ", title='" + title + '\'' +
                 ", subTitle='" + subTitle + '\'' +
                 ", isSaleable=" + isSaleable +
-                ", isDelete=" + isDelete +
-                ", createTime=" + createTime +
-                ", updateTime=" + updateTime +
-                ", spuInfo=" + spuInfo +
-                ", skuList=" + skuList +
+                ", showImage='" + showImage + '\'' +
+                ", goodsApiVOList=" + goodsApiVOList +
                 '}';
     }
 

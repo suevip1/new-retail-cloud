@@ -21,29 +21,67 @@
     <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
-    <association column="tb_spu_info" javaType="com.zhihao.newretail.product.pojo.SpuInfo" property="spuInfo">
-      <id column="id" jdbcType="INTEGER" property="id" />
-      <result column="spu_id" jdbcType="INTEGER" property="spuId" />
-      <result column="show_image" jdbcType="VARCHAR" property="showImage" />
-      <result column="slider_image" jdbcType="VARCHAR" property="sliderImage" />
-      <result column="detail_title" jdbcType="VARCHAR" property="detailTitle" />
-      <result column="detail_pram" jdbcType="VARCHAR" property="detailPram" />
-      <result column="detail_image" jdbcType="VARCHAR" property="detailImage" />
-      <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
-    </association>
+    <association column="tb_spu_info" javaType="com.zhihao.newretail.product.pojo.SpuInfo" property="spuInfo" resultMap="SpuInfo" />
+  </resultMap>
+
+  <resultMap id="SpuSpuInfoSkuList" type="com.zhihao.newretail.product.pojo.Spu">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="category_id" jdbcType="INTEGER" property="categoryId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="sub_title" jdbcType="VARCHAR" property="subTitle" />
+    <result column="is_saleable" jdbcType="TINYINT" property="isSaleable" />
+    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <association column="tb_spu_info" javaType="com.zhihao.newretail.product.pojo.SpuInfo" property="spuInfo" resultMap="SpuInfo" />
+    <collection column="tb_sku" ofType="com.zhihao.newretail.product.pojo.Sku" property="skuList" resultMap="Sku" />
+  </resultMap>
+
+  <resultMap id="SpuInfo" type="com.zhihao.newretail.product.pojo.SpuInfo">
+    <id column="spuInfoId" jdbcType="INTEGER" property="id" />
+    <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="show_image" jdbcType="VARCHAR" property="showImage" />
+    <result column="slider_image" jdbcType="VARCHAR" property="sliderImage" />
+    <result column="detail_title" jdbcType="VARCHAR" property="detailTitle" />
+    <result column="detail_pram" jdbcType="VARCHAR" property="detailPram" />
+    <result column="detail_image" jdbcType="VARCHAR" property="detailImage" />
+    <result column="is_delete" jdbcType="INTEGER" property="isDelete" />
+  </resultMap>
+
+  <resultMap id="Sku" type="com.zhihao.newretail.product.pojo.Sku">
+    <id column="skuId" jdbcType="INTEGER" property="id" />
+    <result column="spu_id" jdbcType="INTEGER" property="spuId" />
+    <result column="sku_image" jdbcType="VARCHAR" property="skuImage" />
+    <result column="param" jdbcType="VARCHAR" property="param" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="is_saleable" jdbcType="TINYINT" property="isSaleable" />
+    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
 
   <sql id="Base_Column_List">
     id, category_id, title, sub_title, is_saleable, is_delete, create_time, update_time
   </sql>
 
-  <sql id="Spu_Spu_Info">
+  <sql id="Spu_SpuInfo">
     SELECT
-      s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time
-      sif.id, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
+      s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
+      sif.id AS spuInfoId, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
     FROM
       tb_spu AS s
         JOIN tb_spu_info AS sif ON s.id = sif.spu_id
+  </sql>
+
+  <sql id="Spu_SpuInfo_SkuList">
+    SELECT
+      s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
+      sif.id AS spuInfoId, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete,
+      sku.id AS skuId, sku.spu_id, sku.sku_image, sku.param, sku.price, sku.is_saleable, sku.is_delete, sku.create_time, sku.update_time
+    FROM
+      tb_spu AS s
+        JOIN tb_spu_info AS sif ON s.id = sif.spu_id
+        JOIN tb_sku AS sku ON s.id = sku.spu_id
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -174,12 +212,21 @@
   </select>
 
   <select id="selectSpuSpuInfoListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
-    <include refid="Spu_Spu_Info" />
-    where category_id = #{categoryId,jdbcType=INTEGER} and is_delete = 0
+    <include refid="Spu_SpuInfo" />
+    <if test="categoryId != null">
+      where s.category_id = #{categoryId,jdbcType=INTEGER} and s.is_delete = 0
+    </if>
+  </select>
+
+  <select id="selectSpuSpuInfoSkuListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfoSkuList">
+    <include refid="Spu_SpuInfo_SkuList" />
+    <if test="categoryId != null">
+      where s.category_id = #{categoryId,jdbcType=INTEGER} and s.is_delete = 0
+    </if>
   </select>
 
   <select id="selectSpuSpuInfoByPrimaryKey" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
-    <include refid="Spu_Spu_Info" />
-    where id = #{id,jdbcType=INTEGER}
+    <include refid="Spu_SpuInfo" />
+    where s.id = #{id,jdbcType=INTEGER}
   </select>
 </mapper>

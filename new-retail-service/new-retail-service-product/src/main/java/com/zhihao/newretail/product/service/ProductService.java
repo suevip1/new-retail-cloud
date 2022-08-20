@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.service;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
+import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
@@ -29,5 +30,10 @@ public interface ProductService {
     * 获取商品列表
     * */
     List<ProductVO> listProductVOS(Integer categoryId);
+
+    /*
+    * 获取商品列表(feign)
+    * */
+    List<ProductApiVO> listProductApiVOS(Integer categoryId);
 
 }

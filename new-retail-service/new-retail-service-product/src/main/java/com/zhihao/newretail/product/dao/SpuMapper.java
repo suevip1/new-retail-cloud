@@ -25,8 +25,19 @@ public interface SpuMapper {
     * */
     List<Spu> selectListByIdSet(@Param("idSet") Set<Integer> idSet);
 
+    /*
+    * spu spuInfo连表查询多条数据
+    * */
     List<Spu> selectSpuSpuInfoListByCategoryId(Integer categoryId);
 
+    /*
+    * spu spuInfo sku连表查询多条数据
+    * */
+    List<Spu> selectSpuSpuInfoSkuListByCategoryId(Integer categoryId);
+
+    /*
+    * spu spuInfo连表查询单条数据
+    * */
     Spu selectSpuSpuInfoByPrimaryKey(Integer id);
 
 }

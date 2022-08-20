@@ -1,8 +1,10 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
+import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
+import com.zhihao.newretail.product.pojo.SpuInfo;
 import com.zhihao.newretail.product.pojo.vo.GoodsVO;
 import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
@@ -93,10 +95,31 @@ public class ProductServiceImpl implements ProductService {
                 }).collect(Collectors.toList());
     }
 
+    @Override
+    public List<ProductApiVO> listProductApiVOS(Integer categoryId) {
+        List<Spu> spuList = spuService.listSpuS(categoryId);
+        return spuList.stream().map(this::spu2ProductApiVO).collect(Collectors.toList());
+    }
+
     private GoodsVO sku2GoodsVO(Sku sku) {
         GoodsVO goodsVO = new GoodsVO();
         BeanUtils.copyProperties(sku, goodsVO);
         return goodsVO;
+    }
+
+    private GoodsApiVO sku2GoodsApiVO(Sku sku) {
+        GoodsApiVO goodsApiVO = new GoodsApiVO();
+        BeanUtils.copyProperties(sku, goodsApiVO);
+        return goodsApiVO;
+    }
+
+    private ProductApiVO spu2ProductApiVO(Spu spu) {
+        List<GoodsApiVO> goodsApiVOList = spu.getSkuList().stream().map(this::sku2GoodsApiVO).collect(Collectors.toList());
+        ProductApiVO productApiVO = new ProductApiVO();
+        BeanUtils.copyProperties(spu, productApiVO);
+        productApiVO.setShowImage(spu.getSpuInfo().getShowImage());
+        productApiVO.setGoodsApiVOList(goodsApiVOList);
+        return productApiVO;
     }
 
 }

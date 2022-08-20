@@ -1,6 +1,7 @@
 package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SkuFeignService;
 import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -18,6 +19,13 @@ public class SkuFeignController implements SkuFeignService {
     @RequiresLogin
     public void addSku(SkuAddApiDTO skuAddApiDTO) {
         skuService.insertSku(skuAddApiDTO);
+        UserLoginContext.sysClean();
+    }
+
+    @Override
+    @RequiresLogin
+    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) {
+        skuService.updateSku(skuId, skuUpdateApiDTO);
         UserLoginContext.sysClean();
     }
 

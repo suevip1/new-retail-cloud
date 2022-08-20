@@ -29,7 +29,7 @@ public interface OrderService {
     /*
      * 获取订单列表
      * */
-    List<OrderVO> listOrderVOs(Integer userId, Integer status);
+    List<OrderVO> listOrderVOS(Integer userId, Integer status);
 
     /*
     * 用户取消订单

@@ -6,12 +6,10 @@ import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
-import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
-import com.zhihao.newretail.api.product.dto.SkuStockBatchApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
-import com.zhihao.newretail.api.product.feign.ProductStockFeignService;
+import com.zhihao.newretail.api.product.feign.StockFeignService;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
@@ -67,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductFeignService productFeignService;
     @Autowired
-    private ProductStockFeignService productStockFeignService;
+    private StockFeignService stockFeignService;
     @Autowired
     private UserAddressFeignService userAddressFeignService;
     @Autowired
@@ -107,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
             if (CollectionUtils.isEmpty(skuIdSet)) {
                 throw new ServiceException(HttpStatus.SC_NOT_FOUND, "请选中商品再下单");
             }
-            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));      // 获取商品信息
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);        // 获取商品信息
 
             /* 渲染订单项 */
             List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
@@ -209,15 +207,15 @@ public class OrderServiceImpl implements OrderService {
                 throw new ServiceException("请选中商品再下单");
             }
             /* 获取商品信息 */
-            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
-            Map<Integer, GoodsApiVO> skuApiVOMap = skuApiVOList2Map(goodsApiVOList);
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
+            Map<Integer, GoodsApiVO> goodsApiVOMap = goodsApiVOList2Map(goodsApiVOList);
             /* 获取商品库存信息 */
-            List<SkuStockApiVO> skuStockApiVOList = productStockFeignService.listSkuStockApiVOs(new SkuStockBatchApiDTO(skuIdSet));
+            List<SkuStockApiVO> skuStockApiVOList = stockFeignService.listSkuStockApiVOS(skuIdSet);
             Map<Integer, SkuStockApiVO> skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
 
             for (CartApiVO cartApiVO : cartApiVOList) {
                 /* 商品有效性校验 */
-                GoodsApiVO goodsApiVO = skuApiVOMap.get(cartApiVO.getSkuId());
+                GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
                 if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
                     throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
                             "商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除");
@@ -254,7 +252,7 @@ public class OrderServiceImpl implements OrderService {
 
         /* 锁定商品库存 */
         try {
-            int batchStockLockRow = productStockFeignService.batchStockLock(new SkuStockLockBatchApiDTO(skuStockLockApiDTOList));
+            int batchStockLockRow = stockFeignService.batchStockLock(new SkuStockLockBatchApiDTO(skuStockLockApiDTOList));
             if (batchStockLockRow <= 0) {
                 throw new ServiceException("库存锁定失败");
             }
@@ -317,7 +315,7 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderId);
             /* 获取商品信息 */
             Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
-            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
             List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
             orderVO.setOrderItemVOList(orderItemVOList);
         }, executor);
@@ -344,7 +342,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderVO> listOrderVOs(Integer userId, Integer status) {
+    public List<OrderVO> listOrderVOS(Integer userId, Integer status) {
         List<Order> orderList = orderMapper.selectListByUserIdAndStatus(userId, status);
         if (CollectionUtils.isEmpty(orderList)) {
             throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
@@ -354,7 +352,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);
         /* 订单商品列表 */
         Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
-        List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+        List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
         List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
 
         return buildOrderVOList(orderList, orderItemVOList);
@@ -473,11 +471,11 @@ public class OrderServiceImpl implements OrderService {
     * 订单项列表
     * */
     private List<OrderItemVO> buildOrderItemVOList(List<OrderItem> orderItemList, List<GoodsApiVO> goodsApiVOList) {
-        Map<Integer, GoodsApiVO> skuApiVOMap = skuApiVOList2Map(goodsApiVOList);
+        Map<Integer, GoodsApiVO> goodsApiVOMap = goodsApiVOList2Map(goodsApiVOList);
         return orderItemList.stream().map(orderItem -> {
             OrderItemVO orderItemVO = new OrderItemVO();
             BeanUtils.copyProperties(orderItem, orderItemVO);
-            GoodsApiVO goodsApiVO = skuApiVOMap.get(orderItemVO.getSkuId());
+            GoodsApiVO goodsApiVO = goodsApiVOMap.get(orderItemVO.getSkuId());
             orderItemVO.setTitle(goodsApiVO.getTitle());
             orderItemVO.setSkuImage(goodsApiVO.getSkuImage());
             orderItemVO.setParam(goodsApiVO.getParam());
@@ -487,7 +485,7 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
     }
 
-    private Map<Integer, GoodsApiVO> skuApiVOList2Map(List<GoodsApiVO> goodsApiVOList) {
+    private Map<Integer, GoodsApiVO> goodsApiVOList2Map(List<GoodsApiVO> goodsApiVOList) {
         return goodsApiVOList.stream().collect(Collectors.toMap(GoodsApiVO::getId, skuApiVO -> skuApiVO));
     }
 

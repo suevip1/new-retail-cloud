@@ -86,6 +86,11 @@ public class SpuServiceImpl implements SpuService {
     }
 
     @Override
+    public Spu getSpu(Integer spuId) {
+        return spuMapper.selectSpuSpuInfoByPrimaryKey(spuId);
+    }
+
+    @Override
     public List<Spu> listSpuS(Integer categoryId) {
         return spuMapper.selectSpuSpuInfoListByCategoryId(categoryId);
     }

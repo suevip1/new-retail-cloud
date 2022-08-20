@@ -6,11 +6,15 @@ public class ProductDetailVO {
 
     private Integer id;
 
+    private Integer categoryId;
+
     private String title;
+
+    private String subTitle;
 
     private ProductInfoVO productInfoVO;
 
-    private List<SkuVO> skuVOList;
+    private List<GoodsVO> goodsVOList;
 
     public Integer getId() {
         return id;
@@ -18,6 +22,14 @@ public class ProductDetailVO {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getTitle() {
@@ -28,6 +40,14 @@ public class ProductDetailVO {
         this.title = title;
     }
 
+    public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+    }
+
     public ProductInfoVO getProductInfoVO() {
         return productInfoVO;
     }
@@ -36,21 +56,23 @@ public class ProductDetailVO {
         this.productInfoVO = productInfoVO;
     }
 
-    public List<SkuVO> getSkuVOList() {
-        return skuVOList;
+    public List<GoodsVO> getGoodsVOList() {
+        return goodsVOList;
     }
 
-    public void setSkuVOList(List<SkuVO> skuVOList) {
-        this.skuVOList = skuVOList;
+    public void setGoodsVOList(List<GoodsVO> goodsVOList) {
+        this.goodsVOList = goodsVOList;
     }
 
     @Override
     public String toString() {
         return "ProductDetailVO{" +
                 "id=" + id +
+                ", categoryId=" + categoryId +
                 ", title='" + title + '\'' +
+                ", subTitle='" + subTitle + '\'' +
                 ", productInfoVO=" + productInfoVO +
-                ", skuVOList=" + skuVOList +
+                ", goodsVOList=" + goodsVOList +
                 '}';
     }
 

@@ -14,6 +14,6 @@ public interface SkuService {
     /*
     * spuId获取skuList
     * */
-    List<Sku> listSkus(Integer spuId);
+    List<Sku> listSkuS(Integer spuId);
 
 }

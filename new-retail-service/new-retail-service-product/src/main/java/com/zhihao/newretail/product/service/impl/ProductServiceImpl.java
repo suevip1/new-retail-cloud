@@ -2,26 +2,21 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.SkuApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
-import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SkuMapper;
-import com.zhihao.newretail.product.dao.SpuInfoMapper;
 import com.zhihao.newretail.product.dao.SpuMapper;
 import com.zhihao.newretail.product.enums.ProductEnum;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
-import com.zhihao.newretail.product.pojo.SpuInfo;
+import com.zhihao.newretail.product.pojo.vo.GoodsVO;
+import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
-import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
-import com.zhihao.newretail.product.pojo.vo.SkuVO;
 import com.zhihao.newretail.product.service.ProductService;
+import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
-import com.zhihao.newretail.product.service.StockService;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
@@ -41,13 +36,10 @@ public class ProductServiceImpl implements ProductService {
     private SkuMapper skuMapper;
 
     @Autowired
-    private SpuInfoMapper spuInfoMapper;
-
-    @Autowired
     private SpuService spuService;
 
     @Autowired
-    private StockService stockService;
+    private SkuService skuService;
 
     @Autowired
     private ThreadPoolExecutor executor;
@@ -56,52 +48,21 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailVO getProductDetailVO(Integer spuId) throws ExecutionException, InterruptedException {
         ProductDetailVO productDetailVO = new ProductDetailVO();
 
-        /*
-        * 多线程异步获取数据
-        * */
-        CompletableFuture<ProductDetailVO> detailFuture = CompletableFuture.supplyAsync(() -> {
-            Spu spu = spuMapper.selectByPrimaryKey(spuId);
-            if (ObjectUtils.isEmpty(spu)) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品不存在");
-            }
+        CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
+            Spu spu = spuService.getSpu(spuId);
+            ProductInfoVO productInfoVO = new ProductInfoVO();
             BeanUtils.copyProperties(spu, productDetailVO);
-            return productDetailVO;
+            BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
+            productDetailVO.setProductInfoVO(productInfoVO);
         }, executor);
 
-        CompletableFuture<Void> detailSkuFuture = detailFuture.thenAcceptAsync((res) -> {
-            /* 避免空指针异常 */
-            if (!ObjectUtils.isEmpty(res)) {
-                List<Sku> skuList = skuMapper.selectListBySpuId(res.getId());
-                if (CollectionUtils.isEmpty(skuList)) {
-                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品规格不存在");
-                }
-                List<SkuVO> skuVOList = skuList.stream()
-                        .map(sku -> {
-                            SkuVO skuVO = new SkuVO();
-                            BeanUtils.copyProperties(sku, skuVO);
-                            return skuVO;
-                        }).collect(Collectors.toList());
-                productDetailVO.setSkuVOList(skuVOList);
-            }
+        CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
+            List<Sku> skuList = skuService.listSkuS(spuId);
+            List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
+            productDetailVO.setGoodsVOList(goodsVOList);
         }, executor);
 
-        CompletableFuture<Void> detailInfoFuture = detailFuture.thenAcceptAsync((res) -> {
-            if (!ObjectUtils.isEmpty(res)) {
-                SpuInfo spuInfo = spuInfoMapper.selectBySpuId(res.getId());
-                if (ObjectUtils.isEmpty(spuInfo)) {
-                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品信息不存在");
-                }
-                ProductInfoVO productInfoVO = new ProductInfoVO();
-                BeanUtils.copyProperties(spuInfo, productInfoVO);
-                productDetailVO.setProductInfoVO(productInfoVO);
-            }
-        }, executor);
-
-        CompletableFuture.allOf(detailSkuFuture, detailInfoFuture).get();
-
-        if (ObjectUtils.isEmpty(productDetailVO)) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品详情不存在");
-        }
+        CompletableFuture.allOf(detailFuture, goodsVOListFuture).get();
         return productDetailVO;
     }
 
@@ -146,6 +107,12 @@ public class ProductServiceImpl implements ProductService {
                     productVO.setShowImage(spu.getSpuInfo().getShowImage());
                     return productVO;
                 }).collect(Collectors.toList());
+    }
+
+    private GoodsVO sku2GoodsVO(Sku sku) {
+        GoodsVO goodsVO = new GoodsVO();
+        BeanUtils.copyProperties(sku, goodsVO);
+        return goodsVO;
     }
 
 }

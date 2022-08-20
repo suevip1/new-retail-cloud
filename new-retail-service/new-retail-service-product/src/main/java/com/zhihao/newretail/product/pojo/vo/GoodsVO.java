@@ -2,11 +2,9 @@ package com.zhihao.newretail.product.pojo.vo;
 
 import java.math.BigDecimal;
 
-public class SkuVO {
+public class GoodsVO {
 
     private Integer id;
-
-    private Integer spuId;
 
     private String skuImage;
 
@@ -20,14 +18,6 @@ public class SkuVO {
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getSpuId() {
-        return spuId;
-    }
-
-    public void setSpuId(Integer spuId) {
-        this.spuId = spuId;
     }
 
     public String getSkuImage() {
@@ -56,9 +46,8 @@ public class SkuVO {
 
     @Override
     public String toString() {
-        return "SkuVO{" +
+        return "GoodsVO{" +
                 "id=" + id +
-                ", spuId=" + spuId +
                 ", skuImage='" + skuImage + '\'' +
                 ", param='" + param + '\'' +
                 ", price=" + price +

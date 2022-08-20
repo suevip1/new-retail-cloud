@@ -30,6 +30,11 @@ public interface SpuService {
     void deleteSpu(Integer spuId);
 
     /*
+    * 获取spu
+    * */
+    Spu getSpu(Integer spuId);
+
+    /*
     * categoryId获取spuList
     * */
     List<Spu> listSpuS(Integer categoryId);

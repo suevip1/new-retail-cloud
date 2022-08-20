@@ -20,7 +20,7 @@ public class SkuServiceImpl implements SkuService {
     }
 
     @Override
-    public List<Sku> listSkus(Integer spuId) {
+    public List<Sku> listSkuS(Integer spuId) {
         return skuMapper.selectListBySpuId(spuId);
     }
 

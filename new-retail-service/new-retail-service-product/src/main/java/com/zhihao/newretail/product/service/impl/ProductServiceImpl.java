@@ -1,10 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
-import com.zhihao.newretail.api.product.vo.SkuApiVO;
-import com.zhihao.newretail.core.enums.DeleteEnum;
-import com.zhihao.newretail.product.dao.SkuMapper;
-import com.zhihao.newretail.product.dao.SpuMapper;
-import com.zhihao.newretail.product.enums.ProductEnum;
+import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.GoodsVO;
@@ -17,7 +13,6 @@ import com.zhihao.newretail.product.service.SpuService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -28,12 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
-
-    @Autowired
-    private SpuMapper spuMapper;
-
-    @Autowired
-    private SkuMapper skuMapper;
 
     @Autowired
     private SpuService spuService;
@@ -67,34 +56,29 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<SkuApiVO> listSkuApiVOs(Set<Integer> skuIdSet) {
-        List<Sku> skuList = skuMapper.selectListByIdSet(skuIdSet);
+    public List<GoodsApiVO> listGoodsApiVOS(Set<Integer> skuIdSet) {
+        List<Sku> skuList = skuService.listSkuS(skuIdSet);
         Set<Integer> spuIdSet = skuList.stream().map(Sku::getSpuId).collect(Collectors.toSet());
-        List<Spu> spuList = spuMapper.selectListByIdSet(spuIdSet);
+        List<Spu> spuList = spuService.listSpuS(spuIdSet);
         return skuList.stream().map(sku -> {
-            SkuApiVO skuApiVO = new SkuApiVO();
-            BeanUtils.copyProperties(sku, skuApiVO);
+            GoodsApiVO goodsApiVO = new GoodsApiVO();
+            BeanUtils.copyProperties(sku, goodsApiVO);
             spuList.stream().filter(spu -> sku.getSpuId().equals(spu.getId()))
                     .forEach(spu -> {
-                        skuApiVO.setTitle(spu.getTitle());
+                        goodsApiVO.setTitle(spu.getTitle());
                     });
-            return skuApiVO;
+            return goodsApiVO;
         }).collect(Collectors.toList());
     }
 
     @Override
-    public SkuApiVO getSkuApiVO(Integer skuId) {
-        SkuApiVO skuApiVO = new SkuApiVO();
-        Sku sku = skuMapper.selectByPrimaryKey(skuId);
-
-        if (ObjectUtils.isEmpty(sku)
-                || DeleteEnum.DELETE.getCode().equals(sku.getIsDelete())
-                || ProductEnum.NOT_SALEABLE.getCode().equals(sku.getIsSaleable())) {
-            return skuApiVO;
-        } else {
-            BeanUtils.copyProperties(sku, skuApiVO);
-            return skuApiVO;
-        }
+    public GoodsApiVO getGoodsApiVO(Integer skuId) {
+        GoodsApiVO goodsApiVO = new GoodsApiVO();
+        Sku sku = skuService.getSku(skuId);
+        Spu spu = spuService.getSpu(sku.getSpuId());
+        BeanUtils.copyProperties(sku, goodsApiVO);
+        goodsApiVO.setTitle(spu.getTitle());
+        return goodsApiVO;
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.zhihao.newretail.product.service;
 
-import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
@@ -16,14 +16,14 @@ public interface ProductService {
     ProductDetailVO getProductDetailVO(Integer spuId) throws ExecutionException, InterruptedException;
 
     /*
-    * 批量获取sku
+    * 批量获取商品
     * */
-    List<SkuApiVO> listSkuApiVOs(Set<Integer> skuIdSet);
+    List<GoodsApiVO> listGoodsApiVOS(Set<Integer> skuIdSet);
 
     /*
     * 获取sku
     * */
-    SkuApiVO getSkuApiVO(Integer skuId);
+    GoodsApiVO getGoodsApiVO(Integer skuId);
 
     /*
     * 获取商品列表

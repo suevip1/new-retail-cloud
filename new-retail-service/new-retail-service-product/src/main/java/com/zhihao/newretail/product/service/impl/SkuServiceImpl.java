@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class SkuServiceImpl implements SkuService {
@@ -15,13 +16,18 @@ public class SkuServiceImpl implements SkuService {
     private SkuMapper skuMapper;
 
     @Override
-    public Sku getSku(Integer spuId) {
-        return skuMapper.selectBySpuId(spuId);
+    public Sku getSku(Integer skuId) {
+        return skuMapper.selectByPrimaryKey(skuId);
     }
 
     @Override
     public List<Sku> listSkuS(Integer spuId) {
         return skuMapper.selectListBySpuId(spuId);
+    }
+
+    @Override
+    public List<Sku> listSkuS(Set<Integer> skuIdSet) {
+        return skuMapper.selectListByIdSet(skuIdSet);
     }
 
 }

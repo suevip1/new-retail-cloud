@@ -2,7 +2,7 @@ package com.zhihao.newretail.api.product.vo;
 
 import java.math.BigDecimal;
 
-public class SkuApiVO {
+public class GoodsApiVO {
 
     private Integer id;
 
@@ -76,7 +76,7 @@ public class SkuApiVO {
 
     @Override
     public String toString() {
-        return "SkuApiVO{" +
+        return "GoodsApiVO{" +
                 "id=" + id +
                 ", spuId=" + spuId +
                 ", title='" + title + '\'' +

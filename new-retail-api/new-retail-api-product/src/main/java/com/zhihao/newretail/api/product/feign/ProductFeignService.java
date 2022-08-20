@@ -1,7 +1,6 @@
 package com.zhihao.newretail.api.product.feign;
 
-import com.zhihao.newretail.api.product.dto.SkuBatchApiDTO;
-import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,14 +8,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
+import java.util.Set;
 
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface ProductFeignService {
 
-    @PostMapping("/api/sku/list")
-    List<SkuApiVO> listSkuApiVOs(@RequestBody SkuBatchApiDTO skuBatchApiDTO);
+    @PostMapping("/api/goods/list")
+    List<GoodsApiVO> listGoodsApiVOS(@RequestBody Set<Integer> idSet);
 
-    @GetMapping("/api/sku/{skuId}")
-    SkuApiVO getSkuApiVO(@PathVariable Integer skuId);
+    @GetMapping("/api/goods/{skuId}")
+    GoodsApiVO getGoodsApiVO(@PathVariable Integer skuId);
 
 }

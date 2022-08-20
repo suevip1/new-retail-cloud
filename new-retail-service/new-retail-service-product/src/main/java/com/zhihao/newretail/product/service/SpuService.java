@@ -6,6 +6,7 @@ import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.product.pojo.Spu;
 
 import java.util.List;
+import java.util.Set;
 
 public interface SpuService {
 
@@ -38,5 +39,10 @@ public interface SpuService {
     * categoryId获取spuList
     * */
     List<Spu> listSpuS(Integer categoryId);
+
+    /*
+    * 批量获取spuList
+    * */
+    List<Spu> listSpuS(Set<Integer> idSet);
 
 }

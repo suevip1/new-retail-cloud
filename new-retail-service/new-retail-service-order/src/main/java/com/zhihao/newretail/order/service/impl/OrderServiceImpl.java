@@ -12,7 +12,7 @@ import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.ProductStockFeignService;
-import com.zhihao.newretail.api.product.vo.SkuApiVO;
+import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
@@ -107,13 +107,13 @@ public class OrderServiceImpl implements OrderService {
             if (CollectionUtils.isEmpty(skuIdSet)) {
                 throw new ServiceException(HttpStatus.SC_NOT_FOUND, "请选中商品再下单");
             }
-            List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));      // 获取商品信息
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));      // 获取商品信息
 
             /* 渲染订单项 */
             List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
             cartApiVOList.forEach(cartApiVO -> {
                 OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
-                buildOrderItemCreateVO(cartApiVO, skuApiVOList, orderItemCreateVO);
+                buildOrderItemCreateVO(cartApiVO, goodsApiVOList, orderItemCreateVO);
                 orderItemCreateVOList.add(orderItemCreateVO);
             });
 
@@ -209,18 +209,18 @@ public class OrderServiceImpl implements OrderService {
                 throw new ServiceException("请选中商品再下单");
             }
             /* 获取商品信息 */
-            List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
-            Map<Integer, SkuApiVO> skuApiVOMap = skuApiVOList2Map(skuApiVOList);
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+            Map<Integer, GoodsApiVO> skuApiVOMap = skuApiVOList2Map(goodsApiVOList);
             /* 获取商品库存信息 */
             List<SkuStockApiVO> skuStockApiVOList = productStockFeignService.listSkuStockApiVOs(new SkuStockBatchApiDTO(skuIdSet));
             Map<Integer, SkuStockApiVO> skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
 
             for (CartApiVO cartApiVO : cartApiVOList) {
                 /* 商品有效性校验 */
-                SkuApiVO skuApiVO = skuApiVOMap.get(cartApiVO.getSkuId());
-                if (ProductEnum.NOT_SALEABLE.getCode().equals(skuApiVO.getIsSaleable())) {
+                GoodsApiVO goodsApiVO = skuApiVOMap.get(cartApiVO.getSkuId());
+                if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
                     throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                            "商品:" + skuApiVO.getTitle() + "商品规格ID:" + skuApiVO.getId() + "商品下架或删除");
+                            "商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除");
                 }
                 /* 库存校验 */
                 SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
@@ -229,9 +229,9 @@ public class OrderServiceImpl implements OrderService {
                             "商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足");
                 }
                 /* 构造订单项、锁定库存信息 */
-                OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), skuApiVO);
+                OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), goodsApiVO);
                 orderItemList.add(orderItem);
-                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), skuApiVO);
+                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
                 skuStockLockApiDTOList.add(skuStockLockApiDTO);
             }
         }, executor);
@@ -317,8 +317,8 @@ public class OrderServiceImpl implements OrderService {
             List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderId);
             /* 获取商品信息 */
             Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
-            List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
-            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOList);
+            List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
             orderVO.setOrderItemVOList(orderItemVOList);
         }, executor);
 
@@ -354,8 +354,8 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);
         /* 订单商品列表 */
         Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
-        List<SkuApiVO> skuApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
-        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, skuApiVOList);
+        List<GoodsApiVO> goodsApiVOList = productFeignService.listSkuApiVOs(new SkuBatchApiDTO(skuIdSet));
+        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
 
         return buildOrderVOList(orderList, orderItemVOList);
     }
@@ -395,8 +395,8 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 构造订单提交页商品列表
     * */
-    private void buildOrderItemCreateVO(CartApiVO cartApiVO, List<SkuApiVO> skuApiVOList, OrderItemCreateVO orderItemCreateVO) {
-        skuApiVOList.stream()
+    private void buildOrderItemCreateVO(CartApiVO cartApiVO, List<GoodsApiVO> goodsApiVOList, OrderItemCreateVO orderItemCreateVO) {
+        goodsApiVOList.stream()
                 .filter(skuApiVO -> cartApiVO.getSkuId().equals(skuApiVO.getId()))
                 .forEach(skuApiVO -> {
                     BeanUtils.copyProperties(skuApiVO, orderItemCreateVO);
@@ -445,12 +445,12 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 构造订单项
     * */
-    private OrderItem buildOrderItem(Long orderNo, Integer quantity, SkuApiVO skuApiVO) {
+    private OrderItem buildOrderItem(Long orderNo, Integer quantity, GoodsApiVO goodsApiVO) {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderId(orderNo);
-        orderItem.setSkuId(skuApiVO.getId());
-        orderItem.setPrice(skuApiVO.getPrice());
-        orderItem.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(quantity)));
+        orderItem.setSkuId(goodsApiVO.getId());
+        orderItem.setPrice(goodsApiVO.getPrice());
+        orderItem.setTotalPrice(goodsApiVO.getPrice().multiply(BigDecimal.valueOf(quantity)));
         orderItem.setNum(quantity);
         return orderItem;
     }
@@ -472,23 +472,23 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 订单项列表
     * */
-    private List<OrderItemVO> buildOrderItemVOList(List<OrderItem> orderItemList, List<SkuApiVO> skuApiVOList) {
-        Map<Integer, SkuApiVO> skuApiVOMap = skuApiVOList2Map(skuApiVOList);
+    private List<OrderItemVO> buildOrderItemVOList(List<OrderItem> orderItemList, List<GoodsApiVO> goodsApiVOList) {
+        Map<Integer, GoodsApiVO> skuApiVOMap = skuApiVOList2Map(goodsApiVOList);
         return orderItemList.stream().map(orderItem -> {
             OrderItemVO orderItemVO = new OrderItemVO();
             BeanUtils.copyProperties(orderItem, orderItemVO);
-            SkuApiVO skuApiVO = skuApiVOMap.get(orderItemVO.getSkuId());
-            orderItemVO.setTitle(skuApiVO.getTitle());
-            orderItemVO.setSkuImage(skuApiVO.getSkuImage());
-            orderItemVO.setParam(skuApiVO.getParam());
-            orderItemVO.setPrice(skuApiVO.getPrice());
-            orderItemVO.setTotalPrice(skuApiVO.getPrice().multiply(BigDecimal.valueOf(orderItemVO.getNum())));
+            GoodsApiVO goodsApiVO = skuApiVOMap.get(orderItemVO.getSkuId());
+            orderItemVO.setTitle(goodsApiVO.getTitle());
+            orderItemVO.setSkuImage(goodsApiVO.getSkuImage());
+            orderItemVO.setParam(goodsApiVO.getParam());
+            orderItemVO.setPrice(goodsApiVO.getPrice());
+            orderItemVO.setTotalPrice(goodsApiVO.getPrice().multiply(BigDecimal.valueOf(orderItemVO.getNum())));
             return orderItemVO;
         }).collect(Collectors.toList());
     }
 
-    private Map<Integer, SkuApiVO> skuApiVOList2Map(List<SkuApiVO> skuApiVOList) {
-        return skuApiVOList.stream().collect(Collectors.toMap(SkuApiVO::getId, skuApiVO -> skuApiVO));
+    private Map<Integer, GoodsApiVO> skuApiVOList2Map(List<GoodsApiVO> goodsApiVOList) {
+        return goodsApiVOList.stream().collect(Collectors.toMap(GoodsApiVO::getId, skuApiVO -> skuApiVO));
     }
 
     private Map<Integer, SkuStockApiVO> skuStockApiVOList2Map(List<SkuStockApiVO> skuStockApiVOList) {
@@ -502,10 +502,10 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 构造锁定库存信息
     * */
-    private SkuStockLockApiDTO buildSkuStockLock(Long orderNo, Integer quantity, SkuApiVO skuApiVO) {
+    private SkuStockLockApiDTO buildSkuStockLock(Long orderNo, Integer quantity, GoodsApiVO goodsApiVO) {
         SkuStockLockApiDTO skuStockLockApiDTO = new SkuStockLockApiDTO();
-        skuStockLockApiDTO.setSpuId(skuApiVO.getSpuId());
-        skuStockLockApiDTO.setSkuId(skuApiVO.getId());
+        skuStockLockApiDTO.setSpuId(goodsApiVO.getSpuId());
+        skuStockLockApiDTO.setSkuId(goodsApiVO.getId());
         skuStockLockApiDTO.setOrderId(orderNo);
         skuStockLockApiDTO.setCount(quantity);
         skuStockLockApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);

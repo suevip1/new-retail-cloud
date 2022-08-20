@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class SpuServiceImpl implements SpuService {
@@ -93,6 +94,11 @@ public class SpuServiceImpl implements SpuService {
     @Override
     public List<Spu> listSpuS(Integer categoryId) {
         return spuMapper.selectSpuSpuInfoListByCategoryId(categoryId);
+    }
+
+    @Override
+    public List<Spu> listSpuS(Set<Integer> idSet) {
+        return spuMapper.selectListByIdSet(idSet);
     }
 
     private SpuApiVO spu2SpuApiVO(Spu spu) {

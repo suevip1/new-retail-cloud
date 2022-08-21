@@ -42,6 +42,7 @@ public class SysProductServiceImpl implements SysProductService {
     }
 
     @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
     public void updateSpu(Integer spuId, Integer categoryId, String title,
                           String subTitle, MultipartFile showImage, MultipartFile[] sliderImage,
                           String detailTitle, String detailPram, MultipartFile[] detailImage) throws IOException {

@@ -8,6 +8,9 @@ import java.util.concurrent.ExecutionException;
 
 public interface SysProductService {
 
+    /*
+    * 查看商品信息
+    * */
     SpuApiVO getSpuApiVO(Integer spuId);
 
     /*

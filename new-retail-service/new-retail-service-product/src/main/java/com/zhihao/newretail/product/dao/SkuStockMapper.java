@@ -10,6 +10,8 @@ public interface SkuStockMapper {
 
     int deleteByPrimaryKey(Integer id);
 
+    int deleteBySkuId(Integer skuId);
+
     int insert(SkuStock record);
 
     int insertSelective(SkuStock record);

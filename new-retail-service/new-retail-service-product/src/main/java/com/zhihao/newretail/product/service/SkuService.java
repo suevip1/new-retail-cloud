@@ -23,7 +23,7 @@ public interface SkuService {
     /*
     * 删除sku
     * */
-    void deleteSku(Integer skuId);
+    void deleteSku(Integer skuId) throws ExecutionException, InterruptedException;
 
     /*
     * 获取sku

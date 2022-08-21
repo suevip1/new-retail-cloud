@@ -66,8 +66,22 @@ public class SkuServiceImpl implements SkuService {
     }
 
     @Override
-    public void deleteSku(Integer skuId) {
-        skuMapper.deleteByPrimaryKey(skuId);
+    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
+        CompletableFuture<Void> deleteSkuFuture = CompletableFuture.runAsync(() -> {
+            int deleteSkuRow = skuMapper.deleteByPrimaryKey(skuId);
+            if (deleteSkuRow <= 0) {
+                throw new ServiceException("删除商品规格失败");
+            }
+        }, executor);
+
+        CompletableFuture<Void> deleteStockFuture = CompletableFuture.runAsync(() -> {
+            int deleteStockRow = stockService.deleteStock(skuId);
+            if (deleteStockRow <= 0) {
+                throw new ServiceException("删除商品库存失败");
+            }
+        }, executor);
+
+        CompletableFuture.allOf(deleteSkuFuture, deleteStockFuture).get();
     }
 
     @Override

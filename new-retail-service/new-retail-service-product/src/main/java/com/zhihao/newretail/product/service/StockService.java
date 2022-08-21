@@ -21,6 +21,11 @@ public interface StockService {
     int updateStock(Integer skuId, Integer stockNum);
 
     /*
+    * 删除商品库存
+    * */
+    int deleteStock(Integer skuId);
+
+    /*
      * 批量获取商品库存信息
      * */
     List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet);

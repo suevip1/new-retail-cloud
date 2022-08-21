@@ -56,6 +56,15 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
+    public int deleteStock(Integer skuId) {
+        int deleteRow = skuStockMapper.deleteBySkuId(skuId);
+        if (deleteRow <= 0) {
+            throw new ServiceException("删除库存失败");
+        }
+        return deleteRow;
+    }
+
+    @Override
     public List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         return skuStockList.stream().map(this::skuStock2SkuStockApiVO).collect(Collectors.toList());

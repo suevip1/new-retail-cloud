@@ -42,6 +42,11 @@ public interface SysProductService {
     void updateSku(Integer skuId, SkuForm form) throws ExecutionException, InterruptedException;
 
     /*
+    * 删除商品规格
+    * */
+    void deleteSku(Integer skuId) throws ExecutionException, InterruptedException;
+
+    /*
     * 上传商品图片
     * */
     String uploadSpuImage(MultipartFile file) throws IOException;

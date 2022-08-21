@@ -17,6 +17,6 @@ public interface SkuFeignService {
     void updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException;
 
     @DeleteMapping("/api/sku/{skuId}")
-    void deleteSku(@PathVariable Integer skuId);
+    void deleteSku(@PathVariable Integer skuId) throws ExecutionException, InterruptedException;
 
 }

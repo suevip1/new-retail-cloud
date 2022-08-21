@@ -28,6 +28,11 @@
     where id = #{id,jdbcType=INTEGER}
   </delete>
 
+  <delete id="deleteBySkuId" parameterType="java.lang.Integer">
+    delete from tb_sku_stock
+    where sku_id = #{skuId,jdbcType=INTEGER}
+  </delete>
+
   <insert id="insert" parameterType="com.zhihao.newretail.product.pojo.SkuStock">
     insert into tb_sku_stock (id, sku_id, actual_stock, 
       lock_stock, stock, is_delete, 

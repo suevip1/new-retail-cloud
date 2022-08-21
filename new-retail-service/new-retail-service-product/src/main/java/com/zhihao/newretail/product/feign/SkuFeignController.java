@@ -33,7 +33,7 @@ public class SkuFeignController implements SkuFeignService {
 
     @Override
     @RequiresLogin
-    public void deleteSku(Integer skuId) {
+    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
         skuService.deleteSku(skuId);
         UserLoginContext.sysClean();
     }

@@ -83,6 +83,12 @@ public class SysProductServiceImpl implements SysProductService {
     }
 
     @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
+        skuFeignService.deleteSku(skuId);
+    }
+
+    @Override
     public String uploadSpuImage(MultipartFile file) throws IOException {
         return fileUploadFeignService.getFileUrl(file, FileUploadDirConst.SHOW_IMG);
     }

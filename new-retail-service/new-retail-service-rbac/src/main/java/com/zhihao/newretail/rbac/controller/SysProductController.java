@@ -84,6 +84,16 @@ public class SysProductController {
     }
 
     @RequiresLogin
+    @DeleteMapping("/sku/{skuId}")
+    public R skuDelete(@PathVariable Integer skuId) throws ExecutionException, InterruptedException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        sysProductService.deleteSku(skuId);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
+    @RequiresLogin
     @PostMapping("/spu/upload/image")
     public R uploadSpuImage(@RequestPart MultipartFile file) throws IOException {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();

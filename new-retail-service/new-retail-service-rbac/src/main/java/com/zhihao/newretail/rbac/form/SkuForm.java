@@ -1,18 +1,23 @@
-package com.zhihao.newretail.api.product.dto;
+package com.zhihao.newretail.rbac.form;
 
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.List;
 
-public class SkuAddApiDTO {
+public class SkuForm {
 
+    @NotNull(message = "请选择所属商品")
     private Integer spuId;
 
     private String skuImage;
 
-    private String param;
-
+    @NotNull(message = "价格不能为空")
     private BigDecimal price;
 
+    @NotNull(message = "请填写库存数量")
     private Integer stock;
+
+    private List<SkuParamForm> skuParamFormList;
 
     public Integer getSpuId() {
         return spuId;
@@ -30,14 +35,6 @@ public class SkuAddApiDTO {
         this.skuImage = skuImage;
     }
 
-    public String getParam() {
-        return param;
-    }
-
-    public void setParam(String param) {
-        this.param = param;
-    }
-
     public BigDecimal getPrice() {
         return price;
     }
@@ -52,6 +49,14 @@ public class SkuAddApiDTO {
 
     public void setStock(Integer stock) {
         this.stock = stock;
+    }
+
+    public List<SkuParamForm> getSkuParamFormList() {
+        return skuParamFormList;
+    }
+
+    public void setSkuParamFormList(List<SkuParamForm> skuParamFormList) {
+        this.skuParamFormList = skuParamFormList;
     }
 
 }

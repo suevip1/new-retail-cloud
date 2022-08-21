@@ -1,14 +1,17 @@
 package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
+import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
+import com.zhihao.newretail.api.product.feign.SkuFeignService;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
+import com.zhihao.newretail.rbac.form.SkuForm;
 import com.zhihao.newretail.rbac.form.SpuForm;
 import com.zhihao.newretail.rbac.service.SysProductService;
 import org.springframework.beans.BeanUtils;
@@ -27,6 +30,9 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Autowired
     private SpuFeignService spuFeignService;
+
+    @Autowired
+    private SkuFeignService skuFeignService;
 
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
@@ -57,6 +63,13 @@ public class SysProductServiceImpl implements SysProductService {
     @RequiresPermission(scope = AuthorizationConst.ROOT)
     public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
         spuFeignService.deleteSpu(spuId);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public void addSku(SkuForm form) {
+        SkuAddApiDTO skuAddApiDTO = skuForm2SkuAddApiDTO(form);
+        skuFeignService.addSku(skuAddApiDTO);
     }
 
     @Override
@@ -99,6 +112,13 @@ public class SysProductServiceImpl implements SysProductService {
             spuAddApiDTO.setDetailImage(GsonUtil.obj2Json(form.getDetailImageUrlList()));
         }
         return spuAddApiDTO;
+    }
+
+    private SkuAddApiDTO skuForm2SkuAddApiDTO(SkuForm form) {
+        SkuAddApiDTO skuAddApiDTO = new SkuAddApiDTO();
+        BeanUtils.copyProperties(form, skuAddApiDTO);
+        skuAddApiDTO.setParam(GsonUtil.obj2Json(form.getSkuParamFormList()));
+        return skuAddApiDTO;
     }
 
 }

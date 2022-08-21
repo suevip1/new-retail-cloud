@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
+import com.zhihao.newretail.rbac.form.SkuForm;
 import com.zhihao.newretail.rbac.form.SpuForm;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,6 +30,11 @@ public interface SysProductService {
     * 删除商品
     * */
     void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
+
+    /*
+    * 添加商品规格
+    * */
+    void addSku(SkuForm form);
 
     /*
     * 上传商品图片

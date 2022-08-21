@@ -31,6 +31,19 @@ public class StockServiceImpl implements StockService {
     private SkuStockLockMapper skuStockLockMapper;
 
     @Override
+    public int insertStockNum(Integer skuId, Integer stockNum) {
+        SkuStock skuStock = new SkuStock();
+        skuStock.setSkuId(skuId);
+        skuStock.setActualStock(stockNum);
+        skuStock.setStock(stockNum);
+        int insertStockRow = skuStockMapper.insertSelective(skuStock);
+        if (insertStockRow <= 0) {
+            throw new ServiceException("库存写入失败");
+        }
+        return insertStockRow;
+    }
+
+    @Override
     public List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         return skuStockList.stream().map(this::skuStock2SkuStockApiVO).collect(Collectors.toList());

@@ -3,6 +3,7 @@ package com.zhihao.newretail.rbac.controller;
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
+import com.zhihao.newretail.rbac.form.SkuForm;
 import com.zhihao.newretail.rbac.form.SpuForm;
 import com.zhihao.newretail.rbac.service.SysProductService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -58,6 +59,16 @@ public class SysProductController {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         sysProductService.deleteSpu(spuId);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
+    @RequiresLogin
+    @PostMapping("/sku")
+    public R skuAdd(@Valid @RequestBody SkuForm form) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        sysProductService.addSku(form);
         UserLoginContext.sysClean();
         return R.ok();
     }

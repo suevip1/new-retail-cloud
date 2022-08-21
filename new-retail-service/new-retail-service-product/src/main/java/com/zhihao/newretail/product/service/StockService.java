@@ -11,6 +11,11 @@ import java.util.Set;
 public interface StockService {
 
     /*
+    * 新增商品库存
+    * */
+    int insertStockNum(Integer skuId, Integer stockNum);
+
+    /*
      * 批量获取商品库存信息
      * */
     List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet);

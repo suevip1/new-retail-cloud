@@ -16,6 +16,8 @@ public interface SpuInfoMapper {
 
     int updateByPrimaryKey(SpuInfo record);
 
+    int updateBySpuId(SpuInfo record);
+
     /*
     * spuId获取商品信息
     * */

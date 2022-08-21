@@ -133,6 +133,34 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <update id="updateBySpuId" parameterType="com.zhihao.newretail.product.pojo.SpuInfo">
+    update tb_spu_info
+    <set>
+      <if test="id != null">
+        id = #{id,jdbcType=INTEGER},
+      </if>
+      <if test="showImage != null">
+        show_image = #{showImage,jdbcType=VARCHAR},
+      </if>
+      <if test="sliderImage != null">
+        slider_image = #{sliderImage,jdbcType=VARCHAR},
+      </if>
+      <if test="detailTitle != null">
+        detail_title = #{detailTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="detailPram != null">
+        detail_pram = #{detailPram,jdbcType=VARCHAR},
+      </if>
+      <if test="detailImage != null">
+        detail_image = #{detailImage,jdbcType=VARCHAR},
+      </if>
+      <if test="isDelete != null">
+        is_delete = #{isDelete,jdbcType=INTEGER},
+      </if>
+    </set>
+    where spu_id = #{spuId,jdbcType=INTEGER}
+  </update>
+
   <select id="selectBySpuId" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />

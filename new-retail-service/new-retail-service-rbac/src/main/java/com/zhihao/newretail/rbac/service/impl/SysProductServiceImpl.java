@@ -2,6 +2,7 @@ package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
@@ -9,6 +10,7 @@ import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
 import com.zhihao.newretail.rbac.service.SysProductService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -29,21 +31,42 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void addSpu(Integer categoryId,
-                       String title,
-                       String subTitle,
-                       MultipartFile showImage,
-                       MultipartFile[] sliderImage,
-                       String detailTitle,
-                       String detailPram,
-                       MultipartFile[] detailImage) throws IOException {
+    public void addSpu(Integer categoryId, String title, String subTitle,
+                       MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
+                       String detailPram, MultipartFile[] detailImage) throws IOException {
+        SpuAddApiDTO spuAddApiDTO = buildSpuAddApiDTO(
+                categoryId, title, subTitle,
+                showImage, sliderImage, detailTitle,
+                detailPram, detailImage);
+        spuFeignService.addSpu(spuAddApiDTO);
+    }
+
+    @Override
+    public void updateSpu(Integer spuId, Integer categoryId, String title,
+                          String subTitle, MultipartFile showImage, MultipartFile[] sliderImage,
+                          String detailTitle, String detailPram, MultipartFile[] detailImage) throws IOException {
+        SpuAddApiDTO spuAddApiDTO = buildSpuAddApiDTO(
+                categoryId, title, subTitle,
+                showImage, sliderImage, detailTitle,
+                detailPram, detailImage);
+        SpuUpdateApiDTO spuUpdateApiDTO = new SpuUpdateApiDTO();
+        BeanUtils.copyProperties(spuAddApiDTO, spuUpdateApiDTO);
+        spuFeignService.updateSpu(spuId, spuUpdateApiDTO);
+    }
+
+    /*
+    * 必传字段
+    * */
+    private SpuAddApiDTO buildSpuAddApiDTO(Integer categoryId, String title, String subTitle,
+                                           MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
+                                           String detailPram, MultipartFile[] detailImage) throws IOException {
         SpuAddApiDTO spuAddApiDTO = new SpuAddApiDTO();
         spuAddApiDTO.setCategoryId(categoryId);     // 所属分类
         spuAddApiDTO.setTitle(title);               // 商品标题
         spuAddApiDTO.setSubTitle(subTitle);         // 商品副标题
-        spuAddApiDTO.setShowImage(getShowImageUrl(showImage));  // 商品图片
-        spuAddApiDTO.setDetailTitle(detailTitle);
-        /* 非必穿字段 */
+        spuAddApiDTO.setShowImage(getShowImageUrl(showImage));      // 商品图片
+        spuAddApiDTO.setDetailTitle(detailTitle);   // 商品详情标题
+        /* 非必传字段 */
         if (!ObjectUtils.isEmpty(sliderImage)) {
             List<String> sliderImageUrlS = getSliderImageUrlS(sliderImage);
             spuAddApiDTO.setSliderImage(GsonUtil.obj2Json(sliderImageUrlS));    // 商品轮播图
@@ -55,7 +78,7 @@ public class SysProductServiceImpl implements SysProductService {
             List<String> detailImageUrlS = getDetailImageUrlS(detailImage);
             spuAddApiDTO.setDetailImage(GsonUtil.obj2Json(detailImageUrlS));    // 商品详情图
         }
-        spuFeignService.addSpu(spuAddApiDTO);
+        return spuAddApiDTO;
     }
 
     /*

@@ -26,7 +26,7 @@ public class SysProductController {
     @PostMapping("/spu")
     public R spuAdd(@RequestParam Integer categoryId,
                     @RequestParam String title,
-                    @RequestParam(required = false) String subTitle,
+                    @RequestParam String subTitle,
                     @RequestPart MultipartFile showImage,
                     @RequestPart(required = false) MultipartFile[] sliderImage,
                     @RequestParam(required = false) String detailTitle,

@@ -9,11 +9,13 @@ import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
+import com.zhihao.newretail.rbac.form.SpuForm;
 import com.zhihao.newretail.rbac.service.SysProductService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,18 +41,6 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void addSpu(Integer categoryId, String title, String subTitle,
-                       MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
-                       String detailPram, MultipartFile[] detailImage) throws IOException {
-        SpuAddApiDTO spuAddApiDTO = buildSpuAddApiDTO(
-                categoryId, title, subTitle,
-                showImage, sliderImage, detailTitle,
-                detailPram, detailImage);
-        spuFeignService.addSpu(spuAddApiDTO);
-    }
-
-    @Override
-    @RequiresPermission(scope = AuthorizationConst.ADMIN)
     public void updateSpu(Integer spuId, Integer categoryId, String title,
                           String subTitle, MultipartFile showImage, MultipartFile[] sliderImage,
                           String detailTitle, String detailPram, MultipartFile[] detailImage) throws IOException {
@@ -61,6 +51,13 @@ public class SysProductServiceImpl implements SysProductService {
         SpuUpdateApiDTO spuUpdateApiDTO = new SpuUpdateApiDTO();
         BeanUtils.copyProperties(spuAddApiDTO, spuUpdateApiDTO);
         spuFeignService.updateSpu(spuId, spuUpdateApiDTO);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public void addSpu(SpuForm form) {
+        SpuAddApiDTO spuAddApiDTO = spuForm2SpuAddApiDTO(form);
+        spuFeignService.addSpu(spuAddApiDTO);
     }
 
     @Override
@@ -114,6 +111,18 @@ public class SysProductServiceImpl implements SysProductService {
         if (!ObjectUtils.isEmpty(detailImage)) {
             List<String> detailImageUrlS = getDetailImageUrlS(detailImage);
             spuAddApiDTO.setDetailImage(GsonUtil.obj2Json(detailImageUrlS));    // 商品详情图
+        }
+        return spuAddApiDTO;
+    }
+
+    private SpuAddApiDTO spuForm2SpuAddApiDTO(SpuForm form) {
+        SpuAddApiDTO spuAddApiDTO = new SpuAddApiDTO();
+        BeanUtils.copyProperties(form, spuAddApiDTO);
+        if (!CollectionUtils.isEmpty(form.getSliderImageUrlList())) {
+            spuAddApiDTO.setSliderImage(GsonUtil.obj2Json(form.getSliderImageUrlList()));
+        }
+        if (!CollectionUtils.isEmpty(form.getDetailImageUrlList())) {
+            spuAddApiDTO.setDetailImage(GsonUtil.obj2Json(form.getDetailImageUrlList()));
         }
         return spuAddApiDTO;
     }

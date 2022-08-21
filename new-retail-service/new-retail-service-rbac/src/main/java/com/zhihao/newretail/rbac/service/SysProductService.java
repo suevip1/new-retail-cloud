@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
+import com.zhihao.newretail.rbac.form.SpuForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -15,18 +16,16 @@ public interface SysProductService {
     SpuApiVO getSpuApiVO(Integer spuId);
 
     /*
-    * 新增商品
-    * */
-    void addSpu(Integer categoryId, String title, String subTitle,
-                MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
-                String detailPram, MultipartFile[] detailImage) throws IOException;
-
-    /*
     * 修改商品
     * */
     void updateSpu(Integer spuId, Integer categoryId, String title,
                    String subTitle, MultipartFile showImage, MultipartFile[] sliderImage,
                    String detailTitle, String detailPram, MultipartFile[] detailImage) throws IOException;
+
+    /*
+    * 新增商品
+    * */
+    void addSpu(SpuForm form);
 
     /*
     * 删除商品

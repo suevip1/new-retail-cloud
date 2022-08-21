@@ -5,6 +5,8 @@ import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.ExecutionException;
+
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface SkuFeignService {
 
@@ -12,7 +14,7 @@ public interface SkuFeignService {
     void addSku(@RequestBody SkuAddApiDTO skuAddApiDTO);
 
     @PutMapping("/api/sku/{skuId}")
-    void updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO);
+    void updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException;
 
     @DeleteMapping("/api/sku/{skuId}")
     void deleteSku(@PathVariable Integer skuId);

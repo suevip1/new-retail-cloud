@@ -31,7 +31,7 @@ public class StockServiceImpl implements StockService {
     private SkuStockLockMapper skuStockLockMapper;
 
     @Override
-    public int insertStockNum(Integer skuId, Integer stockNum) {
+    public int insertStock(Integer skuId, Integer stockNum) {
         SkuStock skuStock = new SkuStock();
         skuStock.setSkuId(skuId);
         skuStock.setActualStock(stockNum);
@@ -41,6 +41,18 @@ public class StockServiceImpl implements StockService {
             throw new ServiceException("库存写入失败");
         }
         return insertStockRow;
+    }
+
+    @Override
+    public int updateStock(Integer skuId, Integer stockNum) {
+        SkuStock skuStock = skuStockMapper.selectBySkuId(skuId);
+        skuStock.setActualStock(stockNum);
+        skuStock.setStock(stockNum - skuStock.getLockStock());
+        int updateRow = skuStockMapper.updateByPrimaryKeySelective(skuStock);
+        if (updateRow <= 0) {
+            throw new ServiceException("修改库存失败");
+        }
+        return updateRow;
     }
 
     @Override

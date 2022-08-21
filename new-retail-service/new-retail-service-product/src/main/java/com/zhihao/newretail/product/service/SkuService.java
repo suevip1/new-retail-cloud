@@ -6,6 +6,7 @@ import com.zhihao.newretail.product.pojo.Sku;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public interface SkuService {
 
@@ -17,7 +18,7 @@ public interface SkuService {
     /*
     * 修改sku
     * */
-    void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO);
+    void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException;
 
     /*
     * 删除sku

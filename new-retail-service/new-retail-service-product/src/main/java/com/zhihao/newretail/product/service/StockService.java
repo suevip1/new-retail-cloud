@@ -13,7 +13,12 @@ public interface StockService {
     /*
     * 新增商品库存
     * */
-    int insertStockNum(Integer skuId, Integer stockNum);
+    int insertStock(Integer skuId, Integer stockNum);
+
+    /*
+    * 修改商品库存
+    * */
+    int updateStock(Integer skuId, Integer stockNum);
 
     /*
      * 批量获取商品库存信息

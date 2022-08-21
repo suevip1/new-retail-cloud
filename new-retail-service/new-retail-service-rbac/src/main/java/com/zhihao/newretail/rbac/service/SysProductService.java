@@ -37,6 +37,11 @@ public interface SysProductService {
     void addSku(SkuForm form);
 
     /*
+    * 修改商品规格
+    * */
+    void updateSku(Integer skuId, SkuForm form) throws ExecutionException, InterruptedException;
+
+    /*
     * 上传商品图片
     * */
     String uploadSpuImage(MultipartFile file) throws IOException;

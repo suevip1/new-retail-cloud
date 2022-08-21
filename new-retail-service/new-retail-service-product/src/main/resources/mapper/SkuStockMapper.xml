@@ -137,7 +137,7 @@
     select
     <include refid="Base_Column_List" />
     from tb_sku_stock
-    where sku_id = #{skuId,jdbcType=INTEGER} and is_delete = 0
+    where sku_id = #{skuId,jdbcType=INTEGER} for update
   </select>
 
   <select id="selectListBySkuIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">

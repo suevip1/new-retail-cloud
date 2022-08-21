@@ -2,6 +2,7 @@ package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SkuFeignService;
@@ -70,6 +71,15 @@ public class SysProductServiceImpl implements SysProductService {
     public void addSku(SkuForm form) {
         SkuAddApiDTO skuAddApiDTO = skuForm2SkuAddApiDTO(form);
         skuFeignService.addSku(skuAddApiDTO);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public void updateSku(Integer skuId, SkuForm form) throws ExecutionException, InterruptedException {
+        SkuAddApiDTO skuAddApiDTO = skuForm2SkuAddApiDTO(form);
+        SkuUpdateApiDTO skuUpdateApiDTO = new SkuUpdateApiDTO();
+        BeanUtils.copyProperties(skuAddApiDTO, skuUpdateApiDTO);
+        skuFeignService.updateSku(skuId, skuUpdateApiDTO);
     }
 
     @Override

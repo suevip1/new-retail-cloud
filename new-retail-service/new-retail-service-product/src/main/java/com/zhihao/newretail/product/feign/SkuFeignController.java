@@ -9,6 +9,8 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 public class SkuFeignController implements SkuFeignService {
 
@@ -24,7 +26,7 @@ public class SkuFeignController implements SkuFeignService {
 
     @Override
     @RequiresLogin
-    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) {
+    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException {
         skuService.updateSku(skuId, skuUpdateApiDTO);
         UserLoginContext.sysClean();
     }

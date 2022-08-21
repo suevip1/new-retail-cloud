@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
 public class SkuServiceImpl implements SkuService {
@@ -24,24 +27,42 @@ public class SkuServiceImpl implements SkuService {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private ThreadPoolExecutor executor;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertSku(SkuAddApiDTO skuAddApiDTO) {
         Sku sku = new Sku();
         BeanUtils.copyProperties(skuAddApiDTO, sku);
         int insertSkuRow = skuMapper.insertSelective(sku);
-        int insertStockRow = stockService.insertStockNum(sku.getId(), skuAddApiDTO.getStock());
+        int insertStockRow = stockService.insertStock(sku.getId(), skuAddApiDTO.getStock());
         if (insertSkuRow <= 0 || insertStockRow <= 0) {
             throw new ServiceException("新增商品规格失败");
         }
     }
 
     @Override
-    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) {
-        Sku sku = new Sku();
-        BeanUtils.copyProperties(skuUpdateApiDTO, sku);
-        sku.setId(skuId);
-        skuMapper.updateByPrimaryKeySelective(sku);
+    @Transactional(rollbackFor = Exception.class)
+    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException {
+        CompletableFuture<Void> skuFuture = CompletableFuture.runAsync(() -> {
+            Sku sku = new Sku();
+            BeanUtils.copyProperties(skuUpdateApiDTO, sku);
+            sku.setId(skuId);
+            int updateSkuRow = skuMapper.updateByPrimaryKeySelective(sku);
+            if (updateSkuRow <= 0) {
+                throw new ServiceException("修改商品规格失败");
+            }
+        }, executor);
+
+        CompletableFuture<Void> stockFuture = CompletableFuture.runAsync(() -> {
+            int updateStockRow = stockService.updateStock(skuId, skuUpdateApiDTO.getStock());
+            if (updateStockRow <= 0) {
+                throw new ServiceException("修改商品库存失败");
+            }
+        }, executor);
+
+        CompletableFuture.allOf(skuFuture, stockFuture).get();
     }
 
     @Override

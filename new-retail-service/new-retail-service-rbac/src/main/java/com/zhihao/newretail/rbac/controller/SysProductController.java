@@ -74,6 +74,16 @@ public class SysProductController {
     }
 
     @RequiresLogin
+    @PutMapping("/sku/{skuId}")
+    public R skuUpdate(@PathVariable Integer skuId, @Valid @RequestBody SkuForm form) throws ExecutionException, InterruptedException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        sysProductService.updateSku(skuId, form);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
+    @RequiresLogin
     @PostMapping("/spu/upload/image")
     public R uploadSpuImage(@RequestPart MultipartFile file) throws IOException {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();

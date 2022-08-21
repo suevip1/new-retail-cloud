@@ -1,5 +1,6 @@
 package com.zhihao.newretail.rbac.controller;
 
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.service.SysProductService;
@@ -17,6 +18,16 @@ public class SysProductController {
 
     @Autowired
     private SysProductService sysProductService;
+
+    @RequiresLogin
+    @GetMapping("/spu/{spuId}")
+    public R spu(@PathVariable Integer spuId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        SpuApiVO spuApiVO = sysProductService.getSpuApiVO(spuId);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", spuApiVO);
+    }
 
     @RequiresLogin
     @PostMapping("/spu")

@@ -4,6 +4,7 @@ import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
@@ -29,6 +30,12 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public SpuApiVO getSpuApiVO(Integer spuId) {
+        return spuFeignService.getSpuApiVO(spuId);
+    }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)

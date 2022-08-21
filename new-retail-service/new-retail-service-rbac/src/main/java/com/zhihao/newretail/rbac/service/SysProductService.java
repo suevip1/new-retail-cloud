@@ -1,11 +1,14 @@
 package com.zhihao.newretail.rbac.service;
 
+import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public interface SysProductService {
+
+    SpuApiVO getSpuApiVO(Integer spuId);
 
     /*
     * 新增商品

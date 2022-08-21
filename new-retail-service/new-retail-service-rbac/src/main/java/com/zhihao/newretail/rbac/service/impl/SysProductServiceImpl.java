@@ -69,6 +69,31 @@ public class SysProductServiceImpl implements SysProductService {
         spuFeignService.deleteSpu(spuId);
     }
 
+    @Override
+    public String uploadSpuImage(MultipartFile file) throws IOException {
+        return fileUploadFeignService.getFileUrl(file, FileUploadDirConst.SHOW_IMG);
+    }
+
+    @Override
+    public List<String> uploadSpuSliderImage(MultipartFile[] files) throws IOException {
+        List<String> sliderImageUrlList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String sliderImageUrl = fileUploadFeignService.getFileUrl(file, FileUploadDirConst.SLIDER_IMG);
+            sliderImageUrlList.add(sliderImageUrl);
+        }
+        return sliderImageUrlList;
+    }
+
+    @Override
+    public List<String> uploadSpuDetailImage(MultipartFile[] files) throws IOException {
+        List<String> detailImageUrlList = new ArrayList<>();
+        for (MultipartFile file : files) {
+            String sliderImageUrl = fileUploadFeignService.getFileUrl(file, FileUploadDirConst.DETAIL_IMG);
+            detailImageUrlList.add(sliderImageUrl);
+        }
+        return detailImageUrlList;
+    }
+
     private SpuAddApiDTO buildSpuAddApiDTO(Integer categoryId, String title, String subTitle,
                                            MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
                                            String detailPram, MultipartFile[] detailImage) throws IOException {

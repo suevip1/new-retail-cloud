@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @RestController
@@ -72,6 +73,36 @@ public class SysProductController {
         sysProductService.deleteSpu(spuId);
         UserLoginContext.sysClean();
         return R.ok();
+    }
+
+    @RequiresLogin
+    @PostMapping("/spu/upload/image")
+    public R uploadSpuImage(@RequestPart MultipartFile file) throws IOException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        String imageUrl = sysProductService.uploadSpuImage(file);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", imageUrl);
+    }
+
+    @RequiresLogin
+    @PostMapping("/spu/upload/slider")
+    public R uploadSliderImage(@RequestPart MultipartFile[] files) throws IOException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        List<String> imageUrlList = sysProductService.uploadSpuSliderImage(files);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", imageUrlList);
+    }
+
+    @RequiresLogin
+    @PostMapping("/spu/upload/detail")
+    public R uploadDetailImage(@RequestPart MultipartFile[] files) throws IOException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        List<String> imageUrlList = sysProductService.uploadSpuDetailImage(files);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", imageUrlList);
     }
 
 }

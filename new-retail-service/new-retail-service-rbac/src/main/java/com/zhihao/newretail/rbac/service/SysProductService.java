@@ -4,6 +4,7 @@ import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface SysProductService {
@@ -31,5 +32,20 @@ public interface SysProductService {
     * 删除商品
     * */
     void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
+
+    /*
+    * 上传商品图片
+    * */
+    String uploadSpuImage(MultipartFile file) throws IOException;
+
+    /*
+    * 上传商品轮播图
+    * */
+    List<String> uploadSpuSliderImage(MultipartFile[] files) throws IOException;
+
+    /*
+    * 上传商品详情图
+    * */
+    List<String> uploadSpuDetailImage(MultipartFile[] files) throws IOException;
 
 }

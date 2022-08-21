@@ -65,6 +65,11 @@ public class SysProductServiceImpl implements SysProductService {
     }
 
     @Override
+    public String uploadSkuImage(MultipartFile file) throws IOException {
+        return fileUploadFeignService.getFileUrl(file, FileUploadDirConst.SKU_IMG);
+    }
+
+    @Override
     public List<String> uploadSpuSliderImage(MultipartFile[] files) throws IOException {
         List<String> sliderImageUrlList = new ArrayList<>();
         for (MultipartFile file : files) {

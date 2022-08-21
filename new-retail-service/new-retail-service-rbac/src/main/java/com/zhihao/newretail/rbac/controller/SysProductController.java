@@ -73,6 +73,16 @@ public class SysProductController {
     }
 
     @RequiresLogin
+    @PostMapping("/sku/upload/image")
+    public R uploadSkuImage(@RequestPart MultipartFile file) throws IOException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        String imageUrl = sysProductService.uploadSkuImage(file);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", imageUrl);
+    }
+
+    @RequiresLogin
     @PostMapping("/spu/upload/slider")
     public R uploadSliderImage(@RequestPart MultipartFile[] files) throws IOException {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();

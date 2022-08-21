@@ -36,6 +36,11 @@ public interface SysProductService {
     String uploadSpuImage(MultipartFile file) throws IOException;
 
     /*
+    * 上传商品规格图片
+    * */
+    String uploadSkuImage(MultipartFile file) throws IOException;
+
+    /*
     * 上传商品轮播图
     * */
     List<String> uploadSpuSliderImage(MultipartFile[] files) throws IOException;

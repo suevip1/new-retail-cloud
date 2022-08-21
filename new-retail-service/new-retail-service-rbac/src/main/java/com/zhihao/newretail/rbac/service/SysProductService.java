@@ -16,16 +16,14 @@ public interface SysProductService {
     SpuApiVO getSpuApiVO(Integer spuId);
 
     /*
-    * 修改商品
-    * */
-    void updateSpu(Integer spuId, Integer categoryId, String title,
-                   String subTitle, MultipartFile showImage, MultipartFile[] sliderImage,
-                   String detailTitle, String detailPram, MultipartFile[] detailImage) throws IOException;
-
-    /*
     * 新增商品
     * */
     void addSpu(SpuForm form);
+
+    /*
+    * 修改商品
+    * */
+    void updateSpu(Integer spuId, SpuForm form);
 
     /*
     * 删除商品

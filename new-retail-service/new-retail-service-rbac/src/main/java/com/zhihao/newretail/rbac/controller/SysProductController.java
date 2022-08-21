@@ -44,18 +44,10 @@ public class SysProductController {
 
     @RequiresLogin
     @PutMapping("/spu/{spuId}")
-    public R spuUpdate(@PathVariable Integer spuId,
-                       @RequestParam Integer categoryId,
-                       @RequestParam String title,
-                       @RequestParam String subTitle,
-                       @RequestPart MultipartFile showImage,
-                       @RequestPart(required = false) MultipartFile[] sliderImage,
-                       @RequestParam(required = false) String detailTitle,
-                       @RequestParam(required = false) String detailPram,
-                       @RequestPart(required = false) MultipartFile[] detailImage) throws IOException {
+    public R spuUpdate(@PathVariable Integer spuId, @Valid @RequestBody SpuForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.updateSpu(spuId, categoryId, title, subTitle, showImage, sliderImage, detailTitle, detailPram, detailImage);
+        sysProductService.updateSpu(spuId, form);
         UserLoginContext.sysClean();
         return R.ok();
     }

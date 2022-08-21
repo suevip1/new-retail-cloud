@@ -10,6 +10,8 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.ExecutionException;
+
 @RestController
 public class SpuFeignController implements SpuFeignService {
 
@@ -40,7 +42,7 @@ public class SpuFeignController implements SpuFeignService {
 
     @Override
     @RequiresLogin
-    public void deleteSpu(Integer spuId) {
+    public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
         spuService.deleteSpu(spuId);
         UserLoginContext.sysClean();
     }

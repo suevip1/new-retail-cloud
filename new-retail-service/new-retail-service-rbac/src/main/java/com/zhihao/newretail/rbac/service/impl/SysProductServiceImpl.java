@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class SysProductServiceImpl implements SysProductService {
@@ -55,9 +56,12 @@ public class SysProductServiceImpl implements SysProductService {
         spuFeignService.updateSpu(spuId, spuUpdateApiDTO);
     }
 
-    /*
-    * 必传字段
-    * */
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
+        spuFeignService.deleteSpu(spuId);
+    }
+
     private SpuAddApiDTO buildSpuAddApiDTO(Integer categoryId, String title, String subTitle,
                                            MultipartFile showImage, MultipartFile[] sliderImage, String detailTitle,
                                            String detailPram, MultipartFile[] detailImage) throws IOException {

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 public class SysProductController {
@@ -48,6 +49,16 @@ public class SysProductController {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         sysProductService.updateSpu(spuId, categoryId, title, subTitle, showImage, sliderImage, detailTitle, detailPram, detailImage);
+        UserLoginContext.sysClean();
+        return R.ok();
+    }
+
+    @RequiresLogin
+    @DeleteMapping("/spu/{spuId}")
+    public R spuDelete(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        sysProductService.deleteSpu(spuId);
         UserLoginContext.sysClean();
         return R.ok();
     }

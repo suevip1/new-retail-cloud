@@ -6,6 +6,8 @@ import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.ExecutionException;
+
 @FeignClient(name = "new-retail-product", path = "/product")
 public interface SpuFeignService {
 
@@ -19,6 +21,6 @@ public interface SpuFeignService {
     void updateSpu(@PathVariable Integer spuId, @RequestBody SpuUpdateApiDTO spuUpdateApiDTO);
 
     @DeleteMapping("/api/spu/{spuId}")
-    void deleteSpu(@PathVariable Integer spuId);
+    void deleteSpu(@PathVariable Integer spuId) throws ExecutionException, InterruptedException;
 
 }

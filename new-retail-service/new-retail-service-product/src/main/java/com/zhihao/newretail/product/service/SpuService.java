@@ -7,6 +7,7 @@ import com.zhihao.newretail.product.pojo.Spu;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public interface SpuService {
 
@@ -28,7 +29,7 @@ public interface SpuService {
     /*
     * 删除商品
     * */
-    void deleteSpu(Integer spuId);
+    void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
 
     /*
     * 获取spu

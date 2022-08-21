@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
 public class SpuServiceImpl implements SpuService {
@@ -26,6 +29,9 @@ public class SpuServiceImpl implements SpuService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Autowired
+    private ThreadPoolExecutor executor;
 
     @Override
     public SpuApiVO getSpuApiVO(Integer spuId) {
@@ -68,16 +74,22 @@ public class SpuServiceImpl implements SpuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteSpu(Integer spuId) {
-        int deleteSpuRow = spuMapper.deleteByPrimaryKey(spuId);
-        if (deleteSpuRow > 0) {
+    public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
+        CompletableFuture<Void> deleteSpuFuture = CompletableFuture.runAsync(() -> {
+            int deleteSpuRow = spuMapper.deleteByPrimaryKey(spuId);
+            if (deleteSpuRow <= 0) {
+                throw new ServiceException("删除商品失败");
+            }
+        }, executor);
+
+        CompletableFuture<Void> deleteSupInfoFuture = CompletableFuture.runAsync(() -> {
             int deleteSupInfoRow = spuInfoMapper.deleteBySpuId(spuId);
             if (deleteSupInfoRow <= 0) {
                 throw new ServiceException("删除商品失败");
             }
-        } else {
-            throw new ServiceException("删除商品失败");
-        }
+        }, executor);
+
+        CompletableFuture.allOf(deleteSpuFuture, deleteSupInfoFuture).get();
     }
 
     @Override

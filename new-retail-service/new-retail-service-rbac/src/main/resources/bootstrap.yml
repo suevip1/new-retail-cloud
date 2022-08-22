@@ -12,6 +12,10 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         file-extension: yml
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   servlet:
     multipart:
       max-file-size: 10MB
@@ -36,3 +40,11 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
   mapper-locations: classpath*:mapper/*.xml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+feign:
+  sentinel:
+    enabled: true

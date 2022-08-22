@@ -4,7 +4,6 @@ import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
-import com.zhihao.newretail.product.pojo.SpuInfo;
 import com.zhihao.newretail.product.pojo.vo.GoodsVO;
 import com.zhihao.newretail.product.pojo.vo.ProductInfoVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;

@@ -12,9 +12,21 @@ spring:
       config:
         server-addr: 127.0.0.1:8848
         file-extension: yml
+    sentinel:
+      transport:
+        port: 8719
+        dashboard: localhost:8080
   main:
     allow-bean-definition-overriding: true
   redis:
     host: localhost
     port: 6379
     database: 1
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+feign:
+  sentinel:
+    enabled: true

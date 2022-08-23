@@ -14,6 +14,8 @@ import com.zhihao.newretail.product.service.SpuService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -40,16 +42,20 @@ public class ProductServiceImpl implements ProductService {
 
         CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
             Spu spu = spuService.getSpu(spuId);
-            ProductInfoVO productInfoVO = new ProductInfoVO();
-            BeanUtils.copyProperties(spu, productDetailVO);
-            BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
-            productDetailVO.setProductInfoVO(productInfoVO);
+            if (!ObjectUtils.isEmpty(spu)) {
+                ProductInfoVO productInfoVO = new ProductInfoVO();
+                BeanUtils.copyProperties(spu, productDetailVO);
+                BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
+                productDetailVO.setProductInfoVO(productInfoVO);
+            }
         }, executor);
 
         CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
             List<Sku> skuList = skuService.listSkuS(spuId);
-            List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
-            productDetailVO.setGoodsVOList(goodsVOList);
+            if (!CollectionUtils.isEmpty(skuList)) {
+                List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
+                productDetailVO.setGoodsVOList(goodsVOList);
+            }
         }, executor);
 
         CompletableFuture.allOf(detailFuture, goodsVOListFuture).get();

@@ -24,7 +24,7 @@ public class ProductController {
     @GetMapping("/detail/{spuId}")
     public R productDetail(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
         ProductDetailVO productDetailVO = productService.getProductDetailVO(spuId);
-        if (!ObjectUtils.isEmpty(productDetailVO)) {
+        if (!ObjectUtils.isEmpty(productDetailVO.getId())) {
             return R.ok().put("data", productDetailVO);
         } else {
             return R.error(HttpStatus.SC_NOT_FOUND, "商品不存在").put("data", productDetailVO);

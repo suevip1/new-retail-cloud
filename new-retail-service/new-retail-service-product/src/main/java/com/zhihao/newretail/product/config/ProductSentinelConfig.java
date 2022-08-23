@@ -16,7 +16,7 @@ public class ProductSentinelConfig implements BlockExceptionHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) throws Exception {
-        R error = R.error(HttpStatus.SC_SERVICE_UNAVAILABLE, "当前访问人数过多，请稍后重试");
+        R error = R.error(HttpStatus.SC_TOO_MANY_REQUESTS, "当前访问人数过多，请稍后重试");
         response.setHeader("Content-Type","application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");

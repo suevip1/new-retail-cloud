@@ -54,6 +54,9 @@ public class CartServiceImpl implements CartService {
         }
         /* 获取购物车商品 */
         List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
+        if (CollectionUtils.isEmpty(goodsApiVOList)) {
+            throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
+        }
 
         for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {
             Cart cart = (Cart) entry.getValue();
@@ -83,24 +86,31 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO addCart(Integer userId, CartAddForm form) {
         GoodsApiVO goodsApiVO = productFeignService.getGoodsApiVO(form.getSkuId());
-        if (ObjectUtils.isEmpty(goodsApiVO.getId())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品下架或删除");
-        }
-
-        String redisKey = String.format(CART_REDIS_KEY, userId);
-        Cart cart = (Cart) redisUtil.getMapValue(redisKey, goodsApiVO.getId());
-        if (ObjectUtils.isEmpty(cart)) {
-            cart = new Cart(
-                    goodsApiVO.getSpuId(),
-                    goodsApiVO.getId(),
-                    form.getQuantity(),
-                    form.getSelected()
-            );
+        if (ObjectUtils.isEmpty(goodsApiVO)) {
+            /*
+            * 远程调用返回空对象表示执行熔断保护方法 com.zhihao.newretail.api.product.fallback.ProductFeignFallback.class
+            * 远程调用上级服务没有结果 Ribbon 会触发兜底创建对象(对象所有值为null)返回
+            * */
+            throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
         } else {
-            cart.setQuantity(cart.getQuantity() + form.getQuantity());
+            if (ObjectUtils.isEmpty(goodsApiVO.getId())) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品下架或删除");
+            }
+            String redisKey = String.format(CART_REDIS_KEY, userId);
+            Cart cart = (Cart) redisUtil.getMapValue(redisKey, goodsApiVO.getId());
+            if (ObjectUtils.isEmpty(cart)) {
+                cart = new Cart(
+                        goodsApiVO.getSpuId(),
+                        goodsApiVO.getId(),
+                        form.getQuantity(),
+                        form.getSelected()
+                );
+            } else {
+                cart.setQuantity(cart.getQuantity() + form.getQuantity());
+            }
+            redisUtil.setHash(redisKey, goodsApiVO.getId(), cart);
+            return getCartVO(userId);
         }
-        redisUtil.setHash(redisKey, goodsApiVO.getId(), cart);
-        return getCartVO(userId);
     }
 
     @Override

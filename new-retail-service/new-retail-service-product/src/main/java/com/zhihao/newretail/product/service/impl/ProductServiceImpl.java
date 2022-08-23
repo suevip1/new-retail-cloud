@@ -82,9 +82,11 @@ public class ProductServiceImpl implements ProductService {
     public GoodsApiVO getGoodsApiVO(Integer skuId) {
         GoodsApiVO goodsApiVO = new GoodsApiVO();
         Sku sku = skuService.getSku(skuId);
-        Spu spu = spuService.getSpu(sku.getSpuId());
-        BeanUtils.copyProperties(sku, goodsApiVO);
-        goodsApiVO.setTitle(spu.getTitle());
+        if (!ObjectUtils.isEmpty(sku)) {
+            Spu spu = spuService.getSpu(sku.getSpuId());
+            BeanUtils.copyProperties(sku, goodsApiVO);
+            goodsApiVO.setTitle(spu.getTitle());
+        }
         return goodsApiVO;
     }
 

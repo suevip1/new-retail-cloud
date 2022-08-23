@@ -1,14 +1,17 @@
 package com.zhihao.newretail.api.product.feign;
 
+import com.zhihao.newretail.api.product.fallback.ProductFeignFallback;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(name = "new-retail-product", path = "/product")
+@Primary
+@FeignClient(name = "new-retail-product", path = "/product", fallback = ProductFeignFallback.class)
 public interface ProductFeignService {
 
     @PostMapping("/api/goods/list")

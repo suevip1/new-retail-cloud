@@ -1,24 +1,25 @@
 package com.zhihao.newretail.cart.feign;
 
-import com.zhihao.newretail.api.cart.feign.CartFeignService;
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
-public class CartFeignController implements CartFeignService {
+public class CartFeignClient {
 
     @Autowired
     private CartService cartService;
 
     @RequiresLogin
-    @Override
-    public List<CartApiVO> listCartApiVOs() {
+    @GetMapping("/api/cart/list")
+    public List<CartApiVO> listCartApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CartApiVO> cartApiVOList = cartService.listCartApiVOs(userId);
         UserLoginContext.clean();
@@ -26,7 +27,7 @@ public class CartFeignController implements CartFeignService {
     }
 
     @RequiresLogin
-    @Override
+    @PutMapping("/api/cart")
     public void deleteCartBySelected() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         cartService.deleteCartBySelected(userId);

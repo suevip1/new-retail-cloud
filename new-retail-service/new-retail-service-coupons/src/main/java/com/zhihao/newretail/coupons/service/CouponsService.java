@@ -15,6 +15,6 @@ public interface CouponsService {
     /*
     * 获取优惠券列表
     * */
-    List<CouponsApiVO> listCouponsApiVOs(Set<Integer> couponsIdSet);
+    List<CouponsApiVO> listCouponsApiVOS(Set<Integer> couponsIdSet);
 
 }

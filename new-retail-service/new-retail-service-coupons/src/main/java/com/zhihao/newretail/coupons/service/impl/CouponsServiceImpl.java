@@ -27,7 +27,7 @@ public class CouponsServiceImpl implements CouponsService {
     }
 
     @Override
-    public List<CouponsApiVO> listCouponsApiVOs(Set<Integer> couponsIdSet) {
+    public List<CouponsApiVO> listCouponsApiVOS(Set<Integer> couponsIdSet) {
         List<Coupons> couponsList = couponsMapper.selectListByCouponsIdSet(couponsIdSet);
         return couponsList.stream()
                 .map(coupons -> {

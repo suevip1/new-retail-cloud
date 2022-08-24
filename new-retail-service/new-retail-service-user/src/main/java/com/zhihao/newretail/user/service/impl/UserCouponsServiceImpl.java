@@ -1,6 +1,5 @@
 package com.zhihao.newretail.user.service.impl;
 
-import com.zhihao.newretail.api.coupons.dto.CouponsBatchApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
@@ -30,9 +29,7 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     public List<CouponsApiVO> listUserCouponsVOs(Integer userId) {
         List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
         Set<Integer> couponsIdSet = userCouponsList.stream().map(UserCoupons::getCouponsId).collect(Collectors.toSet());
-        CouponsBatchApiDTO couponsBatchApiDTO = new CouponsBatchApiDTO();
-        couponsBatchApiDTO.setCouponsIdSet(couponsIdSet);
-        return couponsFeignService.listCouponsApiVOs(couponsBatchApiDTO);
+        return couponsFeignService.listCouponsApiVOS(couponsIdSet);
     }
 
     @Override
@@ -41,7 +38,7 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     }
 
     @Override
-    public List<UserCouponsApiVO> listUserCouponsApiVOs(Integer userId) {
+    public List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId) {
         List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
         return userCouponsList.stream()
                 .map(userCoupons -> {

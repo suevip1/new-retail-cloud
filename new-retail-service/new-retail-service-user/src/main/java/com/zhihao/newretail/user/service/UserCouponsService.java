@@ -22,7 +22,7 @@ public interface UserCouponsService {
     /*
     * 获取优惠券列表
     * */
-    List<UserCouponsApiVO> listUserCouponsApiVOs(Integer userId);
+    List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId);
 
     /*
     * 更新优惠券数量

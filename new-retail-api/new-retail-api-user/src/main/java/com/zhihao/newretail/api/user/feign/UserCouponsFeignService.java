@@ -1,19 +1,22 @@
 package com.zhihao.newretail.api.user.feign;
 
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
+import com.zhihao.newretail.api.user.fallback.UserCouponsFeignFallback;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "new-retail-user", path = "/user")
+@Primary
+@FeignClient(name = "new-retail-user", path = "/user", fallback = UserCouponsFeignFallback.class)
 public interface UserCouponsFeignService {
 
     @GetMapping("/api/userCoupons/list")
-    List<UserCouponsApiVO> listUserCouponsApiVOs();
+    List<UserCouponsApiVO> listUserCouponsApiVOS();
 
     @PutMapping("/api/userCoupons")
     int consumeCoupons(@RequestBody UserCouponsApiDTO userCouponsApiDTO);

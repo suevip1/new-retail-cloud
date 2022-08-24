@@ -22,7 +22,7 @@ public class OrderController {
 
     @RequiresLogin
     @GetMapping("/order/create")
-    public R orderCreate() throws ExecutionException, InterruptedException {
+    public R orderCreate() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         OrderCreateVO orderCreateVO = orderService.getOrderCreateVO(userId);
         UserLoginContext.clean();

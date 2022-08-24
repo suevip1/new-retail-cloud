@@ -14,7 +14,7 @@ public interface OrderService {
     /*
     * 订单提交页
     * */
-    OrderCreateVO getOrderCreateVO(Integer userId) throws ExecutionException, InterruptedException;
+    OrderCreateVO getOrderCreateVO(Integer userId);
 
     /*
     * 创建新订单

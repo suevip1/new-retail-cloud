@@ -37,7 +37,7 @@ public interface UserAddressService {
     /*
     * 获取收货地址列表
     * */
-    List<UserAddressApiVO> listUserAddressApiVOs(Integer userId);
+    List<UserAddressApiVO> listUserAddressApiVOS(Integer userId);
 
     /*
     * 获取收货地址信息

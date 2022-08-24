@@ -86,7 +86,7 @@ public class UserAddressServiceImpl implements UserAddressService {
     }
 
     @Override
-    public List<UserAddressApiVO> listUserAddressApiVOs(Integer userId) {
+    public List<UserAddressApiVO> listUserAddressApiVOS(Integer userId) {
         List<UserAddress> userAddressList = userAddressMapper.selectListByUserId(userId);
         return userAddressList.stream()
                 .map(userAddress -> {

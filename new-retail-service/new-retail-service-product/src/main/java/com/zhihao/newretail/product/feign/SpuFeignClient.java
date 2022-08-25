@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-public class SpuFeignController implements SpuFeignService {
+public class SpuFeignClient implements SpuFeignService {
 
     @Autowired
     private SpuService spuService;

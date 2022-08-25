@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class CategoryFeignController implements CategoryFeignService {
+public class CategoryFeignClient implements CategoryFeignService {
 
     @Autowired
     private CategoryService categoryService;

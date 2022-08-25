@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-public class SpecParamFeignController implements SpecParamFeignService {
+public class SpecParamFeignClient implements SpecParamFeignService {
 
     @Autowired
     private SpecParamService specParamService;

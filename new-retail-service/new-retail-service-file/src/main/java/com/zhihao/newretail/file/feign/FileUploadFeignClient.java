@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-public class FileUploadFeignController implements FileUploadFeignService {
+public class FileUploadFeignClient implements FileUploadFeignService {
 
     @Autowired
     private FileService fileService;

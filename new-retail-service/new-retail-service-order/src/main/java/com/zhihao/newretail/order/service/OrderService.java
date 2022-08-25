@@ -5,8 +5,7 @@ import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
-
-import java.util.List;
+import com.zhihao.newretail.core.util.PageUtil;
 
 public interface OrderService {
 
@@ -28,7 +27,7 @@ public interface OrderService {
     /*
      * 获取订单列表
      * */
-    List<OrderVO> listOrderVOS(Integer userId, Integer status);
+    PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize);
 
     /*
     * 用户取消订单

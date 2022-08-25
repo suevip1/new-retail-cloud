@@ -19,6 +19,11 @@ public interface OrderMapper {
 
     int updateByPrimaryKey(Order record);
 
-    List<Order> selectListByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") Integer status);
+    int countByUserId(Integer userId);
+
+    List<Order> selectList(@Param("userId") Integer userId,
+                           @Param("status") Integer status,
+                           @Param("pageNum") Integer pageNum,
+                           @Param("pageSize") Integer pageSize);
 
 }

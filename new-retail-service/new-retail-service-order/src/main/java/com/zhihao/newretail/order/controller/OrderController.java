@@ -5,13 +5,13 @@ import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
 import com.zhihao.newretail.order.pojo.vo.OrderVO;
 import com.zhihao.newretail.order.service.OrderService;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 public class OrderController {
@@ -62,12 +62,14 @@ public class OrderController {
 
     @RequiresLogin
     @GetMapping("/order/list")
-    public R orderList(@RequestParam(name = "status", required = false) Integer status) {
+    public R orderList(@RequestParam(required = false) Integer status,
+                       @RequestParam(defaultValue = "1") Integer pageNum,
+                       @RequestParam(defaultValue = "5") Integer pageSize) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        List<OrderVO> orderVOList = orderService.listOrderVOS(userId, status);
+        PageUtil<OrderVO> pageData = orderService.listOrderVOS(userId, status, pageNum, pageSize);
         UserLoginContext.clean();
 
-        return R.ok().put("data", orderVOList);
+        return R.ok().put("data", pageData);
     }
 
 }

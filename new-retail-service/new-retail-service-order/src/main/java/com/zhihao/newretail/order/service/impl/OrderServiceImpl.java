@@ -32,6 +32,7 @@ import com.zhihao.newretail.order.pojo.OrderItem;
 import com.zhihao.newretail.order.pojo.vo.*;
 import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
@@ -375,21 +376,24 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderVO> listOrderVOS(Integer userId, Integer status) {
-        List<Order> orderList = orderMapper.selectListByUserIdAndStatus(userId, status);
-        if (CollectionUtils.isEmpty(orderList)) {
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "暂无数据");
+    public PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize) {
+        PageUtil<OrderVO> pageUtil = new PageUtil<>();
+        int count = orderMapper.countByUserId(userId);
+        List<Order> orderList = orderMapper.selectList(userId, status, pageNum, pageSize);
+        pageUtil.setPageNum(pageNum);
+        pageUtil.setPageSize(pageSize);
+        pageUtil.setTotal((long) count);
+        if (!CollectionUtils.isEmpty(orderList)) {
+            Set<Long> orderIdSet = orderList.stream().map(Order::getId).collect(Collectors.toSet());
+            List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);     // 订单项列表
+            List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);       // 订单商品列表
+            if (CollectionUtils.isEmpty(goodsApiVOList)) { return pageUtil; }
+            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
+            List<OrderVO> orderVOList = buildOrderVOList(orderList, orderItemVOList);
+            pageUtil.setList(orderVOList);
+            return pageUtil;
         }
-        /* 订单项列表 */
-        Set<Long> orderIdSet = orderList.stream().map(Order::getId).collect(Collectors.toSet());
-        List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);
-        /* 订单商品列表 */
-        List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
-        if (CollectionUtils.isEmpty(goodsApiVOList)) {
-            return null;
-        }
-        List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
-        return buildOrderVOList(orderList, orderItemVOList);
+        return pageUtil;
     }
 
     @Override

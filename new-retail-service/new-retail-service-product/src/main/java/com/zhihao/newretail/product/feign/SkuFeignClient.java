@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.concurrent.ExecutionException;
 
 @RestController
-public class SkuFeignController implements SkuFeignService {
+public class SkuFeignClient implements SkuFeignService {
 
     @Autowired
     private SkuService skuService;

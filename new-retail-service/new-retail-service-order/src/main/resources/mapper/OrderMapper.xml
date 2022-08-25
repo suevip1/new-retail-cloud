@@ -217,11 +217,14 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-  <select id="countByUserId" parameterType="java.lang.Integer" resultType="int">
+  <select id="countByUserIdAndStatus" parameterType="java.lang.Integer" resultType="int">
     select
     count(*)
     from tb_order
     where user_id = #{userId,jdbcType=INTEGER} and is_delete = 0
+    <if test="status != null">
+      and status = #{status,jdbcType=TINYINT}
+    </if>
   </select>
 
   <select id="selectList" parameterType="java.lang.Object" resultMap="BaseResultMap">

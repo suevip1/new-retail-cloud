@@ -378,21 +378,26 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize) {
         PageUtil<OrderVO> pageUtil = new PageUtil<>();
-        int count = orderMapper.countByUserId(userId);
-        List<Order> orderList = orderMapper.selectList(userId, status, pageNum, pageSize);
-        pageUtil.setPageNum(pageNum);
-        pageUtil.setPageSize(pageSize);
-        pageUtil.setTotal((long) count);
-        if (!CollectionUtils.isEmpty(orderList)) {
-            Set<Long> orderIdSet = orderList.stream().map(Order::getId).collect(Collectors.toSet());
-            List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);     // 订单项列表
-            List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);       // 订单商品列表
-            if (CollectionUtils.isEmpty(goodsApiVOList)) { return pageUtil; }
-            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
-            List<OrderVO> orderVOList = buildOrderVOList(orderList, orderItemVOList);
-            pageUtil.setList(orderVOList);
-            return pageUtil;
-        }
+        CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
+            int count = orderMapper.countByUserIdAndStatus(userId, status);
+            pageUtil.setPageNum(pageNum);
+            pageUtil.setPageSize(pageSize);
+            pageUtil.setTotal((long) count);
+        }, executor);
+        CompletableFuture<Void> listFuture = CompletableFuture.supplyAsync(() ->
+                orderMapper.selectList(userId, status, pageNum, pageSize), executor).thenAccept((res) -> {
+            if (!CollectionUtils.isEmpty(res)) {
+                Set<Long> orderIdSet = res.stream().map(Order::getId).collect(Collectors.toSet());
+                List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderIdSet);     // 订单项列表
+                List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);       // 订单商品列表
+                if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                    List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
+                    List<OrderVO> orderVOList = buildOrderVOList(res, orderItemVOList);
+                    pageUtil.setList(orderVOList);
+                }
+            }
+        });
+        CompletableFuture.allOf(countTotalFuture, listFuture).join();
         return pageUtil;
     }
 

@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class UserFeignController implements UserFeignService {
+public class UserFeignClient implements UserFeignService {
 
     @Autowired
     private UserService userService;

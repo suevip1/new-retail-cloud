@@ -1,16 +1,18 @@
 package com.zhihao.newretail.api.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
-import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
+import com.zhihao.newretail.api.product.fallback.StockFeignFallback;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Set;
 
-@FeignClient(name = "new-retail-product", path = "/product")
+@Primary
+@FeignClient(name = "new-retail-product", path = "/product", fallback = StockFeignFallback.class)
 public interface StockFeignService {
 
     /*
@@ -29,6 +31,6 @@ public interface StockFeignService {
     * 批量锁定商品库存
     * */
     @PostMapping("/api/skuStock/batchLock")
-    int batchStockLock(@RequestBody SkuStockLockBatchApiDTO skuStockLockBatchApiDTO);
+    Integer batchStockLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList);
 
 }

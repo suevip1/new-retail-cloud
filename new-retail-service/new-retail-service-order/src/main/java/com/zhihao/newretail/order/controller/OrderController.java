@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 public class OrderController {
@@ -43,7 +42,7 @@ public class OrderController {
 
     @RequiresLogin
     @GetMapping("/order/{orderId}")
-    public R orderDetail(@PathVariable Long orderId) throws ExecutionException, InterruptedException {
+    public R orderDetail(@PathVariable Long orderId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         OrderVO orderVO = orderService.getOrderVO(userId, orderId);
         UserLoginContext.clean();

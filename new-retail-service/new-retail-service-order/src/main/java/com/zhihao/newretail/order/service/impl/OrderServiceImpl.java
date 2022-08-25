@@ -327,24 +327,31 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderVO getOrderVO(Integer userId, Long orderId) throws ExecutionException, InterruptedException {
+    public OrderVO getOrderVO(Integer userId, Long orderId) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         OrderVO orderVO = new OrderVO();
-        OrderAddressVO orderAddressVO = new OrderAddressVO();
-        OrderCouponsVO orderCouponsVO = new OrderCouponsVO();
-
         /* 订单信息 */
-        CompletableFuture<OrderVO> orderVOFuture = CompletableFuture.supplyAsync(() -> {
-            Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (ObjectUtils.isEmpty(order)
-                    || !userId.equals(order.getUserId())
-                    || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
-            }
-            BeanUtils.copyProperties(order, orderVO);
-            return orderVO;
-        }, executor);
-
+        CompletableFuture<Void> orderVOFuture = CompletableFuture.supplyAsync(() -> {
+                    Order order = orderMapper.selectByPrimaryKey(orderId);
+                    if (ObjectUtils.isEmpty(order)
+                            || !userId.equals(order.getUserId())
+                            || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
+                        throw new CompletionException("订单不存在", new RuntimeException());
+                    }
+                    BeanUtils.copyProperties(order, orderVO);
+                    return orderVO;
+                }, executor)
+                .thenAccept((res) -> {
+                    RequestContextHolder.setRequestAttributes(requestAttributes);
+                    if (!ObjectUtils.isEmpty(res.getCouponsId())) {
+                        CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(res.getCouponsId());
+                        if (!ObjectUtils.isEmpty(couponsApiVO)) {
+                            OrderCouponsVO orderCouponsVO = new OrderCouponsVO();
+                            BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+                            orderVO.setOrderCouponsVO(orderCouponsVO);
+                        }
+                    }
+                });
         /* 订单项列表 */
         CompletableFuture<Void> orderItemVOListFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
@@ -355,27 +362,15 @@ public class OrderServiceImpl implements OrderService {
                 orderVO.setOrderItemVOList(orderItemVOList);
             }
         }, executor);
-
         /* 订单收货地址快照 */
         CompletableFuture<Void> orderAddressVOFuture = CompletableFuture.runAsync(() -> {
             OrderAddress orderAddress = orderAddressMapper.selectByPrimaryKey(orderId);
+            OrderAddressVO orderAddressVO = new OrderAddressVO();
             BeanUtils.copyProperties(orderAddress, orderAddressVO);
             orderVO.setOrderAddressVO(orderAddressVO);
         }, executor);
 
-        /* 订单优惠券 */
-        CompletableFuture<Void> orderCouponsVOFuture = orderVOFuture.thenAcceptAsync((res) -> {
-            RequestContextHolder.setRequestAttributes(requestAttributes);
-            if (!ObjectUtils.isEmpty(res.getCouponsId())) {
-                CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(res.getCouponsId());
-                if (!ObjectUtils.isEmpty(couponsApiVO)) {
-                    BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
-                    orderVO.setOrderCouponsVO(orderCouponsVO);
-                }
-            }
-        }, executor);
-
-        CompletableFuture.allOf(orderVOFuture, orderItemVOListFuture, orderAddressVOFuture, orderCouponsVOFuture).get();
+        CompletableFuture.allOf(orderVOFuture, orderItemVOListFuture, orderAddressVOFuture).join();
         return orderVO;
     }
 

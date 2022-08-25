@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Email: cafebabe0508@163.com
  * */
 @RestController
-public class SysUserFeignController implements SysUserFeignService {
+public class SysUserFeignClient implements SysUserFeignService {
 
     @Autowired
     private SysUserService sysUserService;

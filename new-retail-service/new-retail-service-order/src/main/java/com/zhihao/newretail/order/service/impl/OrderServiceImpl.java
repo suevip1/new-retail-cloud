@@ -95,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
         OrderCreateVO orderCreateVO = new OrderCreateVO();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
+        /* 获取购物车选中的商品 */
         CompletableFuture<List<CartApiVO>> cartListFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             return cartFeignService.listCartApiVOS();
@@ -108,43 +109,37 @@ public class OrderServiceImpl implements OrderService {
                             throw new CompletionException("请选中商品再下单", new RuntimeException());
                         }
                     } catch (NullPointerException e) {
-                        // throw new ServiceException("服务繁忙");
                         throw new CompletionException("购物车服务繁忙", new RuntimeException());
                     }
-                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品
+                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
                 }, executor)
                 .thenApply((res) -> {
-                    List<CartApiVO> cartApiVOList = cartListFuture.join();
-                    List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
-                    cartApiVOList.forEach(cartApiVO -> {
-                        OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
-                        try {
+                    if (!CollectionUtils.isEmpty(res)) {
+                        List<CartApiVO> cartApiVOList = cartListFuture.join();
+                        List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
+                        cartApiVOList.forEach(cartApiVO -> {
+                            OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
                             buildOrderItemCreateVO(cartApiVO, res, orderItemCreateVO);      // 构造订单项
-                        } catch (NullPointerException e) {
-                            throw new CompletionException("商品服务繁忙", new RuntimeException());
-                        }
-                        orderItemCreateVOList.add(orderItemCreateVO);
-                    });
-                    /* 计算商品总价格 */
-                    BigDecimal totalPrice = orderItemCreateVOList.stream()
-                            .map(OrderItemCreateVO::getTotalPrice)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add);
-                    orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
-                    orderCreateVO.setTotalPrice(totalPrice);
-                    return totalPrice;
+                            orderItemCreateVOList.add(orderItemCreateVO);
+                        });
+                        /* 计算商品总价格 */
+                        BigDecimal totalPrice = orderItemCreateVOList.stream()
+                                .map(OrderItemCreateVO::getTotalPrice)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                        orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
+                        orderCreateVO.setTotalPrice(totalPrice);
+                        return totalPrice;
+                    }
+                    return BigDecimal.ZERO;
                 })
                 .thenAccept((res) -> {
                     RequestContextHolder.setRequestAttributes(requestAttributes);
                     List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOS();
-                    Set<Integer> couponsIdSet;
-                    try {
-                        couponsIdSet = userCouponsApiVOList.stream().map(UserCouponsApiVO::getCouponsId).collect(Collectors.toSet());
-                    } catch (NullPointerException e) {
-                        throw new CompletionException("用户优惠券服务繁忙", new RuntimeException());
-                    }
-                    try {
-                        List<CouponsApiVO> couponsApiVOList;
-                        couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSet);
+                    if (!CollectionUtils.isEmpty(userCouponsApiVOList)) {
+                        Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
+                                .map(UserCouponsApiVO::getCouponsId)
+                                .collect(Collectors.toSet());
+                        List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSet);
                         if (!CollectionUtils.isEmpty(couponsApiVOList)) {
                             /* 筛选可用优惠券(满减) */
                             List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
@@ -152,8 +147,6 @@ public class OrderServiceImpl implements OrderService {
                                     .collect(Collectors.toList());
                             orderCreateVO.setCouponsApiVOList(couponsApiVOS);
                         }
-                    } catch (NullPointerException e) {
-                        throw new CompletionException("优惠券服务繁忙", new RuntimeException());
                     }
                 });
 

@@ -8,10 +8,10 @@ import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 public class UserController {
@@ -34,6 +34,16 @@ public class UserController {
     public R userInfo() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
+        UserLoginContext.clean();
+
+        return R.ok().put("data", userInfoVO);
+    }
+
+    @RequiresLogin
+    @PutMapping("/userInfo/photo")
+    public R userInfo(@RequestPart MultipartFile file) throws IOException {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        UserInfoVO userInfoVO = userService.updateUserInfo(userId, file);
         UserLoginContext.clean();
 
         return R.ok().put("data", userInfoVO);

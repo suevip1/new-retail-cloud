@@ -1,10 +1,12 @@
 package com.zhihao.newretail.user.service.impl;
 
+import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
+import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.pojo.User;
@@ -20,6 +22,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @Service
@@ -30,6 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserInfoMapper userInfoMapper;
+
+    @Autowired
+    private FileUploadFeignService fileUploadFeignService;
 
     /*
      * 新增用户
@@ -112,12 +120,30 @@ public class UserServiceImpl implements UserService {
         throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }
 
+    @Override
+    public UserInfoVO updateUserInfo(Integer userId, MultipartFile file) throws IOException {
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+        String url = fileUploadFeignService.getFileUrl(file, FileUploadDirConst.USER_PHOTO);
+        userInfo.setPhoto(url);
+        int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
+        if (updateRow <= 0) {
+            throw new ServiceException("修改头像失败");
+        }
+        return userInfo2UserInfoVO(userInfo);
+    }
+
     /*
     * 雪花生成唯一ID
     * */
     private String getUserUUID() {
         SnowflakeIdWorker snowflakeIdWorker = new SnowflakeIdWorker(0, 0);
         return StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 4);
+    }
+
+    private UserInfoVO userInfo2UserInfoVO(UserInfo userInfo) {
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtils.copyProperties(userInfo, userInfoVO);
+        return userInfoVO;
     }
 
 }

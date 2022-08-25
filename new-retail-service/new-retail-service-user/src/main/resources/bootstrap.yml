@@ -16,6 +16,10 @@ spring:
       transport:
         port: 8719
         dashboard: localhost:8080
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
   main:
     allow-bean-definition-overriding: true
   shardingsphere:

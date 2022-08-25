@@ -2,6 +2,7 @@ package com.zhihao.newretail.user.service;
 
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.user.pojo.User;
+import com.zhihao.newretail.user.pojo.dto.UpdateNickNameDTO;
 import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,5 +31,10 @@ public interface UserService {
     * 用户修改头像
     * */
     UserInfoVO updateUserInfo(Integer userId, MultipartFile file) throws IOException;
+
+    /*
+    * 用户修改昵称
+    * */
+    UserInfoVO updateUserInfo(Integer userId, UpdateNickNameDTO updateNickNameDTO);
 
 }

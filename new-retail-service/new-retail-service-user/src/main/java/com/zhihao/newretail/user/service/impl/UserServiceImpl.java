@@ -11,6 +11,7 @@ import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.pojo.UserInfo;
+import com.zhihao.newretail.user.pojo.dto.UpdateNickNameDTO;
 import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
@@ -128,6 +129,17 @@ public class UserServiceImpl implements UserService {
         int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
         if (updateRow <= 0) {
             throw new ServiceException("修改头像失败");
+        }
+        return userInfo2UserInfoVO(userInfo);
+    }
+
+    @Override
+    public UserInfoVO updateUserInfo(Integer userId, UpdateNickNameDTO updateNickNameDTO) {
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+        userInfo.setNickName(updateNickNameDTO.getNickName());
+        int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
+        if (updateRow <= 0) {
+            throw new ServiceException("修改昵称失败");
         }
         return userInfo2UserInfoVO(userInfo);
     }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Email: cafebabe0508@163.com
  * */
 @RestController
-public class OrderFeignController implements OrderFeignService {
+public class OrderFeignClient implements OrderFeignService {
 
     @Autowired
     private OrderService orderService;

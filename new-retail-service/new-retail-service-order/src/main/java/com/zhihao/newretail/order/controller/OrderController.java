@@ -32,7 +32,7 @@ public class OrderController {
 
     @RequiresLogin
     @PostMapping("/order")
-    public R orderSubmit(@Valid @RequestBody OrderSubmitForm form) throws ExecutionException, InterruptedException {
+    public R orderSubmit(@Valid @RequestBody OrderSubmitForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         String uuid = UserLoginContext.getUserLoginInfo().getUuid();
         Long orderNo = orderService.insertOrder(userId, uuid, form);

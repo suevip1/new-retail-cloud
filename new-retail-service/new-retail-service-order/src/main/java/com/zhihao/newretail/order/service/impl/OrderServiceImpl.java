@@ -6,7 +6,6 @@ import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
-import com.zhihao.newretail.api.product.dto.SkuStockLockBatchApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.StockFeignService;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
@@ -102,15 +101,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         CompletableFuture<Void> orderItemCreateListFuture = cartListFuture.thenApplyAsync((res) -> {
-                    Set<Integer> skuIdSet;
-                    try {
-                        skuIdSet = res.stream().map(CartApiVO::getSkuId).collect(Collectors.toSet());
-                        if (CollectionUtils.isEmpty(skuIdSet)) {
-                            throw new CompletionException("请选中商品再下单", new RuntimeException());
-                        }
-                    } catch (NullPointerException e) {
-                        throw new CompletionException("购物车服务繁忙", new RuntimeException());
-                    }
+                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
                     return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
                 }, executor)
                 .thenApply((res) -> {
@@ -171,7 +162,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long insertOrder(Integer userId, String uuid, OrderSubmitForm form) throws ExecutionException, InterruptedException {
+    public Long insertOrder(Integer userId, String uuid, OrderSubmitForm form) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
         /* 防止重复下单 */
@@ -181,7 +172,6 @@ public class OrderServiceImpl implements OrderService {
         if (result == 0) {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "订单唯一标识错误");
         }
-
         Integer couponsId = form.getCouponsId();                    // 优惠券id
         Long orderNo = getOrderNo(uuid);                            // 订单号
         OrderAddress orderAddress = new OrderAddress();             // 订单收货地址
@@ -192,12 +182,16 @@ public class OrderServiceImpl implements OrderService {
         /* 用户收货地址 */
         CompletableFuture<Void> orderAddressFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
-            UserAddressApiVO userAddressApiVO = userAddressFeignService.getUserAddressApiVO(form.getAddressId());
-            if (ObjectUtils.isEmpty(userAddressApiVO.getId())) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+            try {
+                UserAddressApiVO userAddressApiVO = userAddressFeignService.getUserAddressApiVO(form.getAddressId());
+                if (ObjectUtils.isEmpty(userAddressApiVO.getId())) {
+                    throw new CompletionException("收货地址不存在", new RuntimeException());
+                }
+                BeanUtils.copyProperties(userAddressApiVO, orderAddress);
+                orderAddress.setOrderId(orderNo);
+            } catch (NullPointerException e) {
+                throw new CompletionException("用户收货地址服务繁忙", new RuntimeException());
             }
-            BeanUtils.copyProperties(userAddressApiVO, orderAddress);
-            orderAddress.setOrderId(orderNo);
         }, executor);
 
         /* 优惠券 */
@@ -205,49 +199,77 @@ public class OrderServiceImpl implements OrderService {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             if (!ObjectUtils.isEmpty(couponsId)) {
                 CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(couponsId);
+                if (ObjectUtils.isEmpty(couponsApiVO)) {
+                    throw new CompletionException("优惠券服务繁忙", new RuntimeException());
+                }
                 BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
             }
         }, executor);
 
-        /* 构造订单项(订单商品) */
-        CompletableFuture<Void> buildOrderItemFuture = CompletableFuture.runAsync(() -> {
+        /* 购物车选中的商品 */
+        CompletableFuture<List<CartApiVO>> cartListFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
-            List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOS();
-            Set<Integer> skuIdSet = cartApiVOList.stream().map(CartApiVO::getSkuId).collect(Collectors.toSet());
-            if (CollectionUtils.isEmpty(skuIdSet)) {
-                throw new ServiceException("请选中商品再下单");
-            }
-            /* 获取商品信息 */
-            List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
-            if (CollectionUtils.isEmpty(goodsApiVOList)) {
-                throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
-            }
-            Map<Integer, GoodsApiVO> goodsApiVOMap = goodsApiVOList2Map(goodsApiVOList);
-            /* 获取商品库存信息 */
-            List<SkuStockApiVO> skuStockApiVOList = stockFeignService.listSkuStockApiVOS(skuIdSet);
-            Map<Integer, SkuStockApiVO> skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
-
-            for (CartApiVO cartApiVO : cartApiVOList) {
-                /* 商品有效性校验 */
-                GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
-                if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
-                    throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                            "商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除");
-                }
-                /* 库存校验 */
-                SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
-                if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
-                    throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE,
-                            "商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足");
-                }
-                /* 构造订单项、锁定库存信息 */
-                OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), goodsApiVO);
-                orderItemList.add(orderItem);
-                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
-                skuStockLockApiDTOList.add(skuStockLockApiDTO);
-            }
+            return cartFeignService.listCartApiVOS();
         }, executor);
-        CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderItemFuture).get();
+
+        /* 构造订单项(订单商品) */
+        ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
+        ThreadLocal<Set<Integer>> skuIdSetThreadLocal = new ThreadLocal<>();
+        CompletableFuture<Void> buildOrderItemFuture = cartListFuture.thenApplyAsync((res) -> {
+                    List<CartApiVO> cartApiVOList = cartListFuture.join();
+                    cartListThreadLocal.set(cartApiVOList);
+                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(cartApiVOList);
+                    skuIdSetThreadLocal.set(skuIdSet);
+                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取商品信息
+                }, executor)
+                .thenAccept((res) -> {
+                    List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
+                    Set<Integer> skuIdSet = skuIdSetThreadLocal.get();
+                    Map<Integer, GoodsApiVO> goodsApiVOMap;
+                    try {
+                        goodsApiVOMap = goodsApiVOList2Map(res);
+                    } catch (NullPointerException e) {
+                        cartListThreadLocal.remove();
+                        skuIdSetThreadLocal.remove();
+                        throw new CompletionException("商品服务繁忙", new RuntimeException());
+                    }
+                    /* 获取商品库存信息 */
+                    List<SkuStockApiVO> skuStockApiVOList = stockFeignService.listSkuStockApiVOS(skuIdSet);
+                    Map<Integer, SkuStockApiVO> skuStockApiVOMap;
+                    try {
+                        skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
+                    } catch (NullPointerException e) {
+                        cartListThreadLocal.remove();
+                        skuIdSetThreadLocal.remove();
+                        throw new CompletionException("商品库存服务繁忙", new RuntimeException());
+                    }
+                    for (CartApiVO cartApiVO : cartApiVOList) {
+                        /* 商品有效性校验 */
+                        GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
+                        if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
+                            cartListThreadLocal.remove();
+                            skuIdSetThreadLocal.remove();
+                            throw new CompletionException("商品:" + goodsApiVO.getTitle()
+                                    + "商品规格ID:" + goodsApiVO.getId()
+                                    + "商品下架或删除", new RuntimeException());
+                        }
+                        /* 库存校验 */
+                        SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
+                        if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
+                            cartListThreadLocal.remove();
+                            skuIdSetThreadLocal.remove();
+                            throw new CompletionException("商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足", new RuntimeException());
+                        }
+                        /* 构造订单项、锁定库存信息 */
+                        OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), goodsApiVO);
+                        orderItemList.add(orderItem);
+                        SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
+                        skuStockLockApiDTOList.add(skuStockLockApiDTO);
+                    }
+                    cartListThreadLocal.remove();
+                    skuIdSetThreadLocal.remove();
+                });
+        CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, cartListFuture, buildOrderItemFuture).join();
 
         /* 订单信息保存数据库 */
         Order order;
@@ -266,7 +288,7 @@ public class OrderServiceImpl implements OrderService {
 
         /* 锁定商品库存 */
         try {
-            int batchStockLockRow = stockFeignService.batchStockLock(new SkuStockLockBatchApiDTO(skuStockLockApiDTOList));
+            int batchStockLockRow = stockFeignService.batchStockLock(skuStockLockApiDTOList);
             if (batchStockLockRow <= 0) {
                 throw new ServiceException("库存锁定失败");
             }
@@ -327,13 +349,11 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> orderItemVOListFuture = CompletableFuture.runAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderId);
-            /* 获取商品信息 */
-            List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
-            if (CollectionUtils.isEmpty(goodsApiVOList)) {
-                throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
+            List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);       // 获取商品信息
+            if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
+                orderVO.setOrderItemVOList(orderItemVOList);
             }
-            List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
-            orderVO.setOrderItemVOList(orderItemVOList);
         }, executor);
 
         /* 订单收货地址快照 */
@@ -348,9 +368,11 @@ public class OrderServiceImpl implements OrderService {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             if (!ObjectUtils.isEmpty(res.getCouponsId())) {
                 CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(res.getCouponsId());
-                BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+                if (!ObjectUtils.isEmpty(couponsApiVO)) {
+                    BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+                    orderVO.setOrderCouponsVO(orderCouponsVO);
+                }
             }
-            orderVO.setOrderCouponsVO(orderCouponsVO);
         }, executor);
 
         CompletableFuture.allOf(orderVOFuture, orderItemVOListFuture, orderAddressVOFuture, orderCouponsVOFuture).get();
@@ -369,10 +391,9 @@ public class OrderServiceImpl implements OrderService {
         /* 订单商品列表 */
         List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
         if (CollectionUtils.isEmpty(goodsApiVOList)) {
-            throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
+            return null;
         }
         List<OrderItemVO> orderItemVOList = buildOrderItemVOList(orderItemList, goodsApiVOList);
-
         return buildOrderVOList(orderList, orderItemVOList);
     }
 
@@ -518,6 +539,19 @@ public class OrderServiceImpl implements OrderService {
     private List<GoodsApiVO> listGoodsApiVOS(List<OrderItem> orderItemList) {
         Set<Integer> skuIdSet = orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet());
         return productFeignService.listGoodsApiVOS(skuIdSet);
+    }
+
+    private Set<Integer> cartApiVOListGetSkuIdSet(List<CartApiVO> cartApiVOList) {
+        Set<Integer> skuIdSet;
+        try {
+            skuIdSet = cartApiVOList.stream().map(CartApiVO::getSkuId).collect(Collectors.toSet());
+            if (CollectionUtils.isEmpty(skuIdSet)) {
+                throw new CompletionException("请选中商品再下单", new RuntimeException());
+            }
+        } catch (NullPointerException e) {
+            throw new CompletionException("购物车服务繁忙", new RuntimeException());
+        }
+        return skuIdSet;
     }
 
     /*

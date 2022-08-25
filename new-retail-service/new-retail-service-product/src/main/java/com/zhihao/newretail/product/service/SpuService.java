@@ -42,6 +42,11 @@ public interface SpuService {
     List<Spu> listSpuS(Integer categoryId);
 
     /*
+    * categoryId批量获取spuList
+    * */
+    List<Spu> listSpuSByCategoryIdSet(Set<Integer> categoryIdSet);
+
+    /*
     * 批量获取spuList
     * */
     List<Spu> listSpuS(Set<Integer> idSet);

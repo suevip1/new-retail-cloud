@@ -3,6 +3,7 @@ package com.zhihao.newretail.product.service;
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+import com.zhihao.newretail.product.pojo.Category;
 import com.zhihao.newretail.product.pojo.vo.CategoryVO;
 
 import java.util.List;
@@ -13,6 +14,11 @@ public interface CategoryService {
     * 商品分类列表
     * */
     List<CategoryVO> listCategoryVOS();
+
+    /*
+    * 商品分类列表
+    * */
+    List<Category> listCategories();
 
     /*
     * 商品分类列表(feign)

@@ -103,6 +103,11 @@ public class SpuServiceImpl implements SpuService {
     }
 
     @Override
+    public List<Spu> listSpuSByCategoryIdSet(Set<Integer> categoryIdSet) {
+        return spuMapper.selectSpuSpuInfoListByCategoryIdSet(categoryIdSet);
+    }
+
+    @Override
     public List<Spu> listSpuS(Set<Integer> idSet) {
         return spuMapper.selectListByIdSet(idSet);
     }

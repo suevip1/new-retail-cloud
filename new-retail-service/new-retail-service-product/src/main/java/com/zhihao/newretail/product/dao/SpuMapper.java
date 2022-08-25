@@ -26,6 +26,11 @@ public interface SpuMapper {
     List<Spu> selectListByIdSet(@Param("idSet") Set<Integer> idSet);
 
     /*
+    * categoryId批量查询spuList
+    * */
+    List<Spu> selectSpuSpuInfoListByCategoryIdSet(@Param("categoryIdSet") Set<Integer> categoryIdSet);
+
+    /*
     * spu spuInfo连表查询多条数据
     * */
     List<Spu> selectSpuSpuInfoListByCategoryId(Integer categoryId);

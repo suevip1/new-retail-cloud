@@ -33,6 +33,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<Category> listCategories() {
+        List<Category> categoryList = categoryMapper.selectListByAll();
+        return categoryList.stream()
+                .filter(category -> CategoryEnum.ROOT_NODE.getCode().equals(category.getParentId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CategoryApiVO> listCategoryApiVOS() {
         List<Category> categoryList = categoryMapper.selectListByAll();
         return categoryList.stream().map(this::category2CategoryApiVO).collect(Collectors.toList());

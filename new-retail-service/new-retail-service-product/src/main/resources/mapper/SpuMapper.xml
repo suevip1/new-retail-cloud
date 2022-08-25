@@ -211,6 +211,20 @@
     </foreach>
   </select>
 
+  <select id="selectSpuSpuInfoListByCategoryIdSet" parameterType="java.util.Set" resultMap="SpuSpuInfo">
+    select
+    s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
+    sif.id as spuinfoid, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
+    from
+    tb_spu as s
+    left join tb_spu_info as sif on s.id = sif.spu_id
+    where
+    <foreach collection="categoryIdSet" item="item" index="index" separator="or">
+      s.category_id = #{item}
+    </foreach>
+    order by s.create_time desc
+  </select>
+
   <select id="selectSpuSpuInfoListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
     <include refid="Spu_SpuInfo" />
     <if test="categoryId != null">

@@ -20,6 +20,8 @@ public interface SpuMapper {
 
     int updateByPrimaryKey(Spu record);
 
+    int countByCategoryId(Integer categoryId);
+
     /*
     * 批量查询
     * */
@@ -38,7 +40,9 @@ public interface SpuMapper {
     /*
     * spu spuInfo sku连表查询多条数据
     * */
-    List<Spu> selectSpuSpuInfoSkuListByCategoryId(Integer categoryId);
+    List<Spu> selectSpuSpuInfoSkuListByCategoryId(@Param("categoryId") Integer categoryId,
+                                                  @Param("pageNum") Integer pageNum,
+                                                  @Param("pageSize") Integer pageSize);
 
     /*
     * spu spuInfo连表查询单条数据

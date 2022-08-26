@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.GoodsVO;
@@ -91,20 +92,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductVO> listProductVOS(Integer categoryId) {
-        List<Spu> spuList = spuService.listSpuS(categoryId);
-        return spuList.stream()
-                .map(spu -> {
-                    ProductVO productVO = new ProductVO();
-                    BeanUtils.copyProperties(spu, productVO);
-                    productVO.setShowImage(spu.getSpuInfo().getShowImage());
-                    return productVO;
-                }).collect(Collectors.toList());
+    public PageUtil<ProductVO> listProductVOS(Integer categoryId, Integer pageNum, Integer pageSize) {
+        PageUtil<ProductVO> pageUtil = new PageUtil<>();
+        CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
+            int total = spuService.countByCategoryId(categoryId);
+            pageUtil.setPageNum(pageNum);
+            pageUtil.setPageSize(pageSize);
+            pageUtil.setTotal((long) total);
+        }, executor);
+        CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
+            List<Spu> spuList = spuService.listSpuS(categoryId, pageNum, pageSize);
+            List<ProductVO> productVOList = spuList.stream()
+                    .map(spu -> {
+                        ProductVO productVO = new ProductVO();
+                        BeanUtils.copyProperties(spu, productVO);
+                        productVO.setShowImage(spu.getSpuInfo().getShowImage());
+                        return productVO;
+                    }).collect(Collectors.toList());
+            pageUtil.setList(productVOList);
+        }, executor);
+        CompletableFuture.allOf(countTotalFuture, listFuture).join();
+        return pageUtil;
     }
 
     @Override
     public List<ProductApiVO> listProductApiVOS(Integer categoryId) {
-        List<Spu> spuList = spuService.listSpuS(categoryId);
+        List<Spu> spuList = spuService.listSpuS(categoryId, null, null);
         return spuList.stream().map(this::spu2ProductApiVO).collect(Collectors.toList());
     }
 

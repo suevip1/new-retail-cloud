@@ -65,23 +65,23 @@
   </sql>
 
   <sql id="Spu_SpuInfo">
-    SELECT
+    select
       s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
-      sif.id AS spuInfoId, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
-    FROM
-      tb_spu AS s
-        JOIN tb_spu_info AS sif ON s.id = sif.spu_id
+      sif.id as spuinfoid, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
+    from
+      tb_spu as s
+        left join tb_spu_info as sif on s.id = sif.spu_id
   </sql>
 
   <sql id="Spu_SpuInfo_SkuList">
-    SELECT
+    select
       s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
-      sif.id AS spuInfoId, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete,
-      sku.id AS skuId, sku.spu_id, sku.sku_image, sku.param, sku.price, sku.is_saleable, sku.is_delete, sku.create_time, sku.update_time
-    FROM
-      tb_spu AS s
-        JOIN tb_spu_info AS sif ON s.id = sif.spu_id
-        JOIN tb_sku AS sku ON s.id = sku.spu_id
+      sif.id as spuinfoid, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete,
+      sku.id as skuid, sku.spu_id, sku.sku_image, sku.param, sku.price, sku.is_saleable, sku.is_delete, sku.create_time, sku.update_time
+    from
+      tb_spu as s
+        left join tb_spu_info as sif on s.id = sif.spu_id
+        left join tb_sku as sku on s.id = sku.spu_id
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -201,23 +201,25 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <select id="countByCategoryId" parameterType="java.lang.Integer" resultType="int">
+    select
+    count(*)
+    from tb_spu
+    where category_id = #{categoryId,jdbcType=INTEGER}
+  </select>
+
   <select id="selectListByIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from tb_spu
-    where is_saleable = 1 and is_delete = 0
+    where is_saleable = 1
     <foreach collection="idSet" item="item" open="and" separator="or">
       id = #{item}
     </foreach>
   </select>
 
   <select id="selectSpuSpuInfoListByCategoryIdSet" parameterType="java.util.Set" resultMap="SpuSpuInfo">
-    select
-    s.id, s.category_id, s.title, s.sub_title, s.is_saleable, s.is_delete, s.create_time, s.update_time,
-    sif.id as spuinfoid, sif.spu_id, sif.show_image, sif.slider_image, sif.detail_title, sif.detail_pram, sif.detail_image, sif.is_delete
-    from
-    tb_spu as s
-    left join tb_spu_info as sif on s.id = sif.spu_id
+    <include refid="Spu_SpuInfo" />
     where
     <foreach collection="categoryIdSet" item="item" index="index" separator="or">
       s.category_id = #{item}
@@ -228,14 +230,18 @@
   <select id="selectSpuSpuInfoListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfo">
     <include refid="Spu_SpuInfo" />
     <if test="categoryId != null">
-      where s.category_id = #{categoryId,jdbcType=INTEGER} and s.is_delete = 0
+      where s.category_id = #{categoryId,jdbcType=INTEGER}
     </if>
   </select>
 
   <select id="selectSpuSpuInfoSkuListByCategoryId" parameterType="java.lang.Integer" resultMap="SpuSpuInfoSkuList">
     <include refid="Spu_SpuInfo_SkuList" />
     <if test="categoryId != null">
-      where s.category_id = #{categoryId,jdbcType=INTEGER} and s.is_delete = 0
+      where s.category_id = #{categoryId,jdbcType=INTEGER}
+    </if>
+    <if test="pageNum != null and pageSize != null">
+      <bind name="page_start" value="(pageNum - 1) * pageSize"/>
+      limit #{page_start}, #{pageSize,jdbcType=INTEGER}
     </if>
   </select>
 

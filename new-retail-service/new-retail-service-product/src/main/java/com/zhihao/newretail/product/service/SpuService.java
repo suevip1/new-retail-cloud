@@ -32,6 +32,11 @@ public interface SpuService {
     void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
 
     /*
+    * countByCategoryId
+    * */
+    int countByCategoryId(Integer categoryId);
+
+    /*
     * 获取spu
     * */
     Spu getSpu(Integer spuId);
@@ -39,7 +44,7 @@ public interface SpuService {
     /*
     * categoryId获取spuList
     * */
-    List<Spu> listSpuS(Integer categoryId);
+    List<Spu> listSpuS(Integer categoryId, Integer pageNum, Integer pageSize);
 
     /*
     * categoryId批量获取spuList

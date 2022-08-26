@@ -93,13 +93,18 @@ public class SpuServiceImpl implements SpuService {
     }
 
     @Override
+    public int countByCategoryId(Integer categoryId) {
+        return spuMapper.countByCategoryId(categoryId);
+    }
+
+    @Override
     public Spu getSpu(Integer spuId) {
         return spuMapper.selectSpuSpuInfoByPrimaryKey(spuId);
     }
 
     @Override
-    public List<Spu> listSpuS(Integer categoryId) {
-        return spuMapper.selectSpuSpuInfoSkuListByCategoryId(categoryId);
+    public List<Spu> listSpuS(Integer categoryId, Integer pageNum, Integer pageSize) {
+        return spuMapper.selectSpuSpuInfoSkuListByCategoryId(categoryId, pageNum, pageSize);
     }
 
     @Override

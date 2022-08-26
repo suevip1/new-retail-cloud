@@ -1,7 +1,3 @@
-server:
-  port: 4100
-  servlet:
-    context-path: /user
 spring:
   application:
     name: new-retail-user
@@ -50,7 +46,7 @@ spring:
           readwrite-lb:
             type: ROUND_ROBIN
     props:
-      sql-show: true
+      sql-show: false
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null

@@ -1,0 +1,4 @@
+server:
+  port: 4500
+  servlet:
+    context-path: /pay

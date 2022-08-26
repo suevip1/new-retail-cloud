@@ -1,7 +1,3 @@
-server:
-  port: 4700
-  servlet:
-    context-path: /rbac
 spring:
   application:
     name: new-retail-rbac

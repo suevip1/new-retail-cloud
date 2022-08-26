@@ -1,0 +1,4 @@
+server:
+  port: 4700
+  servlet:
+    context-path: /rbac

@@ -38,6 +38,8 @@ public class HomeServiceImpl implements HomeService {
 
     private static final String HOME_PRODUCT_LIST = "home_product_list";
 
+    private static final String PRESENT = null;
+
     @Override
     public List<HomeProductVO> listHomeProductVOS() {
         RLock lock = redissonClient.getLock("home-product-lock");
@@ -48,7 +50,7 @@ public class HomeServiceImpl implements HomeService {
                 List<HomeProductVO> homeProductVOList = getResources();
                 /* 返回结果为空，key存null值解决缓存穿透 */
                 if (CollectionUtils.isEmpty(homeProductVOList)) {
-                    redisUtil.setObject(HOME_PRODUCT_LIST, null, 43200L);
+                    redisUtil.setObject(HOME_PRODUCT_LIST, PRESENT, 43200L);
                 }
                 redisUtil.setObject(HOME_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 return homeProductVOList;

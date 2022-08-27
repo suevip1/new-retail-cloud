@@ -1,9 +1,10 @@
 package com.zhihao.newretail.order.feign;
 
-import com.zhihao.newretail.api.order.feign.OrderFeignService;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 /*
@@ -12,13 +13,13 @@ import org.springframework.web.bind.annotation.RestController;
  * @Email: cafebabe0508@163.com
  * */
 @RestController
-public class OrderFeignClient implements OrderFeignService {
+public class OrderFeignClient {
 
     @Autowired
     private OrderService orderService;
 
-    @Override
-    public OrderPayInfoApiVO getOrderPayInfoApiVO(Long orderId) {
+    @GetMapping("/api/order/{orderId}")
+    public OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId) {
         return orderService.getOrderPayInfoApiVO(orderId);
     }
 

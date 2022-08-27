@@ -15,6 +15,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -45,6 +46,10 @@ public class HomeServiceImpl implements HomeService {
             String str = (String) redisUtil.getObject(HOME_PRODUCT_LIST);
             if (StringUtils.isEmpty(str)) {
                 List<HomeProductVO> homeProductVOList = getResources();
+                /* 返回结果为空，key存null值解决缓存穿透 */
+                if (CollectionUtils.isEmpty(homeProductVOList)) {
+                    redisUtil.setObject(HOME_PRODUCT_LIST, null, 43200L);
+                }
                 redisUtil.setObject(HOME_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 return homeProductVOList;
             }

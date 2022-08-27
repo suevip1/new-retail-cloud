@@ -1,6 +1,6 @@
 package com.zhihao.newretail.order.service;
 
-import com.zhihao.newretail.api.order.vo.OrderApiVO;
+import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
@@ -45,8 +45,8 @@ public interface OrderService {
     Order getOrder(Long orderId);
 
     /*
-    * 获取订单信息
+    * 获取订单支付信息
     * */
-    OrderApiVO getOrderApiVO(Long orderId);
+    OrderPayInfoApiVO getOrderPayInfoApiVO(Long orderId);
 
 }

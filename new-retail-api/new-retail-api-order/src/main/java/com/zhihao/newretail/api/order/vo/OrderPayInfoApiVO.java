@@ -8,7 +8,7 @@ import java.util.Date;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
-public class OrderApiVO {
+public class OrderPayInfoApiVO {
 
     private Long id;
 
@@ -132,7 +132,7 @@ public class OrderApiVO {
 
     @Override
     public String toString() {
-        return "OrderApiVO{" +
+        return "OrderPayInfoApiVO{" +
                 "id=" + id +
                 ", orderCode='" + orderCode + '\'' +
                 ", userId=" + userId +

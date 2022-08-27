@@ -9,7 +9,7 @@ import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.zhihao.newretail.api.order.feign.OrderFeignService;
-import com.zhihao.newretail.api.order.vo.OrderApiVO;
+import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.GsonUtil;
@@ -60,12 +60,11 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public String getBody(Long orderId) throws AlipayApiException {
-        OrderApiVO orderApiVO = orderFeignService.getOrderApiVO(orderId);
-        if (ObjectUtils.isEmpty(orderApiVO.getId())
-                || DeleteEnum.DELETE.getCode().equals(orderApiVO.getIsDelete())) {
+        OrderPayInfoApiVO orderPayInfoApiVO = orderFeignService.getOrderPayInfoApiVO(orderId);
+        if (ObjectUtils.isEmpty(orderPayInfoApiVO.getId()) || DeleteEnum.DELETE.getCode().equals(orderPayInfoApiVO.getIsDelete())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
         }
-        if (!OrderStatusEnum.NOT_PAY.getCode().equals(orderApiVO.getStatus())) {
+        if (!OrderStatusEnum.NOT_PAY.getCode().equals(orderPayInfoApiVO.getStatus())) {
             throw new ServiceException("订单已关闭支付");
         }
 
@@ -82,18 +81,17 @@ public class PayServiceImpl implements PayService {
         request.setReturnUrl(aliPayPCPramConfig.getReturnUrl());
         request.setNotifyUrl(aliPayPCPramConfig.getNotifyUrl());
         JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", orderApiVO.getId());
-        bizContent.put("total_amount", orderApiVO.getActualAmount());
+        bizContent.put("out_trade_no", orderPayInfoApiVO.getId());
+        bizContent.put("total_amount", orderPayInfoApiVO.getActualAmount());
         bizContent.put("subject", "商品消费");
         bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
         request.setBizContent(bizContent.toString());
         AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
 
         if (response.isSuccess()) {
-
             PayInfo payInfo = payInfoService.getPayInfo(orderId);
             if (ObjectUtils.isEmpty(payInfo)) {
-                payInfo = buildPayInfo(orderApiVO);
+                payInfo = buildPayInfo(orderPayInfoApiVO);
                 payInfoService.insertPayInfo(payInfo);
             }
             return response.getBody();
@@ -141,11 +139,11 @@ public class PayServiceImpl implements PayService {
         }
     }
 
-    private PayInfo buildPayInfo(OrderApiVO orderApiVO) {
+    private PayInfo buildPayInfo(OrderPayInfoApiVO orderPayInfoApiVO) {
         PayInfo payInfo = new PayInfo();
-        payInfo.setOrderId(orderApiVO.getId());
-        payInfo.setUserId(orderApiVO.getUserId());
-        payInfo.setPayAmount(orderApiVO.getActualAmount());
+        payInfo.setOrderId(orderPayInfoApiVO.getId());
+        payInfo.setUserId(orderPayInfoApiVO.getUserId());
+        payInfo.setPayAmount(orderPayInfoApiVO.getActualAmount());
         payInfo.setPayPlatform(PayPlatformEnum.ALIPAY_PC.getCode());
         payInfo.setStatus(OrderStatusEnum.NOT_PAY.getCode());
         return payInfo;

@@ -1,7 +1,7 @@
 package com.zhihao.newretail.order.feign;
 
 import com.zhihao.newretail.api.order.feign.OrderFeignService;
-import com.zhihao.newretail.api.order.vo.OrderApiVO;
+import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +18,8 @@ public class OrderFeignClient implements OrderFeignService {
     private OrderService orderService;
 
     @Override
-    public OrderApiVO getOrderApiVO(Long orderId) {
-        return orderService.getOrderApiVO(orderId);
+    public OrderPayInfoApiVO getOrderPayInfoApiVO(Long orderId) {
+        return orderService.getOrderPayInfoApiVO(orderId);
     }
 
 }

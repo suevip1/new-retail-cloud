@@ -3,6 +3,7 @@ package com.zhihao.newretail.user.feign;
 import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
+import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.service.UserService;
@@ -11,6 +12,9 @@ import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.Set;
 
 @RestController
 public class UserFeignClient implements UserFeignService {
@@ -32,6 +36,11 @@ public class UserFeignClient implements UserFeignService {
         User user = new User();
         BeanUtils.copyProperties(userApiDTO, user);
         return userService.getUserApiVO(user);
+    }
+
+    @Override
+    public List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet) {
+        return userService.listUserInfoApiVOS(userIdSet);
     }
 
 }

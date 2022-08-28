@@ -26,6 +26,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -142,6 +145,16 @@ public class UserServiceImpl implements UserService {
             throw new ServiceException("修改昵称失败");
         }
         return userInfo2UserInfoVO(userInfo);
+    }
+
+    @Override
+    public List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet) {
+        List<UserInfo> userInfoList = userInfoMapper.selectListByUserIdSet(userIdSet);
+        return userInfoList.stream().map(userInfo -> {
+            UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
+            BeanUtils.copyProperties(userInfo, userInfoApiVO);
+            return userInfoApiVO;
+        }).collect(Collectors.toList());
     }
 
     /*

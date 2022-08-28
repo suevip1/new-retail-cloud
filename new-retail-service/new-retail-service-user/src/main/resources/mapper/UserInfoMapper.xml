@@ -117,4 +117,14 @@
     from tb_user_info
     where user_id = #{userId,jdbcType=INTEGER}
   </select>
+
+  <select id="selectListByUserIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_user_info
+    where
+    <foreach collection="userIdSet" item="item" separator="or">
+      user_id = #{item}
+    </foreach>
+  </select>
 </mapper>

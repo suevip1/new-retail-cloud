@@ -2,6 +2,8 @@ package com.zhihao.newretail.api.user.vo;
 
 public class UserInfoApiVO {
 
+    private Integer userId;
+
     private String nickName;
 
     private String photo;
@@ -9,6 +11,14 @@ public class UserInfoApiVO {
     private String gender;
 
     private Integer integral;
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
 
     public String getNickName() {
         return nickName;
@@ -45,7 +55,8 @@ public class UserInfoApiVO {
     @Override
     public String toString() {
         return "UserInfoApiVO{" +
-                "nickName='" + nickName + '\'' +
+                "userId=" + userId +
+                ", nickName='" + nickName + '\'' +
                 ", photo='" + photo + '\'' +
                 ", gender='" + gender + '\'' +
                 ", integral=" + integral +

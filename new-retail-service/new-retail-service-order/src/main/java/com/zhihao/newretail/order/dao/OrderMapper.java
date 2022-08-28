@@ -21,9 +21,17 @@ public interface OrderMapper {
 
     int countByUserIdAndStatus(@Param("userId") Integer userId, @Param("status") Integer status);
 
+    int countByRecord(@Param("id") Long id, @Param("userId") Integer userId, @Param("status") Integer status);
+
     List<Order> selectList(@Param("userId") Integer userId,
                            @Param("status") Integer status,
                            @Param("pageNum") Integer pageNum,
                            @Param("pageSize") Integer pageSize);
+
+    List<Order> selectOrderOrderAddressList(@Param("id") Long id,
+                                            @Param("userId") Integer userId,
+                                            @Param("status") Integer status,
+                                            @Param("pageNum") Integer pageNum,
+                                            @Param("pageSize") Integer pageSize);
 
 }

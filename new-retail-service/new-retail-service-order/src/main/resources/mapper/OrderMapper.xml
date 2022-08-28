@@ -19,9 +19,47 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
 
+  <resultMap id="OrderOrderAddress" type="com.zhihao.newretail.order.pojo.Order">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="order_index" jdbcType="INTEGER" property="orderIndex" />
+    <result column="order_code" jdbcType="VARCHAR" property="orderCode" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="amount" jdbcType="DECIMAL" property="amount" />
+    <result column="actual_amount" jdbcType="DECIMAL" property="actualAmount" />
+    <result column="postage" jdbcType="DECIMAL" property="postage" />
+    <result column="coupons_id" jdbcType="INTEGER" property="couponsId" />
+    <result column="payment_type" jdbcType="TINYINT" property="paymentType" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
+    <result column="order_sharding" jdbcType="INTEGER" property="orderSharding" />
+    <result column="mq_version" jdbcType="INTEGER" property="mqVersion" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <association column="tb_order_address" javaType="com.zhihao.newretail.order.pojo.OrderAddress" property="orderAddress" resultMap="OrderAddress" />
+  </resultMap>
+
+  <resultMap id="OrderAddress" type="com.zhihao.newretail.order.pojo.OrderAddress">
+    <id column="order_id" jdbcType="BIGINT" property="orderId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="tel" jdbcType="CHAR" property="tel" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="address_detail" jdbcType="VARCHAR" property="addressDetail" />
+    <result column="order_address_sharding" jdbcType="INTEGER" property="orderAddressSharding" />
+  </resultMap>
+
   <sql id="Base_Column_List">
     id, order_index, order_code, user_id, amount, actual_amount, postage, coupons_id, 
     payment_type, status, is_delete, order_sharding, mq_version, create_time, update_time
+  </sql>
+
+  <sql id="Order_OrderAddress">
+    select
+      o.id, o.order_index, o.order_code, o.user_id, o.amount, o.actual_amount, o.postage, coupons_id,
+      o.payment_type, o.status, o.is_delete, o.order_sharding, o.mq_version, o.create_time, o.update_time,
+      oa.order_id, oa.`name`, oa.tel, oa.address, oa.address_detail, oa.order_address_sharding
+    from
+      tb_order as o
+        left join tb_order_address as oa on o.id = oa.order_id
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -227,6 +265,23 @@
     </if>
   </select>
 
+  <select id="countByRecord" parameterType="java.lang.Object" resultType="int">
+    select
+    count(*)
+    from tb_order
+    where
+    <if test="id != null">
+      id = #{id,jdbcType=BIGINT} and
+    </if>
+    <if test="userId != null">
+      user_id = #{userId,jdbcType=INTEGER} and
+    </if>
+    <if test="status != null">
+      status = #{status,jdbcType=TINYINT} and
+    </if>
+    is_delete = 0
+  </select>
+
   <select id="selectList" parameterType="java.lang.Object" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
@@ -235,6 +290,26 @@
     <if test="status != null">
       and status = #{status,jdbcType=TINYINT}
     </if>
+    <if test="pageNum != null and pageSize != null">
+      <bind name="page_start" value="(pageNum - 1) * pageSize"/>
+      limit #{page_start}, #{pageSize,jdbcType=INTEGER}
+    </if>
+  </select>
+
+  <select id="selectOrderOrderAddressList" parameterType="java.lang.Object" resultMap="OrderOrderAddress">
+    <include refid="Order_OrderAddress" />
+    where
+    <if test="id != null">
+      o.id = #{id,jdbcType=BIGINT} and
+    </if>
+    <if test="userId != null">
+      o.user_id = #{userId,jdbcType=INTEGER} and
+    </if>
+    <if test="status != null">
+      o.`status` = #{status,jdbcType=TINYINT} and
+    </if>
+    o.is_delete = 1
+    order by o.create_time desc
     <if test="pageNum != null and pageSize != null">
       <bind name="page_start" value="(pageNum - 1) * pageSize"/>
       limit #{page_start}, #{pageSize,jdbcType=INTEGER}

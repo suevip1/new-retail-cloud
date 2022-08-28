@@ -1,5 +1,6 @@
 package com.zhihao.newretail.order.service;
 
+import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
@@ -28,6 +29,11 @@ public interface OrderService {
      * 获取订单列表
      * */
     PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize);
+
+    /*
+    * 获取订单列表(后台)
+    * */
+    PageUtil<OrderApiVO> listOrderApiVOS(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize);
 
     /*
     * 用户取消订单

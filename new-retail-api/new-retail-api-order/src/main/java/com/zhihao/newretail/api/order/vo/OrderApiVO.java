@@ -1,9 +1,10 @@
-package com.zhihao.newretail.order.pojo;
+package com.zhihao.newretail.api.order.vo;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
-public class Order {
+public class OrderApiVO {
 
     private Long id;
 
@@ -21,21 +22,23 @@ public class Order {
 
     private Integer couponsId;
 
+    private BigDecimal deno;
+
+    private BigDecimal condition;
+
     private Integer paymentType;
 
     private Integer status;
-
-    private Integer isDelete;
-
-    private Integer orderSharding;
-
-    private Integer mqVersion;
 
     private Date createTime;
 
     private Date updateTime;
 
-    private OrderAddress orderAddress;
+    private OrderUserApiVO orderUserApiVO;
+
+    private OrderAddressApiVO orderAddressApiVO;
+
+    private List<OrderItemApiVO> orderItemApiVOList;
 
     public Long getId() {
         return id;
@@ -101,6 +104,22 @@ public class Order {
         this.couponsId = couponsId;
     }
 
+    public BigDecimal getDeno() {
+        return deno;
+    }
+
+    public void setDeno(BigDecimal deno) {
+        this.deno = deno;
+    }
+
+    public BigDecimal getCondition() {
+        return condition;
+    }
+
+    public void setCondition(BigDecimal condition) {
+        this.condition = condition;
+    }
+
     public Integer getPaymentType() {
         return paymentType;
     }
@@ -115,30 +134,6 @@ public class Order {
 
     public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public Integer getIsDelete() {
-        return isDelete;
-    }
-
-    public void setIsDelete(Integer isDelete) {
-        this.isDelete = isDelete;
-    }
-
-    public Integer getOrderSharding() {
-        return orderSharding;
-    }
-
-    public void setOrderSharding(Integer orderSharding) {
-        this.orderSharding = orderSharding;
-    }
-
-    public Integer getMqVersion() {
-        return mqVersion;
-    }
-
-    public void setMqVersion(Integer mqVersion) {
-        this.mqVersion = mqVersion;
     }
 
     public Date getCreateTime() {
@@ -157,17 +152,33 @@ public class Order {
         this.updateTime = updateTime;
     }
 
-    public OrderAddress getOrderAddress() {
-        return orderAddress;
+    public OrderUserApiVO getOrderUserApiVO() {
+        return orderUserApiVO;
     }
 
-    public void setOrderAddress(OrderAddress orderAddress) {
-        this.orderAddress = orderAddress;
+    public void setOrderUserApiVO(OrderUserApiVO orderUserApiVO) {
+        this.orderUserApiVO = orderUserApiVO;
+    }
+
+    public OrderAddressApiVO getOrderAddressApiVO() {
+        return orderAddressApiVO;
+    }
+
+    public void setOrderAddressApiVO(OrderAddressApiVO orderAddressApiVO) {
+        this.orderAddressApiVO = orderAddressApiVO;
+    }
+
+    public List<OrderItemApiVO> getOrderItemApiVOList() {
+        return orderItemApiVOList;
+    }
+
+    public void setOrderItemApiVOList(List<OrderItemApiVO> orderItemApiVOList) {
+        this.orderItemApiVOList = orderItemApiVOList;
     }
 
     @Override
     public String toString() {
-        return "Order{" +
+        return "OrderApiVO{" +
                 "id=" + id +
                 ", orderIndex=" + orderIndex +
                 ", orderCode='" + orderCode + '\'' +
@@ -176,14 +187,15 @@ public class Order {
                 ", actualAmount=" + actualAmount +
                 ", postage=" + postage +
                 ", couponsId=" + couponsId +
+                ", deno=" + deno +
+                ", condition=" + condition +
                 ", paymentType=" + paymentType +
                 ", status=" + status +
-                ", isDelete=" + isDelete +
-                ", orderSharding=" + orderSharding +
-                ", mqVersion=" + mqVersion +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
-                ", orderAddress=" + orderAddress +
+                ", orderUserApiVO=" + orderUserApiVO +
+                ", orderAddressApiVO=" + orderAddressApiVO +
+                ", orderItemApiVOList=" + orderItemApiVOList +
                 '}';
     }
 

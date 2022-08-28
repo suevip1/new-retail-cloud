@@ -4,7 +4,7 @@ import com.zhihao.newretail.api.cart.feign.CartFeignService;
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
-import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
+import com.zhihao.newretail.api.order.vo.*;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.StockFeignService;
@@ -13,8 +13,10 @@ import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
+import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
+import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.GsonUtil;
@@ -39,6 +41,7 @@ import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
 import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -56,6 +59,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class OrderServiceImpl implements OrderService {
 
@@ -65,6 +69,8 @@ public class OrderServiceImpl implements OrderService {
     private ProductFeignService productFeignService;
     @Autowired
     private StockFeignService stockFeignService;
+    @Autowired
+    private UserFeignService userFeignService;
     @Autowired
     private UserAddressFeignService userAddressFeignService;
     @Autowired
@@ -402,6 +408,84 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public PageUtil<OrderApiVO> listOrderApiVOS(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize) {
+        PageUtil<OrderApiVO> pageUtil = new PageUtil<>();
+        ThreadLocal<List<Order>> orderListThreadLocal = new ThreadLocal<>();
+        ThreadLocal<Set<Long>> orderNoSetThreadLocal = new ThreadLocal<>();
+        ThreadLocal<Set<Integer>> userIdSetThreadLocal = new ThreadLocal<>();
+        ThreadLocal<Set<Integer>> couponsIdSetThreadLocal = new ThreadLocal<>();
+
+        CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
+            int count = orderMapper.countByRecord(orderNo, userId, status);
+            pageUtil.setPageNum(pageNum);
+            pageUtil.setPageSize(pageSize);
+            pageUtil.setTotal((long) count);
+        }, executor);
+        CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
+                    List<Order> orderList = orderMapper.selectOrderOrderAddressList(orderNo, userId, status, pageNum, pageSize);
+                    if (!CollectionUtils.isEmpty(orderList)) {
+                        orderListThreadLocal.set(orderList);
+                        orderNoSetThreadLocal.set(orderList.stream().map(Order::getId).collect(Collectors.toSet()));
+                        userIdSetThreadLocal.set(orderList.stream().map(Order::getUserId).collect(Collectors.toSet()));
+                        couponsIdSetThreadLocal.set(orderList.stream().map(Order::getCouponsId).collect(Collectors.toSet()));
+                    }
+                }, executor)
+                .thenApply((res) -> {
+                    if (!CollectionUtils.isEmpty(orderListThreadLocal.get())) {
+                        List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderNoSetThreadLocal.get());
+                        List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet()));
+                        return orderItemList.stream().map(orderItem -> {
+                            OrderItemApiVO orderItemApiVO = new OrderItemApiVO();
+                            BeanUtils.copyProperties(orderItem, orderItemApiVO);
+                            if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                                goodsApiVOList.stream()
+                                        .filter(goodsApiVO -> orderItem.getSkuId().equals(goodsApiVO.getId()))
+                                        .forEach(goodsApiVO -> {
+                                            orderItemApiVO.setSpuId(goodsApiVO.getSpuId());
+                                            orderItemApiVO.setTitle(goodsApiVO.getTitle());
+                                            orderItemApiVO.setSkuImage(goodsApiVO.getSkuImage());
+                                            orderItemApiVO.setParam(goodsApiVO.getParam());
+                                        });
+                            }
+                            return orderItemApiVO;
+                        }).collect(Collectors.toList());
+                    }
+                    return null;
+                })
+                .thenAccept((res) -> {
+                    if (!CollectionUtils.isEmpty(res)) {
+                        List<UserInfoApiVO> userInfoApiVOList = userFeignService.listUserInfoApiVOS(userIdSetThreadLocal.get());
+                        List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSetThreadLocal.get());
+                        List<OrderApiVO> orderApiVOList = orderListThreadLocal.get().stream().map(order -> {
+                            OrderApiVO orderApiVO = new OrderApiVO();
+                            BeanUtils.copyProperties(order, orderApiVO);
+                            userInfoApiVOList.stream().filter(userInfoApiVO -> order.getUserId().equals(userInfoApiVO.getUserId())).map(this::userInfoApiVO2OrderUserApiVO).forEach(orderApiVO::setOrderUserApiVO);
+                            if (!CollectionUtils.isEmpty(couponsApiVOList)) {
+                                couponsApiVOList.stream().filter(couponsApiVO -> order.getCouponsId().equals(couponsApiVO.getId())).forEach(couponsApiVO -> {
+                                    orderApiVO.setDeno(couponsApiVO.getDeno());
+                                    orderApiVO.setCondition(couponsApiVO.getCondition());
+                                });
+                            }
+                            OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
+                            BeanUtils.copyProperties(order.getOrderAddress(), orderAddressApiVO);
+                            orderApiVO.setOrderAddressApiVO(orderAddressApiVO);
+                            orderApiVO.setOrderItemApiVOList(res);
+                            return orderApiVO;
+                        }).collect(Collectors.toList());
+                        pageUtil.setList(orderApiVOList);
+                    }
+                })
+                .whenComplete((res, e) -> {
+                    orderListThreadLocal.remove();
+                    orderNoSetThreadLocal.remove();
+                    userIdSetThreadLocal.remove();
+                    couponsIdSetThreadLocal.remove();
+                });
+        CompletableFuture.allOf(countTotalFuture, listFuture).join();
+        return pageUtil;
+    }
+
+    @Override
     public void updateOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
         if (ObjectUtils.isEmpty(order)
@@ -556,6 +640,12 @@ public class OrderServiceImpl implements OrderService {
             throw new CompletionException("购物车服务繁忙", new RuntimeException());
         }
         return skuIdSet;
+    }
+
+    private OrderUserApiVO userInfoApiVO2OrderUserApiVO(UserInfoApiVO userInfoApiVO) {
+        OrderUserApiVO orderUserApiVO = new OrderUserApiVO();
+        BeanUtils.copyProperties(userInfoApiVO, orderUserApiVO);
+        return orderUserApiVO;
     }
 
     /*

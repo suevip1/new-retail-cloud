@@ -71,6 +71,12 @@
 
         <dependency>
             <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-coupons</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-order</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <exclusions>

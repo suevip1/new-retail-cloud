@@ -505,6 +505,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public int updateOrder(Long orderNo) {
+        Order order = orderMapper.selectByPrimaryKey(orderNo);
+        if (OrderStatusEnum.PAY_SUCCEED.getCode().equals(order.getStatus())) {
+            order.setStatus(OrderStatusEnum.NOT_TAKE.getCode());
+            int updateRow = orderMapper.updateByPrimaryKeySelective(order);
+            if (updateRow <= 0) {
+                throw new ServiceException("发货失败");
+            }
+            return updateRow;
+        }
+        throw new ServiceException("当前订单状态不符合发货要求");
+    }
+
+    @Override
     public Order getOrder(Long orderId) {
         return orderMapper.selectByPrimaryKey(orderId);
     }

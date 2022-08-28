@@ -8,6 +8,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /*
@@ -28,5 +29,11 @@ public interface OrderFeignService {
                                                @RequestParam(required = false) Integer status,
                                                @RequestParam(defaultValue = "1") Integer pageNum,
                                                @RequestParam(defaultValue = "10") Integer pageSize);
+
+    /*
+    * 订单发货
+    * */
+    @PutMapping("/api/order/{orderNo}")
+    Integer deliverGoods(@PathVariable Long orderNo);
 
 }

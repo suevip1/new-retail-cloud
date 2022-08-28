@@ -19,4 +19,9 @@ public class OrderFeignFallback implements OrderFeignService {
         return null;
     }
 
+    @Override
+    public Integer deliverGoods(Long orderNo) {
+        return null;
+    }
+
 }

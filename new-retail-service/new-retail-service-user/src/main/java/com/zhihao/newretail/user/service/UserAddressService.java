@@ -6,6 +6,7 @@ import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserAddressService {
 
@@ -38,6 +39,11 @@ public interface UserAddressService {
     * 获取收货地址列表
     * */
     List<UserAddressApiVO> listUserAddressApiVOS(Integer userId);
+
+    /*
+    * 批量获取收货地址
+    * */
+    List<UserAddressApiVO> listUserAddressApiVOS(Set<Integer> userIdSet);
 
     /*
     * 获取收货地址信息

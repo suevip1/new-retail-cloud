@@ -1,8 +1,10 @@
 package com.zhihao.newretail.user.dao;
 
 import com.zhihao.newretail.user.pojo.UserAddress;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserAddressMapper {
 
@@ -20,5 +22,7 @@ public interface UserAddressMapper {
 
     /* 用户id查询 */
     List<UserAddress> selectListByUserId(Integer userId);
+
+    List<UserAddress> selectListByUserIdSet(@Param("userIdSet") Set<Integer> userIdSet);
 
 }

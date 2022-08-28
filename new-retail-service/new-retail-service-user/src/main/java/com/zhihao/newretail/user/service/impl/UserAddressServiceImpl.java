@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -87,18 +88,23 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     public List<UserAddressApiVO> listUserAddressApiVOS(Integer userId) {
-        List<UserAddress> userAddressList = userAddressMapper.selectListByUserId(userId);
-        return userAddressList.stream()
-                .map(userAddress -> {
-                    UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
-                    BeanUtils.copyProperties(userAddress, userAddressApiVO);
-                    return userAddressApiVO;
-                }).collect(Collectors.toList());
+        return userAddressMapper.selectListByUserId(userId).stream().map(this::userAddress2UserAddressApiVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserAddressApiVO> listUserAddressApiVOS(Set<Integer> userIdSet) {
+        return userAddressMapper.selectListByUserIdSet(userIdSet).stream().map(this::userAddress2UserAddressApiVO).collect(Collectors.toList());
     }
 
     @Override
     public UserAddressApiVO getUserAddressApiVO(Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
+        UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
+        BeanUtils.copyProperties(userAddress, userAddressApiVO);
+        return userAddressApiVO;
+    }
+
+    private UserAddressApiVO userAddress2UserAddressApiVO(UserAddress userAddress) {
         UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
         BeanUtils.copyProperties(userAddress, userAddressApiVO);
         return userAddressApiVO;

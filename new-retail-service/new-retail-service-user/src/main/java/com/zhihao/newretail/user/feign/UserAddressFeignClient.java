@@ -5,11 +5,10 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.service.UserAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 public class UserAddressFeignClient {
@@ -29,6 +28,11 @@ public class UserAddressFeignClient {
     @GetMapping("/api/address/{addressId}")
     public UserAddressApiVO getUserAddressApiVO(@PathVariable Integer addressId) {
         return userAddressService.getUserAddressApiVO(addressId);
+    }
+
+    @PostMapping("/api/address/list")
+    List<UserAddressApiVO> listUserAddressApiVOS(@RequestBody Set<Integer> userIdSet) {
+        return userAddressService.listUserAddressApiVOS(userIdSet);
     }
 
 }

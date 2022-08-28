@@ -9,10 +9,7 @@ import com.zhihao.newretail.rbac.service.SysOrderService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin")
@@ -36,6 +33,22 @@ public class SysOrderController {
         PageUtil<OrderApiVO> pageData = sysOrderService.listOrderApiVOSByPage(orderNo, userId, status, pageNum, pageSize);
         UserLoginContext.sysClean();
         return R.ok().put("data", pageData);
+    }
+
+    @RequiresLogin
+    @PutMapping("/order/{orderNo}")
+    public R deliverGoods(@PathVariable Long orderNo) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        Integer updateRow = sysOrderService.deliverGoods(orderNo);
+        UserLoginContext.sysClean();
+        if (updateRow == null) {
+            throw new ServiceException("订单服务繁忙");
+        }
+        if (updateRow <= 0) {
+            throw new ServiceException("订单发货失败");
+        }
+        return R.ok("发货成功");
     }
 
 }

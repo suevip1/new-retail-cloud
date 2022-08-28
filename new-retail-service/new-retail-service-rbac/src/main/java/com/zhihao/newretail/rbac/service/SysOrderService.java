@@ -10,4 +10,9 @@ public interface SysOrderService {
     * */
     PageUtil<OrderApiVO> listOrderApiVOSByPage(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize);
 
+    /*
+    * 订单发货
+    * */
+    Integer deliverGoods(Long orderNo);
+
 }

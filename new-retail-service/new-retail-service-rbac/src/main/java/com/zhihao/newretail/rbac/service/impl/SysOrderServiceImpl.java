@@ -21,4 +21,10 @@ public class SysOrderServiceImpl implements SysOrderService {
         return orderFeignService.listOrderApiVOSByPage(orderNo, userId, status, pageNum, pageSize);
     }
 
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public Integer deliverGoods(Long orderNo) {
+        return orderFeignService.deliverGoods(orderNo);
+    }
+
 }

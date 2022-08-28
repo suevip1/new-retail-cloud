@@ -63,6 +63,11 @@ public class CouponsServiceImpl implements CouponsService {
         return couponsMapper.updateByPrimaryKeySelective(coupons);
     }
 
+    @Override
+    public int deleteCoupons(Integer couponsId) {
+        return couponsMapper.deleteByPrimaryKey(couponsId);
+    }
+
     private CouponsApiVO coupons2CouponsApiVO(Coupons coupons) {
         CouponsApiVO couponsApiVO = new CouponsApiVO();
         BeanUtils.copyProperties(coupons, couponsApiVO);

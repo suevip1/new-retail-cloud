@@ -35,4 +35,9 @@ public interface CouponsService {
     * */
     int updateCoupons(Integer couponsId, CouponsUpdateApiDTO couponsUpdateApiDTO);
 
+    /*
+    * 删除优惠券
+    * */
+    int deleteCoupons(Integer couponsId);
+
 }

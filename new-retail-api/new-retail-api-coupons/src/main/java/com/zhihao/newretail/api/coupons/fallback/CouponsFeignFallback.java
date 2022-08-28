@@ -38,4 +38,9 @@ public class CouponsFeignFallback implements CouponsFeignService {
         return null;
     }
 
+    @Override
+    public Integer deleteCoupons(Integer couponsId) {
+        return null;
+    }
+
 }

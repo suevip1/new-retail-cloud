@@ -33,4 +33,7 @@ public interface CouponsFeignService {
     @PutMapping("/api/coupons/{couponsId}")
     Integer updateCoupons(@PathVariable Integer couponsId, @RequestBody CouponsUpdateApiDTO couponsUpdateApiDTO);
 
+    @DeleteMapping("/api/coupons/{couponsId}")
+    Integer deleteCoupons(@PathVariable Integer couponsId);
+
 }

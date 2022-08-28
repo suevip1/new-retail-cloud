@@ -55,4 +55,12 @@ public class CouponsFeignClient {
         return updateRow;
     }
 
+    @RequiresLogin
+    @DeleteMapping("/api/coupons/{couponsId}")
+    Integer deleteCoupons(@PathVariable Integer couponsId) {
+        int deleteRow = couponsService.deleteCoupons(couponsId);
+        UserLoginContext.sysClean();
+        return deleteRow;
+    }
+
 }

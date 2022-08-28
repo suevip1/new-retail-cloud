@@ -2,6 +2,8 @@ package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
+import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
 import com.zhihao.newretail.rbac.form.CouponsForm;
@@ -15,6 +17,12 @@ public class SysCouponsServiceImpl implements SysCouponsService {
 
     @Autowired
     private CouponsFeignService couponsFeignService;
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public PageUtil<CouponsApiVO> listCouponsApiVOS(Integer saleable, Integer pageNum, Integer pageSize) {
+        return couponsFeignService.listCouponsApiVOS(saleable, pageNum, pageSize);
+    }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)

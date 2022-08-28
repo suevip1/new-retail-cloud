@@ -41,4 +41,10 @@ public class SysCouponsServiceImpl implements SysCouponsService {
         return couponsFeignService.updateCoupons(couponsId, couponsUpdateApiDTO);
     }
 
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public Integer deleteCoupons(Integer couponsId) {
+        return couponsFeignService.deleteCoupons(couponsId);
+    }
+
 }

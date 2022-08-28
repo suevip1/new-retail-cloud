@@ -68,4 +68,20 @@ public class SysCouponsController {
         return R.ok("修改优惠券成功");
     }
 
+    @RequiresLogin
+    @DeleteMapping("/coupons/{couponsId}")
+    public R couponsDelete(@PathVariable Integer couponsId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        Integer deleteRow = sysCouponsService.deleteCoupons(couponsId);
+        UserLoginContext.sysClean();
+        if (deleteRow == null) {
+            throw new ServiceException("优惠券服务繁忙");
+        }
+        if (deleteRow <= 0) {
+            throw new ServiceException("删除优惠券失败");
+        }
+        return R.ok("删除优惠券成功");
+    }
+
 }

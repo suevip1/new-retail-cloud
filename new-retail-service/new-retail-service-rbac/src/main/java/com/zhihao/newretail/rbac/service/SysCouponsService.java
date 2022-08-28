@@ -21,4 +21,9 @@ public interface SysCouponsService {
     * */
     Integer updateCoupons(Integer couponsId, CouponsForm form);
 
+    /*
+    * 删除优惠券
+    * */
+    Integer deleteCoupons(Integer couponsId);
+
 }

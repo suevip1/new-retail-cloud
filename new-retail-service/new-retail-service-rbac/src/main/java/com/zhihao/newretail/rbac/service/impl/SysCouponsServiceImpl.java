@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
+import com.zhihao.newretail.api.coupons.dto.CouponsUpdateApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -30,6 +31,14 @@ public class SysCouponsServiceImpl implements SysCouponsService {
         CouponsAddApiDTO couponsAddApiDTO = new CouponsAddApiDTO();
         BeanUtils.copyProperties(form, couponsAddApiDTO);
         return couponsFeignService.insertCoupons(couponsAddApiDTO);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public Integer updateCoupons(Integer couponsId, CouponsForm form) {
+        CouponsUpdateApiDTO couponsUpdateApiDTO = new CouponsUpdateApiDTO();
+        BeanUtils.copyProperties(form, couponsUpdateApiDTO);
+        return couponsFeignService.updateCoupons(couponsId, couponsUpdateApiDTO);
     }
 
 }

@@ -52,4 +52,20 @@ public class SysCouponsController {
         return R.ok("新增优惠券成功");
     }
 
+    @RequiresLogin
+    @PutMapping("/coupons/{couponsId}")
+    public R couponsUpdate(@PathVariable Integer couponsId, @Valid @RequestBody CouponsForm form) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        Integer updateRow = sysCouponsService.updateCoupons(couponsId, form);
+        UserLoginContext.sysClean();
+        if (updateRow == null) {
+            throw new ServiceException("优惠券服务繁忙");
+        }
+        if (updateRow <= 0) {
+            throw new ServiceException("修改优惠券失败");
+        }
+        return R.ok("修改优惠券成功");
+    }
+
 }

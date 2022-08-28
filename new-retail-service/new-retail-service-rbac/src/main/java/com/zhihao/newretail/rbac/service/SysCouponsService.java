@@ -16,4 +16,9 @@ public interface SysCouponsService {
     * */
     Integer insertCoupons(CouponsForm form);
 
+    /*
+    * 修改优惠券
+    * */
+    Integer updateCoupons(Integer couponsId, CouponsForm form);
+
 }

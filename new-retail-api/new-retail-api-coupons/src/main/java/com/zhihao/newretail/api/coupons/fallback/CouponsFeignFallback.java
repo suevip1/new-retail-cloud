@@ -1,5 +1,6 @@
 package com.zhihao.newretail.api.coupons.fallback;
 
+import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,11 @@ public class CouponsFeignFallback implements CouponsFeignService {
 
     @Override
     public List<CouponsApiVO> listCouponsApiVOS(Set<Integer> couponsIdSet) {
+        return null;
+    }
+
+    @Override
+    public Integer insertCoupons(CouponsAddApiDTO couponsAddApiDTO) {
         return null;
     }
 

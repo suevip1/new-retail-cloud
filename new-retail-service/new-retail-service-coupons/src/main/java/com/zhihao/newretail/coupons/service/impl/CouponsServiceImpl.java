@@ -1,5 +1,6 @@
 package com.zhihao.newretail.coupons.service.impl;
 
+import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.coupons.dao.CouponsMapper;
 import com.zhihao.newretail.coupons.pojo.Coupons;
@@ -35,6 +36,13 @@ public class CouponsServiceImpl implements CouponsService {
                     BeanUtils.copyProperties(coupons, couponsApiVO);
                     return couponsApiVO;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public int insertCoupons(CouponsAddApiDTO couponsAddApiDTO) {
+        Coupons coupons = new Coupons();
+        BeanUtils.copyProperties(couponsAddApiDTO, coupons);
+        return couponsMapper.insertSelective(coupons);
     }
 
 }

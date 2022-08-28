@@ -1,5 +1,6 @@
 package com.zhihao.newretail.api.coupons.feign;
 
+import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.fallback.CouponsFeignFallback;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,5 +22,8 @@ public interface CouponsFeignService {
 
     @PostMapping("/api/coupons/list")
     List<CouponsApiVO> listCouponsApiVOS(@RequestBody Set<Integer> couponsIdSet);
+
+    @PostMapping("/api/coupons")
+    Integer insertCoupons(@RequestBody CouponsAddApiDTO couponsAddApiDTO);
 
 }

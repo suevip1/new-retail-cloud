@@ -1,6 +1,7 @@
 package com.zhihao.newretail.coupons.feign;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
+import com.zhihao.newretail.api.coupons.dto.CouponsUpdateApiDTO;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.coupons.service.CouponsService;
@@ -44,6 +45,14 @@ public class CouponsFeignClient {
         int insertRow = couponsService.insertCoupons(couponsAddApiDTO);
         UserLoginContext.sysClean();
         return insertRow;
+    }
+
+    @RequiresLogin
+    @PutMapping("/api/coupons/{couponsId}")
+    Integer updateCoupons(@PathVariable Integer couponsId, @RequestBody CouponsUpdateApiDTO couponsUpdateApiDTO) {
+        int updateRow = couponsService.updateCoupons(couponsId, couponsUpdateApiDTO);
+        UserLoginContext.sysClean();
+        return updateRow;
     }
 
 }

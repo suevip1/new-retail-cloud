@@ -1,6 +1,7 @@
 package com.zhihao.newretail.coupons.service;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
+import com.zhihao.newretail.api.coupons.dto.CouponsUpdateApiDTO;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
 
@@ -28,5 +29,10 @@ public interface CouponsService {
     * 新增优惠券
     * */
     int insertCoupons(CouponsAddApiDTO couponsAddApiDTO);
+
+    /*
+    * 修改优惠券
+    * */
+    int updateCoupons(Integer couponsId, CouponsUpdateApiDTO couponsUpdateApiDTO);
 
 }

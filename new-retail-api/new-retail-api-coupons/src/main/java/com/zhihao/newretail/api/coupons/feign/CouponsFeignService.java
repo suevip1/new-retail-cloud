@@ -1,6 +1,7 @@
 package com.zhihao.newretail.api.coupons.feign;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
+import com.zhihao.newretail.api.coupons.dto.CouponsUpdateApiDTO;
 import com.zhihao.newretail.api.coupons.fallback.CouponsFeignFallback;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -28,5 +29,8 @@ public interface CouponsFeignService {
 
     @PostMapping("/api/coupons")
     Integer insertCoupons(@RequestBody CouponsAddApiDTO couponsAddApiDTO);
+
+    @PutMapping("/api/coupons/{couponsId}")
+    Integer updateCoupons(@PathVariable Integer couponsId, @RequestBody CouponsUpdateApiDTO couponsUpdateApiDTO);
 
 }

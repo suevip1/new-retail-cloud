@@ -1,6 +1,7 @@
 package com.zhihao.newretail.api.coupons.fallback;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
+import com.zhihao.newretail.api.coupons.dto.CouponsUpdateApiDTO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -29,6 +30,11 @@ public class CouponsFeignFallback implements CouponsFeignService {
 
     @Override
     public Integer insertCoupons(CouponsAddApiDTO couponsAddApiDTO) {
+        return null;
+    }
+
+    @Override
+    public Integer updateCoupons(Integer couponsId, CouponsUpdateApiDTO couponsUpdateApiDTO) {
         return null;
     }
 

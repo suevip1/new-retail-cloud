@@ -133,6 +133,17 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <select id="countBySaleable" parameterType="java.lang.Integer" resultType="int">
+    select
+    count(*)
+    from tb_coupons
+    where
+    <if test="saleable != null">
+      is_saleable = #{isSaleable,jdbcType=TINYINT} and
+    </if>
+    is_delete = 0
+  </select>
+
   <select id="selectListByCouponsIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
@@ -141,5 +152,20 @@
     <foreach collection="couponsIdSet" item="item" open="and" separator="or">
       id = #{item}
     </foreach>
+  </select>
+
+  <select id="selectListBySaleable" parameterType="java.lang.Object" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_coupons
+    where
+    <if test="saleable != null">
+      is_saleable = #{isSaleable,jdbcType=TINYINT} and
+    </if>
+    is_delete = 0
+    <if test="pageNum != null and pageSize != null">
+      <bind name="page_start" value="(pageNum - 1) * pageSize"/>
+      limit #{page_start}, #{pageSize,jdbcType=INTEGER}
+    </if>
   </select>
 </mapper>

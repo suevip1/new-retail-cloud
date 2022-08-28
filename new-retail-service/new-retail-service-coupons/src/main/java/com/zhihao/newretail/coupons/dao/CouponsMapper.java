@@ -20,9 +20,13 @@ public interface CouponsMapper {
 
     int updateByPrimaryKey(Coupons record);
 
+    int countBySaleable(Integer saleable);
+
     /*
     * 批量查询
     * */
     List<Coupons> selectListByCouponsIdSet(@Param("couponsIdSet") Set<Integer> couponsIdSet);
+
+    List<Coupons> selectListBySaleable(@Param("saleable") Integer saleable, @Param("pageNum") Integer pageNum, @Param("pageSize") Integer pageSize);
 
 }

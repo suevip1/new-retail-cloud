@@ -2,6 +2,7 @@ package com.zhihao.newretail.coupons.feign;
 
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.coupons.service.CouponsService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
@@ -20,6 +21,16 @@ public class CouponsFeignClient {
     @GetMapping("/api/coupons/{couponsId}")
     public CouponsApiVO getCouponsApiVO(@PathVariable Integer couponsId) {
         return couponsService.getCouponsApiVO(couponsId);
+    }
+
+    @RequiresLogin
+    @GetMapping("/api/coupons/list")
+    PageUtil<CouponsApiVO> listCouponsApiVOS(@RequestParam(required = false) Integer saleable,
+                                             @RequestParam(defaultValue = "1") Integer pageNum,
+                                             @RequestParam(defaultValue = "10") Integer pageSize) {
+        PageUtil<CouponsApiVO> pageData = couponsService.listCouponsApiVOS(saleable, pageNum, pageSize);
+        UserLoginContext.sysClean();
+        return pageData;
     }
 
     @PostMapping("/api/coupons/list")

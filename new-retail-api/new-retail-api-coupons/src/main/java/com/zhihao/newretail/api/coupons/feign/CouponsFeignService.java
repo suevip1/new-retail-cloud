@@ -3,12 +3,10 @@ package com.zhihao.newretail.api.coupons.feign;
 import com.zhihao.newretail.api.coupons.dto.CouponsAddApiDTO;
 import com.zhihao.newretail.api.coupons.fallback.CouponsFeignFallback;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -19,6 +17,11 @@ public interface CouponsFeignService {
 
     @GetMapping("/api/coupons/{couponsId}")
     CouponsApiVO getCouponsApiVO(@PathVariable Integer couponsId);
+
+    @GetMapping("/api/coupons/list")
+    PageUtil<CouponsApiVO> listCouponsApiVOS(@RequestParam(required = false) Integer saleable,
+                                             @RequestParam(defaultValue = "1") Integer pageNum,
+                                             @RequestParam(defaultValue = "10") Integer pageSize);
 
     @PostMapping("/api/coupons/list")
     List<CouponsApiVO> listCouponsApiVOS(@RequestBody Set<Integer> couponsIdSet);

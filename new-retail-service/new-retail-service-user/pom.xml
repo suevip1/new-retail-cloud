@@ -61,6 +61,12 @@
             <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-coupons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.zhihao</groupId>
+                    <artifactId>new-retail-common-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

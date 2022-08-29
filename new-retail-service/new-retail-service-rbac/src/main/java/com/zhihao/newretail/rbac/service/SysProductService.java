@@ -19,17 +19,17 @@ public interface SysProductService {
     /*
     * 新增商品
     * */
-    void addSpu(SpuForm form);
+    Integer addSpu(SpuForm form);
 
     /*
     * 修改商品
     * */
-    void updateSpu(Integer spuId, SpuForm form);
+    Integer updateSpu(Integer spuId, SpuForm form);
 
     /*
     * 删除商品
     * */
-    void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
+    Integer deleteSpu(Integer spuId);
 
     /*
     * 添加商品规格

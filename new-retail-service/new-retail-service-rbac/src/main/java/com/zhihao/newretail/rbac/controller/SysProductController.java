@@ -1,6 +1,7 @@
 package com.zhihao.newretail.rbac.controller;
 
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.form.SkuForm;
@@ -25,7 +26,7 @@ public class SysProductController {
 
     @RequiresLogin
     @GetMapping("/spu/{spuId}")
-    public R spu(@PathVariable Integer spuId) {
+    public R spuInfo(@PathVariable Integer spuId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
         SpuApiVO spuApiVO = sysProductService.getSpuApiVO(spuId);
@@ -35,31 +36,49 @@ public class SysProductController {
 
     @RequiresLogin
     @PostMapping("/spu")
-    public R spuAdd(@Valid @RequestBody SpuForm form) {
+    public R spu(@Valid @RequestBody SpuForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.addSpu(form);
+        Integer insertRow = sysProductService.addSpu(form);
         UserLoginContext.sysClean();
+        if (insertRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (insertRow <= 0) {
+            throw new ServiceException("新增商品失败");
+        }
         return R.ok();
     }
 
     @RequiresLogin
     @PutMapping("/spu/{spuId}")
-    public R spuUpdate(@PathVariable Integer spuId, @Valid @RequestBody SpuForm form) {
+    public R spu(@PathVariable Integer spuId, @Valid @RequestBody SpuForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.updateSpu(spuId, form);
+        Integer updateRow = sysProductService.updateSpu(spuId, form);
         UserLoginContext.sysClean();
+        if (updateRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (updateRow <= 0) {
+            throw new ServiceException("修改商品失败");
+        }
         return R.ok();
     }
 
     @RequiresLogin
     @DeleteMapping("/spu/{spuId}")
-    public R spuDelete(@PathVariable Integer spuId) throws ExecutionException, InterruptedException {
+    public R spu(@PathVariable Integer spuId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.deleteSpu(spuId);
+        Integer deleteRow = sysProductService.deleteSpu(spuId);
         UserLoginContext.sysClean();
+        if (deleteRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (deleteRow <= 0) {
+            throw new ServiceException("删除商品失败");
+        }
         return R.ok();
     }
 

@@ -46,24 +46,24 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void addSpu(SpuForm form) {
+    public Integer addSpu(SpuForm form) {
         SpuAddApiDTO spuAddApiDTO = spuForm2SpuAddApiDTO(form);
-        spuFeignService.addSpu(spuAddApiDTO);
+        return spuFeignService.addSpu(spuAddApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void updateSpu(Integer spuId, SpuForm form) {
+    public Integer updateSpu(Integer spuId, SpuForm form) {
         SpuAddApiDTO spuAddApiDTO = spuForm2SpuAddApiDTO(form);
         SpuUpdateApiDTO spuUpdateApiDTO = new SpuUpdateApiDTO();
         BeanUtils.copyProperties(spuAddApiDTO, spuUpdateApiDTO);
-        spuFeignService.updateSpu(spuId, spuUpdateApiDTO);
+        return spuFeignService.updateSpu(spuId, spuUpdateApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ROOT)
-    public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
-        spuFeignService.deleteSpu(spuId);
+    public Integer deleteSpu(Integer spuId) {
+        return spuFeignService.deleteSpu(spuId);
     }
 
     @Override

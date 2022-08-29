@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
@@ -41,7 +40,7 @@ public class SpuServiceImpl implements SpuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertSpu(SpuAddApiDTO spuAddApiDTO) {
+    public int insertSpu(SpuAddApiDTO spuAddApiDTO) {
         Spu spu = buildSpu(spuAddApiDTO);
         int insertSpuRow = spuMapper.insertSelective(spu);
         if (insertSpuRow > 0) {
@@ -53,11 +52,12 @@ public class SpuServiceImpl implements SpuService {
         } else {
             throw new ServiceException("新增商品失败");
         }
+        return insertSpuRow;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO) {
+    public int updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO) {
         Spu spu = buildSpu(spuUpdateApiDTO);
         spu.setId(spuId);
         int updateSpuRow = spuMapper.updateByPrimaryKeySelective(spu);
@@ -70,26 +70,27 @@ public class SpuServiceImpl implements SpuService {
         } else {
             throw new ServiceException("修改商品失败");
         }
+        return updateSpuRow;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException {
-        CompletableFuture<Void> deleteSpuFuture = CompletableFuture.runAsync(() -> {
+    public int deleteSpu(Integer spuId) {
+        CompletableFuture<Integer> deleteSpuFuture = CompletableFuture.supplyAsync(() -> {
             int deleteSpuRow = spuMapper.deleteByPrimaryKey(spuId);
             if (deleteSpuRow <= 0) {
                 throw new ServiceException("删除商品失败");
             }
+            return deleteSpuRow;
         }, executor);
-
         CompletableFuture<Void> deleteSupInfoFuture = CompletableFuture.runAsync(() -> {
             int deleteSupInfoRow = spuInfoMapper.deleteBySpuId(spuId);
             if (deleteSupInfoRow <= 0) {
                 throw new ServiceException("删除商品失败");
             }
         }, executor);
-
-        CompletableFuture.allOf(deleteSpuFuture, deleteSupInfoFuture).get();
+        CompletableFuture.allOf(deleteSpuFuture, deleteSupInfoFuture).join();
+        return deleteSpuFuture.join();
     }
 
     @Override

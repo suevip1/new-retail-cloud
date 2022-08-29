@@ -7,7 +7,6 @@ import com.zhihao.newretail.product.pojo.Spu;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 public interface SpuService {
 
@@ -19,17 +18,17 @@ public interface SpuService {
     /*
     * 新增商品
     * */
-    void insertSpu(SpuAddApiDTO spuAddApiDTO);
+    int insertSpu(SpuAddApiDTO spuAddApiDTO);
 
     /*
     * 修改商品
     * */
-    void updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO);
+    int updateSpu(Integer spuId, SpuUpdateApiDTO spuUpdateApiDTO);
 
     /*
     * 删除商品
     * */
-    void deleteSpu(Integer spuId) throws ExecutionException, InterruptedException;
+    int deleteSpu(Integer spuId);
 
     /*
     * countByCategoryId

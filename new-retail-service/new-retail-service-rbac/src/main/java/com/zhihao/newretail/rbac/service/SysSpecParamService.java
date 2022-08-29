@@ -16,16 +16,16 @@ public interface SysSpecParamService {
     /*
     * 新增分类参数
     * */
-    void addSpecParam(SpecParamAddApiDTO specParamAddApiDTO);
+    Integer addSpecParam(SpecParamAddApiDTO specParamAddApiDTO);
 
     /*
     * 修改分类参数
     * */
-    void updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO);
+    Integer updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
     /*
     * 删除分类参数
     * */
-    void deleteSpecParam(Integer specParamId);
+    Integer deleteSpecParam(Integer specParamId);
 
 }

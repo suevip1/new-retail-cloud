@@ -26,20 +26,20 @@ public class SysSpecParamServiceImpl implements SysSpecParamService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void addSpecParam(SpecParamAddApiDTO specParamAddApiDTO) {
-        specParamFeignService.addSpecParam(specParamAddApiDTO);
+    public Integer addSpecParam(SpecParamAddApiDTO specParamAddApiDTO) {
+        return specParamFeignService.addSpecParam(specParamAddApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO) {
-        specParamFeignService.updateSpecParam(specParamId, specParamUpdateApiDTO);
+    public Integer updateSpecParam(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO) {
+        return specParamFeignService.updateSpecParam(specParamId, specParamUpdateApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ROOT)
-    public void deleteSpecParam(Integer specParamId) {
-        specParamFeignService.deleteSpecParam(specParamId);
+    public Integer deleteSpecParam(Integer specParamId) {
+        return specParamFeignService.deleteSpecParam(specParamId);
     }
 
 }

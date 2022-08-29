@@ -30,23 +30,23 @@ public class SpecParamServiceImpl implements SpecParamService {
     }
 
     @Override
-    public void insertSpecParamKey(SpecParamAddApiDTO specParamAddApiDTO) {
+    public int insertSpecParamKey(SpecParamAddApiDTO specParamAddApiDTO) {
         SpecParamKey specParamKey = new SpecParamKey();
         BeanUtils.copyProperties(specParamAddApiDTO, specParamKey);
-        specParamKeyMapper.insertSelective(specParamKey);
+        return specParamKeyMapper.insertSelective(specParamKey);
     }
 
     @Override
-    public void updateSpecParamKey(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO) {
+    public int updateSpecParamKey(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO) {
         SpecParamKey specParamKey = new SpecParamKey();
         BeanUtils.copyProperties(specParamUpdateApiDTO, specParamKey);
         specParamKey.setId(specParamId);
-        specParamKeyMapper.updateByPrimaryKeySelective(specParamKey);
+        return specParamKeyMapper.updateByPrimaryKeySelective(specParamKey);
     }
 
     @Override
-    public void deleteSpecParamKey(Integer specParamId) {
-        specParamKeyMapper.deleteByPrimaryKey(specParamId);
+    public int deleteSpecParamKey(Integer specParamId) {
+        return specParamKeyMapper.deleteByPrimaryKey(specParamId);
     }
 
     private SpecParamApiVO specParamKey2SpecParamApiVO(SpecParamKey specParamKey) {

@@ -16,16 +16,16 @@ public interface SpecParamService {
     /*
     * 新增分类参数
     * */
-    void insertSpecParamKey(SpecParamAddApiDTO specParamAddApiDTO);
+    int insertSpecParamKey(SpecParamAddApiDTO specParamAddApiDTO);
 
     /*
     * 修改分类参数
     * */
-    void updateSpecParamKey(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO);
+    int updateSpecParamKey(Integer specParamId, SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
     /*
     * 删除分类参数
     * */
-    void deleteSpecParamKey(Integer specParamId);
+    int deleteSpecParamKey(Integer specParamId);
 
 }

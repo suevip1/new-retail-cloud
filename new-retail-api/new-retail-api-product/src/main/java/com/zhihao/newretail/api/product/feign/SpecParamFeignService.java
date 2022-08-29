@@ -2,13 +2,16 @@ package com.zhihao.newretail.api.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SpecParamAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpecParamUpdateApiDTO;
+import com.zhihao.newretail.api.product.fallback.SpecParamFeignFallback;
 import com.zhihao.newretail.api.product.vo.SpecParamApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "new-retail-product", path = "/product")
+@Primary
+@FeignClient(name = "new-retail-product", path = "/product", fallback = SpecParamFeignFallback.class)
 public interface SpecParamFeignService {
 
     /*
@@ -21,19 +24,18 @@ public interface SpecParamFeignService {
     * 新增分类参数
     * */
     @PostMapping("/api/specParam")
-    void addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO);
+    Integer addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO);
 
     /*
     * 修改分类参数
     * */
     @PutMapping("/api/specParam/{specParamId}")
-    void updateSpecParam(@PathVariable Integer specParamId,
-                         @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
+    Integer updateSpecParam(@PathVariable Integer specParamId, @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
     /*
     * 删除分类参数
     * */
     @DeleteMapping("/api/specParam/{specParamId}")
-    void deleteSpecParam(@PathVariable Integer specParamId);
+    Integer deleteSpecParam(@PathVariable Integer specParamId);
 
 }

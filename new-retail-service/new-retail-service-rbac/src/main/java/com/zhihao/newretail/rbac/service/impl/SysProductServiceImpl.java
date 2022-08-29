@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class SysProductServiceImpl implements SysProductService {
@@ -68,24 +67,24 @@ public class SysProductServiceImpl implements SysProductService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void addSku(SkuForm form) {
+    public Integer addSku(SkuForm form) {
         SkuAddApiDTO skuAddApiDTO = skuForm2SkuAddApiDTO(form);
-        skuFeignService.addSku(skuAddApiDTO);
+        return skuFeignService.addSku(skuAddApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public void updateSku(Integer skuId, SkuForm form) throws ExecutionException, InterruptedException {
+    public Integer updateSku(Integer skuId, SkuForm form) {
         SkuAddApiDTO skuAddApiDTO = skuForm2SkuAddApiDTO(form);
         SkuUpdateApiDTO skuUpdateApiDTO = new SkuUpdateApiDTO();
         BeanUtils.copyProperties(skuAddApiDTO, skuUpdateApiDTO);
-        skuFeignService.updateSku(skuId, skuUpdateApiDTO);
+        return skuFeignService.updateSku(skuId, skuUpdateApiDTO);
     }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ROOT)
-    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
-        skuFeignService.deleteSku(skuId);
+    public Integer deleteSku(Integer skuId) {
+        return skuFeignService.deleteSku(skuId);
     }
 
     @Override

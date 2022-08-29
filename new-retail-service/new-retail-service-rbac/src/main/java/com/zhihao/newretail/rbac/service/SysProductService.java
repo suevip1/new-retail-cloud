@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public interface SysProductService {
 
@@ -34,17 +33,17 @@ public interface SysProductService {
     /*
     * 添加商品规格
     * */
-    void addSku(SkuForm form);
+    Integer addSku(SkuForm form);
 
     /*
     * 修改商品规格
     * */
-    void updateSku(Integer skuId, SkuForm form) throws ExecutionException, InterruptedException;
+    Integer updateSku(Integer skuId, SkuForm form);
 
     /*
     * 删除商品规格
     * */
-    void deleteSku(Integer skuId) throws ExecutionException, InterruptedException;
+    Integer deleteSku(Integer skuId);
 
     /*
     * 上传商品图片

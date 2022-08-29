@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 public class SysProductController {
@@ -84,31 +83,49 @@ public class SysProductController {
 
     @RequiresLogin
     @PostMapping("/sku")
-    public R skuAdd(@Valid @RequestBody SkuForm form) {
+    public R sku(@Valid @RequestBody SkuForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.addSku(form);
+        Integer insertRow = sysProductService.addSku(form);
         UserLoginContext.sysClean();
+        if (insertRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (insertRow <= 0) {
+            throw new ServiceException("新增商品规格失败");
+        }
         return R.ok();
     }
 
     @RequiresLogin
     @PutMapping("/sku/{skuId}")
-    public R skuUpdate(@PathVariable Integer skuId, @Valid @RequestBody SkuForm form) throws ExecutionException, InterruptedException {
+    public R sku(@PathVariable Integer skuId, @Valid @RequestBody SkuForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.updateSku(skuId, form);
+        Integer updateRow = sysProductService.updateSku(skuId, form);
         UserLoginContext.sysClean();
+        if (updateRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (updateRow <= 0) {
+            throw new ServiceException("修改商品规格失败");
+        }
         return R.ok();
     }
 
     @RequiresLogin
     @DeleteMapping("/sku/{skuId}")
-    public R skuDelete(@PathVariable Integer skuId) throws ExecutionException, InterruptedException {
+    public R sku(@PathVariable Integer skuId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        sysProductService.deleteSku(skuId);
+        Integer deleteRow = sysProductService.deleteSku(skuId);
         UserLoginContext.sysClean();
+        if (deleteRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (deleteRow <= 0) {
+            throw new ServiceException("删除商品规格失败");
+        }
         return R.ok();
     }
 

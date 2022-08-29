@@ -53,25 +53,25 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void insertCategory(CategoryAddApiDTO categoryAddApiDTO) {
+    public int insertCategory(CategoryAddApiDTO categoryAddApiDTO) {
         Category category = new Category();
         category.setName(categoryAddApiDTO.getName());
         category.setParentId(categoryAddApiDTO.getParentId());
-        categoryMapper.insertSelective(category);
+        return categoryMapper.insertSelective(category);
     }
 
     @Override
-    public void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO) {
+    public int updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO) {
         Category category = new Category();
         category.setId(categoryId);
         category.setName(categoryUpdateApiDTO.getName());
         category.setParentId(categoryUpdateApiDTO.getParentId());
-        categoryMapper.updateByPrimaryKeySelective(category);
+        return categoryMapper.updateByPrimaryKeySelective(category);
     }
 
     @Override
-    public void deleteCategory(Integer categoryId) {
-        categoryMapper.deleteByPrimaryKey(categoryId);
+    public int deleteCategory(Integer categoryId) {
+        return categoryMapper.deleteByPrimaryKey(categoryId);
     }
 
     private void findSubCategoryVOList(List<Category> categoryList, List<CategoryVO> categoryVOList) {

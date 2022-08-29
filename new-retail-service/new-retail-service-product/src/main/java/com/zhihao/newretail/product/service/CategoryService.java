@@ -33,16 +33,16 @@ public interface CategoryService {
     /*
     * 新增商品分类
     * */
-    void insertCategory(CategoryAddApiDTO categoryAddApiDTO);
+    int insertCategory(CategoryAddApiDTO categoryAddApiDTO);
 
     /*
     * 修改商品分类
     * */
-    void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO);
+    int updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO);
 
     /*
     * 删除商品分类
     * */
-    void deleteCategory(Integer categoryId);
+    int deleteCategory(Integer categoryId);
 
 }

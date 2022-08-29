@@ -2,40 +2,40 @@ package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
-import com.zhihao.newretail.api.product.feign.SkuFeignService;
 import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.concurrent.ExecutionException;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class SkuFeignClient implements SkuFeignService {
+public class SkuFeignClient {
 
     @Autowired
     private SkuService skuService;
 
-    @Override
     @RequiresLogin
-    public void addSku(SkuAddApiDTO skuAddApiDTO) {
-        skuService.insertSku(skuAddApiDTO);
+    @PostMapping("/api/sku")
+    public Integer addSku(@RequestBody SkuAddApiDTO skuAddApiDTO) {
+        int insertRow = skuService.insertSku(skuAddApiDTO);
         UserLoginContext.sysClean();
+        return insertRow;
     }
 
-    @Override
     @RequiresLogin
-    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException {
-        skuService.updateSku(skuId, skuUpdateApiDTO);
+    @PutMapping("/api/sku/{skuId}")
+    public Integer updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO) {
+        int updateRow = skuService.updateSku(skuId, skuUpdateApiDTO);
         UserLoginContext.sysClean();
+        return updateRow;
     }
 
-    @Override
     @RequiresLogin
-    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
-        skuService.deleteSku(skuId);
+    @DeleteMapping("/api/sku/{skuId}")
+    public Integer deleteSku(@PathVariable Integer skuId) {
+        int deleteRow = skuService.deleteSku(skuId);
         UserLoginContext.sysClean();
+        return deleteRow;
     }
 
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @RestController
@@ -32,7 +31,7 @@ public class SkuServiceImpl implements SkuService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void insertSku(SkuAddApiDTO skuAddApiDTO) {
+    public int insertSku(SkuAddApiDTO skuAddApiDTO) {
         Sku sku = new Sku();
         BeanUtils.copyProperties(skuAddApiDTO, sku);
         int insertSkuRow = skuMapper.insertSelective(sku);
@@ -40,12 +39,13 @@ public class SkuServiceImpl implements SkuService {
         if (insertSkuRow <= 0 || insertStockRow <= 0) {
             throw new ServiceException("新增商品规格失败");
         }
+        return insertSkuRow;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException {
-        CompletableFuture<Void> skuFuture = CompletableFuture.runAsync(() -> {
+    public int updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) {
+        CompletableFuture<Integer> skuFuture = CompletableFuture.supplyAsync(() -> {
             Sku sku = new Sku();
             BeanUtils.copyProperties(skuUpdateApiDTO, sku);
             sku.setId(skuId);
@@ -53,35 +53,35 @@ public class SkuServiceImpl implements SkuService {
             if (updateSkuRow <= 0) {
                 throw new ServiceException("修改商品规格失败");
             }
+            return updateSkuRow;
         }, executor);
-
         CompletableFuture<Void> stockFuture = CompletableFuture.runAsync(() -> {
             int updateStockRow = stockService.updateStock(skuId, skuUpdateApiDTO.getStock());
             if (updateStockRow <= 0) {
                 throw new ServiceException("修改商品库存失败");
             }
         }, executor);
-
-        CompletableFuture.allOf(skuFuture, stockFuture).get();
+        CompletableFuture.allOf(skuFuture, stockFuture).join();
+        return skuFuture.join();
     }
 
     @Override
-    public void deleteSku(Integer skuId) throws ExecutionException, InterruptedException {
-        CompletableFuture<Void> deleteSkuFuture = CompletableFuture.runAsync(() -> {
+    public int deleteSku(Integer skuId) {
+        CompletableFuture<Integer> deleteSkuFuture = CompletableFuture.supplyAsync(() -> {
             int deleteSkuRow = skuMapper.deleteByPrimaryKey(skuId);
             if (deleteSkuRow <= 0) {
                 throw new ServiceException("删除商品规格失败");
             }
+            return deleteSkuRow;
         }, executor);
-
         CompletableFuture<Void> deleteStockFuture = CompletableFuture.runAsync(() -> {
             int deleteStockRow = stockService.deleteStock(skuId);
             if (deleteStockRow <= 0) {
                 throw new ServiceException("删除商品库存失败");
             }
         }, executor);
-
-        CompletableFuture.allOf(deleteSkuFuture, deleteStockFuture).get();
+        CompletableFuture.allOf(deleteSkuFuture, deleteStockFuture).join();
+        return deleteSkuFuture.join();
     }
 
     @Override

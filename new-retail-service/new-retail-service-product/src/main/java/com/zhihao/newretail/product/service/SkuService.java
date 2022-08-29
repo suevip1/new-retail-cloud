@@ -6,24 +6,23 @@ import com.zhihao.newretail.product.pojo.Sku;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 public interface SkuService {
 
     /*
     * 新增sku
     * */
-    void insertSku(SkuAddApiDTO skuAddApiDTO);
+    int insertSku(SkuAddApiDTO skuAddApiDTO);
 
     /*
     * 修改sku
     * */
-    void updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO) throws ExecutionException, InterruptedException;
+    int updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO);
 
     /*
     * 删除sku
     * */
-    void deleteSku(Integer skuId) throws ExecutionException, InterruptedException;
+    int deleteSku(Integer skuId);
 
     /*
     * 获取sku

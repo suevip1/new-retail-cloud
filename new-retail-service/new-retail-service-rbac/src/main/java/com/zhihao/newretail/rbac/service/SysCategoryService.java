@@ -21,16 +21,16 @@ public interface SysCategoryService {
     /*
     * 新增商品分类
     * */
-    void addCategory(CategoryAddApiDTO categoryAddApiDTO);
+    Integer addCategory(CategoryAddApiDTO categoryAddApiDTO);
 
     /*
     * 修改商品分类
     * */
-    void updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO);
+    Integer updateCategory(Integer categoryId, CategoryUpdateApiDTO categoryUpdateApiDTO);
 
     /*
     * 删除商品分类
     * */
-    void deleteCategory(Integer categoryId);
+    Integer deleteCategory(Integer categoryId);
 
 }

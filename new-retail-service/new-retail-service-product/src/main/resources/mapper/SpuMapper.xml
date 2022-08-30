@@ -205,7 +205,11 @@
     select
     count(*)
     from tb_spu
-    where category_id = #{categoryId,jdbcType=INTEGER}
+    <where>
+      <if test="categoryId != null">
+        category_id = #{categoryId,jdbcType=INTEGER}
+      </if>
+    </where>
   </select>
 
   <select id="selectListByIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">

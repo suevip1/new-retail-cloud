@@ -3,6 +3,7 @@ package com.zhihao.newretail.api.product.fallback;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class ProductFeignFallback implements ProductFeignService {
     }
 
     @Override
-    public List<ProductApiVO> listProductApiVOS(Integer categoryId) {
+    public PageUtil<ProductApiVO> listProductApiVOS(Integer categoryId, Integer pageNum, Integer pageSize) {
         return null;
     }
 

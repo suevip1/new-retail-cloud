@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.service.ProductService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
@@ -29,10 +30,12 @@ public class ProductFeignClient {
 
     @RequiresLogin
     @GetMapping("/api/product/list")
-    public List<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId) {
-        List<ProductApiVO> productApiVOList = productService.listProductApiVOS(categoryId);
+    public PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
+                                                    @RequestParam(defaultValue = "!") Integer pageNum,
+                                                    @RequestParam(defaultValue = "!") Integer pageSize) {
+        PageUtil<ProductApiVO> pageData = productService.listProductApiVOS(categoryId, pageNum, pageSize);
         UserLoginContext.sysClean();
-        return productApiVOList;
+        return pageData;
     }
 
 }

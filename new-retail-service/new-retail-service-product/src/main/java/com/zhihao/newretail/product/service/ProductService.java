@@ -35,6 +35,6 @@ public interface ProductService {
     /*
     * 获取商品列表(feign)
     * */
-    List<ProductApiVO> listProductApiVOS(Integer categoryId);
+    PageUtil<ProductApiVO> listProductApiVOS(Integer categoryId, Integer pageNum, Integer pageSize);
 
 }

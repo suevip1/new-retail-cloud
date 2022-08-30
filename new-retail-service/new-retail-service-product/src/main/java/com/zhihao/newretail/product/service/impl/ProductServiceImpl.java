@@ -116,9 +116,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductApiVO> listProductApiVOS(Integer categoryId) {
-        List<Spu> spuList = spuService.listSpuS(categoryId, null, null);
-        return spuList.stream().map(this::spu2ProductApiVO).collect(Collectors.toList());
+    public PageUtil<ProductApiVO> listProductApiVOS(Integer categoryId, Integer pageNum, Integer pageSize) {
+        PageUtil<ProductApiVO> pageUtil = new PageUtil<>();
+        CompletableFuture<Void> totalFuture = CompletableFuture.runAsync(() -> {
+            int total = spuService.countByCategoryId(categoryId);
+            pageUtil.setPageNum(pageNum);
+            pageUtil.setPageSize(pageSize);
+            pageUtil.setTotal((long) total);
+        }, executor);
+        CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
+            List<ProductApiVO> productApiVOList = spuService.listSpuS(categoryId, pageNum, pageSize).stream()
+                    .map(this::spu2ProductApiVO)
+                    .collect(Collectors.toList());
+            pageUtil.setList(productApiVOList);
+        }, executor);
+        CompletableFuture.allOf(totalFuture, listFuture).join();
+        return pageUtil;
     }
 
     private GoodsVO sku2GoodsVO(Sku sku) {

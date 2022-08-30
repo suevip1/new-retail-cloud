@@ -3,6 +3,7 @@ package com.zhihao.newretail.api.product.feign;
 import com.zhihao.newretail.api.product.fallback.ProductFeignFallback;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,8 @@ public interface ProductFeignService {
     GoodsApiVO getGoodsApiVO(@PathVariable Integer skuId);
 
     @GetMapping("/api/product/list")
-    List<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId);
+    PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
+                                             @RequestParam(defaultValue = "!") Integer pageNum,
+                                             @RequestParam(defaultValue = "!") Integer pageSize);
 
 }

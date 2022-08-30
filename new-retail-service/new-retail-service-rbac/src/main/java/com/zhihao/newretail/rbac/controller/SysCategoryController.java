@@ -18,7 +18,6 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/admin")
 public class SysCategoryController {
 
     @Autowired

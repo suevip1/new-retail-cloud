@@ -47,6 +47,18 @@
 
         <dependency>
             <groupId>com.zhihao</groupId>
+            <artifactId>new-retail-api-pay</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.zhihao</groupId>
+                    <artifactId>new-retail-common-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.zhihao</groupId>
             <artifactId>new-retail-api-order</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <exclusions>

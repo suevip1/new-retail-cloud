@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.controller;
 
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
@@ -35,6 +36,9 @@ public class ProductController {
     public R productList(@PathVariable Integer categoryId,
                          @RequestParam(defaultValue = "1") Integer pageNum,
                          @RequestParam(defaultValue = "20") Integer pageSize) {
+        if (pageNum == 0 || pageSize == 0) {
+            throw new ServiceException("分页参数不能为0");
+        }
         PageUtil<ProductVO> pageData = productService.listProductVOS(categoryId, pageNum, pageSize);
         return R.ok().put("data", pageData);
     }

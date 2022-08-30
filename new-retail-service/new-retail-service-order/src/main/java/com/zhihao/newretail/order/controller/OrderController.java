@@ -1,5 +1,6 @@
 package com.zhihao.newretail.order.controller;
 
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
@@ -65,6 +66,9 @@ public class OrderController {
     public R orderList(@RequestParam(required = false) Integer status,
                        @RequestParam(defaultValue = "1") Integer pageNum,
                        @RequestParam(defaultValue = "5") Integer pageSize) {
+        if (pageNum == 0 || pageSize == 0) {
+            throw new ServiceException("分页参数不能为0");
+        }
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         PageUtil<OrderVO> pageData = orderService.listOrderVOS(userId, status, pageNum, pageSize);
         UserLoginContext.clean();

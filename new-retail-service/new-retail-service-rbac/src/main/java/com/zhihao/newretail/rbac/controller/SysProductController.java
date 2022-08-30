@@ -1,7 +1,9 @@
 package com.zhihao.newretail.rbac.controller;
 
+import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.form.SkuForm;
@@ -22,6 +24,21 @@ public class SysProductController {
 
     @Autowired
     private SysProductService sysProductService;
+
+    @RequiresLogin
+    @GetMapping("/product/list")
+    public R productList(@RequestParam(required = false) Integer categoryId,
+                         @RequestParam(defaultValue = "1") Integer pageNum,
+                         @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (pageNum == 0 || pageSize == 0) {
+            throw new ServiceException("分页参数不能为0");
+        }
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        PageUtil<ProductApiVO> pageData = sysProductService.listProductApiVOS(categoryId, pageNum, pageSize);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", pageData);
+    }
 
     @RequiresLogin
     @GetMapping("/spu/{spuId}")

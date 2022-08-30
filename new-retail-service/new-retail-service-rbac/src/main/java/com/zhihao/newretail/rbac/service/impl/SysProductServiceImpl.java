@@ -5,10 +5,13 @@ import com.zhihao.newretail.api.product.dto.SkuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SkuUpdateApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SpuUpdateApiDTO;
+import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.SkuFeignService;
 import com.zhihao.newretail.api.product.feign.SpuFeignService;
+import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
 import com.zhihao.newretail.core.util.GsonUtil;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
@@ -35,7 +38,16 @@ public class SysProductServiceImpl implements SysProductService {
     private SkuFeignService skuFeignService;
 
     @Autowired
+    private ProductFeignService productFeignService;
+
+    @Autowired
     private FileUploadFeignService fileUploadFeignService;
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public PageUtil<ProductApiVO> listProductApiVOS(Integer categoryId, Integer pageNum, Integer pageSize) {
+        return productFeignService.listProductApiVOS(categoryId, pageNum, pageSize);
+    }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.COMMON)

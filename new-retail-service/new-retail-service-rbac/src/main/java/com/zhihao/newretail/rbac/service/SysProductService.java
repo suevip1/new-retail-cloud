@@ -1,6 +1,8 @@
 package com.zhihao.newretail.rbac.service;
 
+import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.api.product.vo.SpuApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.rbac.form.SkuForm;
 import com.zhihao.newretail.rbac.form.SpuForm;
 import org.springframework.web.multipart.MultipartFile;
@@ -9,6 +11,11 @@ import java.io.IOException;
 import java.util.List;
 
 public interface SysProductService {
+
+    /*
+    * 商品列表
+    * */
+    PageUtil<ProductApiVO> listProductApiVOS(Integer categoryId, Integer pageNum, Integer pageSize);
 
     /*
     * 查看商品信息

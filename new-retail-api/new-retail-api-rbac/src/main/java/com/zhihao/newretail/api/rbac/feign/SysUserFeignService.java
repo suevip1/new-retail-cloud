@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
-@FeignClient(name = "new-retail-rbac", path = "/rbac")
+@FeignClient(name = "new-retail-rbac", path = "/admin")
 public interface SysUserFeignService {
 
     @PostMapping("/api/sysUserInfo")

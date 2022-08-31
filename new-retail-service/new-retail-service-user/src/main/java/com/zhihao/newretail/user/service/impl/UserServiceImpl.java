@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
                 UserInfo userInfo = new UserInfo();
                 userInfo.setUserId(userId);
                 userInfo.setNickName("用户:" + uuid);     // 用户昵称
-                userInfo.setPhoto("photoURL");          // TODO 用户头像URL
+                userInfo.setPhoto("https://zh-product.oss-cn-shenzhen.aliyuncs.com/user-photo/photo.png");  // 用户默认头像
                 int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
 
                 if (insertUserInfoRow <= 0) {

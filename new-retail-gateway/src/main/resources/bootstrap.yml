@@ -56,7 +56,7 @@ spring:
         - id: new-retail-rbac
           uri: lb://new-retail-rbac
           predicates:
-            - Path=/rbac/**
+            - Path=/admin/**
 
         - id: new-retail-file
           uri: lb://new-retail-file

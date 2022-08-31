@@ -3,6 +3,7 @@ package com.zhihao.newretail.product.service;
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.pojo.Category;
 import com.zhihao.newretail.product.pojo.vo.CategoryVO;
 
@@ -23,7 +24,7 @@ public interface CategoryService {
     /*
     * 商品分类列表(feign)
     * */
-    List<CategoryApiVO> listCategoryApiVOS();
+    PageUtil<CategoryApiVO> listCategoryApiVOS(Integer pageNum, Integer pageSize);
 
     /*
     * 商品分类信息

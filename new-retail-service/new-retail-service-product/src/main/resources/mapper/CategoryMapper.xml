@@ -111,10 +111,27 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <select id="countCategory" resultType="int">
+    select
+    count(*)
+    from tb_category
+  </select>
+
   <select id="selectListByAll" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from tb_category
     where is_delete = 0
+  </select>
+
+  <select id="selectListByPage" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_category
+    order by sort desc
+    <if test="pageNum != null and pageSize != null">
+      <bind name="page_start" value="(pageNum -1) * pageSize"/>
+      limit #{page_start}, #{pageSize}
+    </if>
   </select>
 </mapper>

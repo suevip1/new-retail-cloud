@@ -4,6 +4,7 @@ import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.CategoryFeignService;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class CategoryFeignFallback implements CategoryFeignService {
 
     @Override
-    public List<CategoryApiVO> listCategoryApiVOS() {
+    public PageUtil<CategoryApiVO> listCategoryApiVOS(Integer pageNum, Integer pageSize) {
         return null;
     }
 

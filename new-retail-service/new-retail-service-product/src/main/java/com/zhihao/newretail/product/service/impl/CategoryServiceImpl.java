@@ -3,6 +3,7 @@ package com.zhihao.newretail.product.service.impl;
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
 import com.zhihao.newretail.product.pojo.Category;
@@ -11,9 +12,12 @@ import com.zhihao.newretail.product.service.CategoryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,6 +25,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Autowired
     private CategoryMapper categoryMapper;
+
+    @Autowired
+    private ThreadPoolExecutor executor;
 
     @Override
     public List<CategoryVO> listCategoryVOS() {
@@ -41,9 +48,23 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryApiVO> listCategoryApiVOS() {
-        List<Category> categoryList = categoryMapper.selectListByAll();
-        return categoryList.stream().map(this::category2CategoryApiVO).collect(Collectors.toList());
+    public PageUtil<CategoryApiVO> listCategoryApiVOS(Integer pageNum, Integer pageSize) {
+        PageUtil<CategoryApiVO> pageUtil = new PageUtil<>();
+        CompletableFuture<Void> totalFuture = CompletableFuture.runAsync(() -> {
+            int countCategory = categoryMapper.countCategory();
+            pageUtil.setPageNum(pageNum);
+            pageUtil.setPageSize(pageSize);
+            pageUtil.setTotal((long) countCategory);
+        }, executor);
+        CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
+            List<Category> categoryList = categoryMapper.selectListByPage(pageNum, pageSize);
+            if (!CollectionUtils.isEmpty(categoryList)) {
+                List<CategoryApiVO> categoryApiVOList = categoryList.stream().map(this::category2CategoryApiVO).collect(Collectors.toList());
+                pageUtil.setList(categoryApiVOList);
+            }
+        }, executor);
+        CompletableFuture.allOf(totalFuture, listFuture).join();
+        return pageUtil;
     }
 
     @Override

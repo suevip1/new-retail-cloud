@@ -46,6 +46,11 @@ public interface OrderService {
     void updateOrder(Order order);
 
     /*
+    * 订单确认收货
+    * */
+    void takeAnOrder(Integer userId, Long orderId);
+
+    /*
     * 更新订单(订单发货)
     * */
     int updateOrder(Long orderNo);

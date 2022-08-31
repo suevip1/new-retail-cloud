@@ -62,6 +62,16 @@ public class OrderController {
     }
 
     @RequiresLogin
+    @PutMapping("/order/receipt/{orderId}")
+    public R orderConfirmReceipt(@PathVariable Long orderId) {
+        Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
+        orderService.takeAnOrder(userId, orderId);
+        UserLoginContext.clean();
+
+        return R.ok();
+    }
+
+    @RequiresLogin
     @GetMapping("/order/list")
     public R orderList(@RequestParam(required = false) Integer status,
                        @RequestParam(defaultValue = "1") Integer pageNum,

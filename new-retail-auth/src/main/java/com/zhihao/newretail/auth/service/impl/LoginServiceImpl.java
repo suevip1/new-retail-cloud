@@ -68,6 +68,9 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public R loginAdmin(UserLoginForm form) {
         SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
+        if (ObjectUtils.isEmpty(sysUserApiVO)) {
+            throw new ServiceException("系统服务繁忙");
+        }
         String username = sysUserApiVO.getUsername();
         String password = form.getPassword();
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);

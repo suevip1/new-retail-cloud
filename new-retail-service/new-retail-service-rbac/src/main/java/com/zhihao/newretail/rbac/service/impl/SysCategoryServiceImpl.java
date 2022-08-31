@@ -4,13 +4,12 @@ import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.CategoryFeignService;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
 import com.zhihao.newretail.rbac.service.SysCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class SysCategoryServiceImpl implements SysCategoryService {
@@ -20,8 +19,8 @@ public class SysCategoryServiceImpl implements SysCategoryService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.COMMON)
-    public List<CategoryApiVO> listCategoryApiVOS() {
-        return categoryFeignService.listCategoryApiVOS();
+    public PageUtil<CategoryApiVO> listCategoryApiVOS(Integer pageNum, Integer pageSize) {
+        return categoryFeignService.listCategoryApiVOS(pageNum, pageSize);
     }
 
     @Override

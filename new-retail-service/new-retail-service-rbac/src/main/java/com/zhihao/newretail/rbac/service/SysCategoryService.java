@@ -3,15 +3,14 @@ package com.zhihao.newretail.rbac.service;
 import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
-
-import java.util.List;
+import com.zhihao.newretail.core.util.PageUtil;
 
 public interface SysCategoryService {
 
     /*
     * 商品分类列表
     * */
-    List<CategoryApiVO> listCategoryApiVOS();
+    PageUtil<CategoryApiVO> listCategoryApiVOS(Integer pageNum, Integer pageSize);
 
     /*
     * 商品分类信息

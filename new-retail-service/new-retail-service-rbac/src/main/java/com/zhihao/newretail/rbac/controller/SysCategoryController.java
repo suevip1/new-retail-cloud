@@ -4,18 +4,16 @@ import com.zhihao.newretail.api.product.dto.CategoryAddApiDTO;
 import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.service.SysCategoryService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 public class SysCategoryController {
@@ -25,16 +23,16 @@ public class SysCategoryController {
 
     @RequiresLogin
     @GetMapping("/category/list")
-    public R categories() {
+    public R categories(@RequestParam(defaultValue = "1") Integer pageNum,
+                        @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (pageNum == 0 || pageSize == 0) {
+            throw new ServiceException("分页参数不能为0");
+        }
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        List<CategoryApiVO> categoryApiVOList = categoryService.listCategoryApiVOS();
+        PageUtil<CategoryApiVO> pageData = categoryService.listCategoryApiVOS(pageNum, pageSize);
         UserLoginContext.sysClean();
-        if (!CollectionUtils.isEmpty(categoryApiVOList)) {
-            return R.ok().put("data", categoryApiVOList);
-        } else {
-            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", categoryApiVOList);
-        }
+        return R.ok().put("data", pageData);
     }
 
     @RequiresLogin

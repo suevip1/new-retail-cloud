@@ -70,8 +70,9 @@ public class HomeServiceImpl implements HomeService {
                 /* 返回结果为空，key存null值解决缓存穿透 */
                 if (CollectionUtils.isEmpty(homeProductVOList)) {
                     redisUtil.setObject(HOME_CATEGORY_PRODUCT_LIST, PRESENT, 43200L);
+                } else {
+                    redisUtil.setObject(HOME_CATEGORY_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 }
-                redisUtil.setObject(HOME_CATEGORY_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 return homeProductVOList;
             }
             return GsonUtil.json2List(str, HomeProductVO[].class);

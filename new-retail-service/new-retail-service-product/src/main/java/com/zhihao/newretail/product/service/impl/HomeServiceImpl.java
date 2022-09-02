@@ -1,7 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.core.util.GsonUtil;
-import com.zhihao.newretail.product.enums.ProductCacheKeyEnum;
 import com.zhihao.newretail.product.pojo.Category;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
@@ -21,6 +20,8 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.zhihao.newretail.product.consts.ProductCacheConst.*;
+
 @Service
 public class HomeServiceImpl implements HomeService {
 
@@ -36,21 +37,19 @@ public class HomeServiceImpl implements HomeService {
     @Autowired
     private RedissonClient redissonClient;
 
-    private static final String PRESENT = null;
-
     @Override
     public List<HomeProductVO> listHomeProductVOS() {
-        RLock lock = redissonClient.getLock("home-product-lock");
+        RLock lock = redissonClient.getLock(HOME_PRODUCT_LIST_LOCK);
         lock.lock();
         try {
-            String str = (String) redisUtil.getObject(ProductCacheKeyEnum.HOME_PRODUCT_LIST.getKey());
+            String str = (String) redisUtil.getObject(HOME_PRODUCT_LIST);
             if (StringUtils.isEmpty(str)) {
                 List<HomeProductVO> homeProductVOList = getHomeProductVOResources();
                 /* 返回结果为空，key存null值解决缓存穿透 */
                 if (CollectionUtils.isEmpty(homeProductVOList)) {
-                    redisUtil.setObject(ProductCacheKeyEnum.HOME_PRODUCT_LIST.getKey(), PRESENT, 43200L);
+                    redisUtil.setObject(HOME_PRODUCT_LIST, PRESENT, 43200L);
                 }
-                redisUtil.setObject(ProductCacheKeyEnum.HOME_PRODUCT_LIST.getKey(), GsonUtil.obj2Json(homeProductVOList));
+                redisUtil.setObject(HOME_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 return homeProductVOList;
             }
             return GsonUtil.json2List(str, HomeProductVO[].class);
@@ -61,17 +60,17 @@ public class HomeServiceImpl implements HomeService {
 
     @Override
     public List<HomeProductVO> listHomeCategoryProductVOS() {
-        RLock lock = redissonClient.getLock("home-category-product-lock");
+        RLock lock = redissonClient.getLock(HOME_CATEGORY_PRODUCT_LIST_LOCK);
         lock.lock();
         try {
-            String str = (String) redisUtil.getObject(ProductCacheKeyEnum.HOME_CATEGORY_PRODUCT_LIST.getKey());
+            String str = (String) redisUtil.getObject(HOME_CATEGORY_PRODUCT_LIST);
             if (StringUtils.isEmpty(str)) {
                 List<HomeProductVO> homeProductVOList = getHomeCategoryProductVOResources();
                 /* 返回结果为空，key存null值解决缓存穿透 */
                 if (CollectionUtils.isEmpty(homeProductVOList)) {
-                    redisUtil.setObject(ProductCacheKeyEnum.HOME_CATEGORY_PRODUCT_LIST.getKey(), PRESENT, 43200L);
+                    redisUtil.setObject(HOME_CATEGORY_PRODUCT_LIST, PRESENT, 43200L);
                 }
-                redisUtil.setObject(ProductCacheKeyEnum.HOME_CATEGORY_PRODUCT_LIST.getKey(), GsonUtil.obj2Json(homeProductVOList));
+                redisUtil.setObject(HOME_CATEGORY_PRODUCT_LIST, GsonUtil.obj2Json(homeProductVOList));
                 return homeProductVOList;
             }
             return GsonUtil.json2List(str, HomeProductVO[].class);

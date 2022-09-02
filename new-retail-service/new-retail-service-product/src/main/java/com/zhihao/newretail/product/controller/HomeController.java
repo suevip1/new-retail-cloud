@@ -1,7 +1,6 @@
 package com.zhihao.newretail.product.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.product.enums.ProductCacheKeyEnum;
 import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
 import com.zhihao.newretail.product.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static com.zhihao.newretail.product.consts.ProductCacheConst.*;
 
 @RestController
 public class HomeController {
@@ -28,11 +29,11 @@ public class HomeController {
         ConcurrentMap<String, List<HomeProductVO>> listConcurrentMap = new ConcurrentHashMap<>();
         CompletableFuture<Void> homeCategoryProductVOListFuture = CompletableFuture.runAsync(() -> {
             List<HomeProductVO> homeCategoryProductVOList = homeService.listHomeCategoryProductVOS();
-            listConcurrentMap.put(ProductCacheKeyEnum.HOME_CATEGORY_PRODUCT_LIST.getKey(), homeCategoryProductVOList);
+            listConcurrentMap.put(HOME_CATEGORY_PRODUCT_LIST, homeCategoryProductVOList);
         }, executor);
         CompletableFuture<Void> homeProductVOListFuture = CompletableFuture.runAsync(() -> {
             List<HomeProductVO> homeProductVOList = homeService.listHomeProductVOS();
-            listConcurrentMap.put(ProductCacheKeyEnum.HOME_PRODUCT_LIST.getKey(), homeProductVOList);
+            listConcurrentMap.put(HOME_PRODUCT_LIST, homeProductVOList);
         }, executor);
         CompletableFuture.allOf(homeCategoryProductVOListFuture, homeProductVOListFuture).join();
         return R.ok().put("data", listConcurrentMap);

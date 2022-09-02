@@ -12,6 +12,8 @@ import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 import com.zhihao.newretail.product.service.ProductService;
 import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
+import com.zhihao.newretail.redis.util.MyRedisUtil;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private SkuService skuService;
+
+    @Autowired
+    private MyRedisUtil redisUtil;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Autowired
     private ThreadPoolExecutor executor;

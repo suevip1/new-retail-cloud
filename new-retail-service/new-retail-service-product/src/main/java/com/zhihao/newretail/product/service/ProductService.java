@@ -8,14 +8,13 @@ import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 public interface ProductService {
 
     /*
     * 获取商品详情
     * */
-    ProductDetailVO getProductDetailVO(Integer spuId) throws ExecutionException, InterruptedException;
+    ProductDetailVO getProductDetailVO(Integer spuId);
 
     /*
     * 批量获取商品

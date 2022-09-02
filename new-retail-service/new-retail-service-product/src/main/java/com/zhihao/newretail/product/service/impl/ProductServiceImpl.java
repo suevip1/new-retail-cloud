@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
@@ -13,6 +14,8 @@ import com.zhihao.newretail.product.service.ProductService;
 import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +26,10 @@ import org.springframework.util.ObjectUtils;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
+
+import static com.zhihao.newretail.product.consts.ProductCacheConst.*;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -46,29 +50,43 @@ public class ProductServiceImpl implements ProductService {
     private ThreadPoolExecutor executor;
 
     @Override
-    public ProductDetailVO getProductDetailVO(Integer spuId) throws ExecutionException, InterruptedException {
-        ProductDetailVO productDetailVO = new ProductDetailVO();
-
-        CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
-            Spu spu = spuService.getSpu(spuId);
-            if (!ObjectUtils.isEmpty(spu)) {
-                ProductInfoVO productInfoVO = new ProductInfoVO();
-                BeanUtils.copyProperties(spu, productDetailVO);
-                BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
-                productDetailVO.setProductInfoVO(productInfoVO);
+    public ProductDetailVO getProductDetailVO(Integer spuId) {
+        RLock lock = redissonClient.getLock(String.format(PRODUCT_DETAIL_LOCK, spuId));     // 获取分布式锁
+        lock.lock();
+        try {
+            String redisKey = String.format(PRODUCT_DETAIL, spuId);     // 获取缓存key
+            String str = (String) redisUtil.getObject(redisKey);
+            /* 缓存不存在查询数据库 */
+            if (StringUtils.isEmpty(str)) {
+                ProductDetailVO productDetailVO = new ProductDetailVO();
+                CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
+                    Spu spu = spuService.getSpu(spuId);
+                    if (!ObjectUtils.isEmpty(spu)) {
+                        ProductInfoVO productInfoVO = new ProductInfoVO();
+                        BeanUtils.copyProperties(spu, productDetailVO);
+                        BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
+                        productDetailVO.setProductInfoVO(productInfoVO);
+                    }
+                }, executor);
+                CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
+                    List<Sku> skuList = skuService.listSkuS(spuId);
+                    if (!CollectionUtils.isEmpty(skuList)) {
+                        List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
+                        productDetailVO.setGoodsVOList(goodsVOList);
+                    }
+                }, executor);
+                CompletableFuture.allOf(detailFuture, goodsVOListFuture).join();
+                if (ObjectUtils.isEmpty(productDetailVO.getId())) {
+                    redisUtil.setObject(redisKey, PRESENT, 43200L);     // 数据不存在处理缓存穿透
+                } else {
+                    redisUtil.setObject(redisKey, GsonUtil.obj2Json(productDetailVO));
+                }
+                return productDetailVO;
             }
-        }, executor);
-
-        CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
-            List<Sku> skuList = skuService.listSkuS(spuId);
-            if (!CollectionUtils.isEmpty(skuList)) {
-                List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
-                productDetailVO.setGoodsVOList(goodsVOList);
-            }
-        }, executor);
-
-        CompletableFuture.allOf(detailFuture, goodsVOListFuture).get();
-        return productDetailVO;
+            return GsonUtil.json2Obj(str, ProductDetailVO.class);
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override

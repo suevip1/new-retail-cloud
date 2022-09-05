@@ -2,6 +2,7 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.product.pojo.Category;
+import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
@@ -122,8 +123,9 @@ public class HomeServiceImpl implements HomeService {
         ProductVO productVO = new ProductVO();
         BeanUtils.copyProperties(spu, productVO);
         productVO.setShowImage(spu.getSpuInfo().getShowImage());
-        if (!CollectionUtils.isEmpty(spu.getSkuList())) {
-            productVO.setPrice(spu.getSkuList().get(0).getPrice());
+        List<Sku> skuList = spu.getSkuList().stream().sorted(Comparator.comparing(Sku::getPrice)).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(skuList)) {
+            productVO.setPrice(skuList.get(0).getPrice());
         }
         return productVO;
     }

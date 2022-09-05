@@ -122,6 +122,9 @@ public class HomeServiceImpl implements HomeService {
         ProductVO productVO = new ProductVO();
         BeanUtils.copyProperties(spu, productVO);
         productVO.setShowImage(spu.getSpuInfo().getShowImage());
+        if (!CollectionUtils.isEmpty(spu.getSkuList())) {
+            productVO.setPrice(spu.getSkuList().get(0).getPrice());
+        }
         return productVO;
     }
 

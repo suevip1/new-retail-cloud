@@ -222,7 +222,7 @@
     </foreach>
   </select>
 
-  <select id="selectSpuSpuInfoListByCategoryIdSet" parameterType="java.util.Set" resultMap="SpuSpuInfo">
+  <select id="selectSpuSpuInfoSkuListByCategoryIdSet" parameterType="java.util.Set" resultMap="SpuSpuInfoSkuList">
     <include refid="Spu_SpuInfo" />
     where
     <foreach collection="categoryIdSet" item="item" index="index" separator="or">

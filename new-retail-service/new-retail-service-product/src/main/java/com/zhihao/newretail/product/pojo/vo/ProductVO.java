@@ -1,5 +1,7 @@
 package com.zhihao.newretail.product.pojo.vo;
 
+import java.math.BigDecimal;
+
 public class ProductVO {
 
     private Integer id;
@@ -9,6 +11,8 @@ public class ProductVO {
     private String title;
 
     private String subTitle;
+
+    private BigDecimal price;
 
     private String showImage;
 
@@ -44,6 +48,14 @@ public class ProductVO {
         this.subTitle = subTitle;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public String getShowImage() {
         return showImage;
     }
@@ -54,11 +66,12 @@ public class ProductVO {
 
     @Override
     public String toString() {
-        return "GoodsVO{" +
+        return "ProductVO{" +
                 "id=" + id +
                 ", categoryId=" + categoryId +
                 ", title='" + title + '\'' +
                 ", subTitle='" + subTitle + '\'' +
+                ", price=" + price +
                 ", showImage='" + showImage + '\'' +
                 '}';
     }

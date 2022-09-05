@@ -30,7 +30,7 @@ public interface SpuMapper {
     /*
     * categoryId批量查询spuList
     * */
-    List<Spu> selectSpuSpuInfoListByCategoryIdSet(@Param("categoryIdSet") Set<Integer> categoryIdSet);
+    List<Spu> selectSpuSpuInfoSkuListByCategoryIdSet(@Param("categoryIdSet") Set<Integer> categoryIdSet);
 
     /*
     * spu spuInfo连表查询多条数据

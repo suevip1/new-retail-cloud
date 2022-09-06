@@ -27,6 +27,10 @@ public class HomeController {
     @GetMapping("/home")
     public R home() {
         ConcurrentMap<String, List<HomeProductVO>> listConcurrentMap = new ConcurrentHashMap<>();
+        CompletableFuture<Void> homeNavCategoryProductVOListFuture = CompletableFuture.runAsync(() -> {
+            List<HomeProductVO> homeNavCategoryProductVOList = homeService.listHomeNavCategoryProductVOS();
+            listConcurrentMap.put(HOME_NAV_CATEGORY_PRODUCT_LIST, homeNavCategoryProductVOList);
+        }, executor);
         CompletableFuture<Void> homeCategoryProductVOListFuture = CompletableFuture.runAsync(() -> {
             List<HomeProductVO> homeCategoryProductVOList = homeService.listHomeCategoryProductVOS();
             listConcurrentMap.put(HOME_CATEGORY_PRODUCT_LIST, homeCategoryProductVOList);
@@ -35,7 +39,7 @@ public class HomeController {
             List<HomeProductVO> homeProductVOList = homeService.listHomeProductVOS();
             listConcurrentMap.put(HOME_PRODUCT_LIST, homeProductVOList);
         }, executor);
-        CompletableFuture.allOf(homeCategoryProductVOListFuture, homeProductVOListFuture).join();
+        CompletableFuture.allOf(homeNavCategoryProductVOListFuture, homeCategoryProductVOListFuture, homeProductVOListFuture).join();
         return R.ok().put("data", listConcurrentMap);
     }
 

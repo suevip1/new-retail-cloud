@@ -16,4 +16,9 @@ public interface HomeService {
     * */
     List<HomeProductVO> listHomeCategoryProductVOS();
 
+    /*
+    * 首页导航分类商品
+    * */
+    List<HomeProductVO> listHomeNavCategoryProductVOS();
+
 }

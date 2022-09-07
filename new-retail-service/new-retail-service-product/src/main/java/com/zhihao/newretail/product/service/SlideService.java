@@ -23,4 +23,9 @@ public interface SlideService {
     * */
     int updateSlide(Integer slideId, SlideUpdateApiDTO slideUpdateApiDTO);
 
+    /*
+    * 删除轮播图
+    * */
+    int deleteSlide(Integer slideId);
+
 }

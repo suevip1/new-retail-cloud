@@ -30,4 +30,12 @@ public class SlideFeignClient {
         return updateRow;
     }
 
+    @RequiresLogin
+    @DeleteMapping("/api/slide/{slideId}")
+    Integer deleteSlide(@PathVariable Integer slideId) {
+        int deleteRow = slideService.deleteSlide(slideId);
+        UserLoginContext.sysClean();
+        return deleteRow;
+    }
+
 }

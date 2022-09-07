@@ -39,4 +39,9 @@ public class SlideServiceImpl implements SlideService {
         return slideMapper.updateByPrimaryKeySelective(slide);
     }
 
+    @Override
+    public int deleteSlide(Integer slideId) {
+        return slideMapper.deleteByPrimaryKey(slideId);
+    }
+
 }

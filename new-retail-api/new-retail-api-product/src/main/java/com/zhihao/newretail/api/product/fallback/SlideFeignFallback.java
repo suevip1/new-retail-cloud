@@ -18,4 +18,9 @@ public class SlideFeignFallback implements SlideFeignService {
         return null;
     }
 
+    @Override
+    public Integer deleteSlide(Integer slideId) {
+        return null;
+    }
+
 }

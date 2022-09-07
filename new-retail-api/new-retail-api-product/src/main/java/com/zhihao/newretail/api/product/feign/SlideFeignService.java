@@ -5,10 +5,7 @@ import com.zhihao.newretail.api.product.dto.SlideUpdateApiDTO;
 import com.zhihao.newretail.api.product.fallback.SlideFeignFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Primary
 @FeignClient(name = "new-retail-product", path = "/product", fallback = SlideFeignFallback.class)
@@ -25,5 +22,11 @@ public interface SlideFeignService {
     * */
     @PutMapping("/api/slide/{slideId}")
     Integer updateSlide(@PathVariable Integer slideId, @RequestBody SlideUpdateApiDTO slideUpdateApiDTO);
+
+    /*
+    * 删除首页轮播图
+    * */
+    @DeleteMapping("/api/slide/{slideId}")
+    Integer deleteSlide(@PathVariable Integer slideId);
 
 }

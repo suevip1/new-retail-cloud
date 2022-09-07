@@ -8,10 +8,7 @@ import com.zhihao.newretail.rbac.service.SysSlideService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -35,6 +32,22 @@ public class SysSlideController {
         }
         if (insertRow <= 0) {
             throw new ServiceException("新增轮播图失败");
+        }
+        return R.ok();
+    }
+
+    @RequiresLogin
+    @PutMapping("/slide/{slideId}")
+    public R slide(@PathVariable Integer slideId, @Valid @RequestBody SlideForm form) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        Integer updateRow = sysSlideService.updateSlide(slideId, form);
+        UserLoginContext.sysClean();
+        if (updateRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (updateRow <= 0) {
+            throw new ServiceException("修改轮播图失败");
         }
         return R.ok();
     }

@@ -2,6 +2,7 @@ package com.zhihao.newretail.rbac.service.impl;
 
 import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.product.dto.SlideAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SlideUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SlideFeignService;
 import com.zhihao.newretail.core.util.BeanCopyUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
@@ -28,6 +29,12 @@ public class SysSlideServiceImpl implements SysSlideService {
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
     public Integer insertSlide(SlideForm form) {
         return slideFeignService.addSlide(BeanCopyUtil.source2Target(form, SlideAddApiDTO.class));
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.ADMIN)
+    public Integer updateSlide(Integer slideId, SlideForm form) {
+        return slideFeignService.updateSlide(slideId, BeanCopyUtil.source2Target(form, SlideUpdateApiDTO.class));
     }
 
     @Override

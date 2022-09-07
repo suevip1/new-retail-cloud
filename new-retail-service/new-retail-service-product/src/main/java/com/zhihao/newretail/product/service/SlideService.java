@@ -2,16 +2,16 @@ package com.zhihao.newretail.product.service;
 
 import com.zhihao.newretail.api.product.dto.SlideAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SlideUpdateApiDTO;
-import com.zhihao.newretail.product.pojo.vo.SlideVO;
+import com.zhihao.newretail.product.pojo.Slide;
 
 import java.util.List;
 
 public interface SlideService {
 
     /*
-    * 首页轮播图
+    * 首页轮播图列表
     * */
-    List<SlideVO> listSlideVOS();
+    List<Slide> listSlideS();
 
     /*
     * 新增轮播图

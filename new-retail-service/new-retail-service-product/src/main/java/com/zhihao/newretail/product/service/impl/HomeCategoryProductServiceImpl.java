@@ -1,8 +1,8 @@
 package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.product.consts.ProductCacheConst;
+import com.zhihao.newretail.product.factory.HomeProductResourcesFactory;
 import com.zhihao.newretail.product.pojo.Category;
-import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
@@ -12,9 +12,7 @@ import com.zhihao.newretail.product.service.SpuService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,24 +34,10 @@ public class HomeCategoryProductServiceImpl implements HomeProductResourcesServi
         return categoryList.stream().map(category -> {
             HomeProductVO homeProductVO = new HomeProductVO();
             BeanUtils.copyProperties(category, homeProductVO);
-            List<ProductVO> productVOList = spuList.stream()
-                    .filter(spu -> category.getId().equals(spu.getCategoryId()))
-                    .map(this::spu2ProductVO)
-                    .collect(Collectors.toList());
+            List<ProductVO> productVOList = HomeProductResourcesFactory.spuList2ProductVOList(spuList, category);
             homeProductVO.setProductVOList(productVOList);
             return homeProductVO;
         }).collect(Collectors.toList());
-    }
-
-    private ProductVO spu2ProductVO(Spu spu) {
-        ProductVO productVO = new ProductVO();
-        BeanUtils.copyProperties(spu, productVO);
-        productVO.setShowImage(spu.getSpuInfo().getShowImage());
-        List<Sku> skuList = spu.getSkuList().stream().sorted(Comparator.comparing(Sku::getPrice)).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(skuList)) {
-            productVO.setPrice(skuList.get(0).getPrice());
-        }
-        return productVO;
     }
 
 }

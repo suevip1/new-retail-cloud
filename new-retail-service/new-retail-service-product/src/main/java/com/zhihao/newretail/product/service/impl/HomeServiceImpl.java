@@ -43,7 +43,6 @@ public class HomeServiceImpl implements HomeService {
         return getData(HOME_NAV_CATEGORY_PRODUCT_LIST, HOME_NAV_CATEGORY_PRODUCT_LIST_LOCK);
     }
 
-
     private List<HomeProductVO> getData(String cacheKey, String lockKey) {
         RLock lock = redissonClient.getLock(lockKey);
         lock.lock();

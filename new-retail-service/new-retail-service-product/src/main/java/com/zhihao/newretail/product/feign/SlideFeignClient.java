@@ -1,13 +1,12 @@
 package com.zhihao.newretail.product.feign;
 
 import com.zhihao.newretail.api.product.dto.SlideAddApiDTO;
+import com.zhihao.newretail.api.product.dto.SlideUpdateApiDTO;
 import com.zhihao.newretail.product.service.SlideService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class SlideFeignClient {
@@ -21,6 +20,14 @@ public class SlideFeignClient {
         int insertRow = slideService.insertSlide(slideAddApiDTO);
         UserLoginContext.sysClean();
         return insertRow;
+    }
+
+    @RequiresLogin
+    @PutMapping("/api/slide/{slideId}")
+    Integer updateSlide(@PathVariable Integer slideId, @RequestBody SlideUpdateApiDTO slideUpdateApiDTO) {
+        int updateRow = slideService.updateSlide(slideId, slideUpdateApiDTO);
+        UserLoginContext.sysClean();
+        return updateRow;
     }
 
 }

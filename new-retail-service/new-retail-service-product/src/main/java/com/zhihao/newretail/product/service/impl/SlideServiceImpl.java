@@ -1,5 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
+import com.zhihao.newretail.api.product.dto.SlideAddApiDTO;
 import com.zhihao.newretail.core.util.BeanCopyUtil;
 import com.zhihao.newretail.product.dao.SlideMapper;
 import com.zhihao.newretail.product.pojo.Slide;
@@ -21,6 +22,12 @@ public class SlideServiceImpl implements SlideService {
     public List<SlideVO> listSlideVOS() {
         List<Slide> slideList = slideMapper.selectListByAll();
         return slideList.stream().map(slide -> BeanCopyUtil.source2Target(slide, SlideVO.class)).collect(Collectors.toList());
+    }
+
+    @Override
+    public int insertSlide(SlideAddApiDTO slideAddApiDTO) {
+        Slide slide = BeanCopyUtil.source2Target(slideAddApiDTO, Slide.class);
+        return slideMapper.insertSelective(slide);
     }
 
 }

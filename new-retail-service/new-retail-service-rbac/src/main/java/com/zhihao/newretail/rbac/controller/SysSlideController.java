@@ -53,6 +53,22 @@ public class SysSlideController {
     }
 
     @RequiresLogin
+    @DeleteMapping("/slide/{slideId}")
+    public R slide(@PathVariable Integer slideId) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        Integer deleteRow = sysSlideService.deleteSlide(slideId);
+        UserLoginContext.sysClean();
+        if (deleteRow == null) {
+            throw new ServiceException("商品服务繁忙");
+        }
+        if (deleteRow <= 0) {
+            throw new ServiceException("删除轮播图失败");
+        }
+        return R.ok();
+    }
+
+    @RequiresLogin
     @PostMapping("/slide/upload/image")
     public R uploadSlideImage(@RequestPart MultipartFile file) throws IOException {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();

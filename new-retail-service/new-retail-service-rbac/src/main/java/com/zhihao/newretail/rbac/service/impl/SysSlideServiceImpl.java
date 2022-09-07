@@ -38,6 +38,12 @@ public class SysSlideServiceImpl implements SysSlideService {
     }
 
     @Override
+    @RequiresPermission(scope = AuthorizationConst.ROOT)
+    public Integer deleteSlide(Integer slideId) {
+        return slideFeignService.deleteSlide(slideId);
+    }
+
+    @Override
     public String uploadSlideImage(MultipartFile file) throws IOException {
         return fileUploadFeignService.getFileUrl(file, FileUploadDirConst.SLIDER_IMG);
     }

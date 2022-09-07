@@ -17,6 +17,11 @@ public interface SysSlideService {
     * */
     Integer updateSlide(Integer slideId, SlideForm form);
 
+    /*
+    * 删除首页轮播图
+    * */
+    Integer deleteSlide(Integer slideId);
+
     String uploadSlideImage(MultipartFile file) throws IOException;
 
 }

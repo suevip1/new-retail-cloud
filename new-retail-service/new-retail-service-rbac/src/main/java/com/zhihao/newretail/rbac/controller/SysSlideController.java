@@ -1,6 +1,8 @@
 package com.zhihao.newretail.rbac.controller;
 
+import com.zhihao.newretail.api.product.vo.SlideApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.rbac.context.SysUserTokenContext;
 import com.zhihao.newretail.rbac.form.SlideForm;
@@ -19,6 +21,21 @@ public class SysSlideController {
 
     @Autowired
     private SysSlideService sysSlideService;
+
+    @RequiresLogin
+    @GetMapping("/slide/list")
+    public R slide(@RequestParam(required = false) Integer slideId,
+                   @RequestParam(defaultValue = "1") Integer pageNum,
+                   @RequestParam(defaultValue = "10") Integer pageSize) {
+        if (pageNum == 0 || pageSize == 0) {
+            throw new ServiceException("分页参数不能为0");
+        }
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        PageUtil<SlideApiVO> pageData = sysSlideService.listSlideApiVOS(slideId, pageNum, pageSize);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", pageData);
+    }
 
     @RequiresLogin
     @PostMapping("/slide")

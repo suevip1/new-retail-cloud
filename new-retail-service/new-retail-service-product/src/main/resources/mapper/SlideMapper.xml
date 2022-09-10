@@ -98,11 +98,34 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
 
+  <select id="countSlide" parameterType="java.lang.Integer" resultType="int">
+    select
+    count(*)
+    from tb_slide
+    <if test="isDelete != null">
+      where is_delete = #{isDelete,jdbcType=INTEGER}
+    </if>
+  </select>
+
   <select id="selectListByAll" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from tb_slide
     where is_delete = 0
     order by create_time desc
+  </select>
+
+  <select id="selectListByRecord" parameterType="java.lang.Object" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_slide
+    <if test="id != null">
+      where id = #{id,jdbcType=INTEGER}
+    </if>
+    order by create_time desc
+    <if test="pageNum != null and pageSize != null">
+      <bind name="page_start" value="(pageNum - 1) * pageSize"/>
+      limit #{page_start}, #{pageSize,jdbcType=INTEGER}
+    </if>
   </select>
 </mapper>

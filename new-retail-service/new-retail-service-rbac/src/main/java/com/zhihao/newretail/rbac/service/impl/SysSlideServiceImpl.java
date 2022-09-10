@@ -4,7 +4,9 @@ import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.product.dto.SlideAddApiDTO;
 import com.zhihao.newretail.api.product.dto.SlideUpdateApiDTO;
 import com.zhihao.newretail.api.product.feign.SlideFeignService;
+import com.zhihao.newretail.api.product.vo.SlideApiVO;
 import com.zhihao.newretail.core.util.BeanCopyUtil;
+import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.rbac.annotation.RequiresPermission;
 import com.zhihao.newretail.rbac.consts.AuthorizationConst;
@@ -24,6 +26,12 @@ public class SysSlideServiceImpl implements SysSlideService {
 
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public PageUtil<SlideApiVO> listSlideApiVOS(Integer slideId, Integer pageNum, Integer pageSize) {
+        return slideFeignService.listSlideApiVOS(slideId, pageNum, pageSize);
+    }
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)

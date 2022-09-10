@@ -31,8 +31,8 @@ public class ProductFeignClient {
     @RequiresLogin
     @GetMapping("/api/product/list")
     public PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
-                                                    @RequestParam(defaultValue = "!") Integer pageNum,
-                                                    @RequestParam(defaultValue = "!") Integer pageSize) {
+                                                    @RequestParam(defaultValue = "1") Integer pageNum,
+                                                    @RequestParam(defaultValue = "10") Integer pageSize) {
         PageUtil<ProductApiVO> pageData = productService.listProductApiVOS(categoryId, pageNum, pageSize);
         UserLoginContext.sysClean();
         return pageData;

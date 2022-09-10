@@ -23,7 +23,7 @@ public interface ProductFeignService {
 
     @GetMapping("/api/product/list")
     PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
-                                             @RequestParam(defaultValue = "!") Integer pageNum,
-                                             @RequestParam(defaultValue = "!") Integer pageSize);
+                                             @RequestParam(defaultValue = "1") Integer pageNum,
+                                             @RequestParam(defaultValue = "10") Integer pageSize);
 
 }

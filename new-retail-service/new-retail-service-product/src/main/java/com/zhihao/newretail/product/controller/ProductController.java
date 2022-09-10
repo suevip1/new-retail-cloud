@@ -6,7 +6,9 @@ import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
 import com.zhihao.newretail.product.pojo.vo.ProductVO;
 import com.zhihao.newretail.product.service.ProductService;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +23,9 @@ public class ProductController {
     @GetMapping("/detail/{spuId}")
     public R productDetail(@PathVariable Integer spuId) {
         ProductDetailVO productDetailVO = productService.getProductDetailVO(spuId);
+        if (ObjectUtils.isEmpty(productDetailVO.getId())) {
+            return R.error(HttpStatus.SC_NOT_FOUND, "商品不存在");
+        }
         return R.ok().put("data", productDetailVO);
     }
 

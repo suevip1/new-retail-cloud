@@ -76,14 +76,14 @@ public class UserServiceImpl implements UserService {
                 Integer userId = user.getId();          // 获取返回主键值
                 UserInfo userInfo = new UserInfo();
                 userInfo.setUserId(userId);
-                userInfo.setNickName("用户:" + uuid);     // 用户昵称
+                userInfo.setNickName("用户" + uuid);     // 用户昵称
                 userInfo.setPhoto("https://zh-product.oss-cn-shenzhen.aliyuncs.com/user-photo/photo.png");  // 用户默认头像
                 int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
 
                 if (insertUserInfoRow <= 0) {
                     throw new ServiceException("保存用户信息失败");
                 }
-                return userId;
+                return insertUserRow;
             }
         }
         throw new ServiceException("用户已存在");

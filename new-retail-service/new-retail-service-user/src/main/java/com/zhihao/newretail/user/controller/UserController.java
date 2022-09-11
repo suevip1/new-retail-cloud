@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.controller;
 
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -23,12 +24,12 @@ public class UserController {
 
     @PostMapping("/register")
     public R register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        Integer registerRow = userService.insertUser(userRegisterDTO);
-
-        if (!ObjectUtils.isEmpty(registerRow)) {
+        Integer insertRow = userService.insertUser(userRegisterDTO);
+        if (insertRow <= 0 || ObjectUtils.isEmpty(insertRow)) {
+            throw new ServiceException("注册失败");
+        } else {
             return R.ok("注册成功");
         }
-        return R.error("注册失败");
     }
 
     @RequiresLogin

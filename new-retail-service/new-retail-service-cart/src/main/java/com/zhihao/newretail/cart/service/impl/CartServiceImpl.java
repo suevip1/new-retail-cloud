@@ -55,7 +55,7 @@ public class CartServiceImpl implements CartService {
         /* 获取购物车商品 */
         List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
         if (CollectionUtils.isEmpty(goodsApiVOList)) {
-            throw new ServiceException(HttpStatus.SC_SERVICE_UNAVAILABLE, "服务繁忙");
+            throw new ServiceException("商品服务繁忙");
         }
 
         for (Map.Entry<Object, Object> entry : redisMap.entrySet()) {

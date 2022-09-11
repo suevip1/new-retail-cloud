@@ -113,7 +113,7 @@ public class CartServiceImpl implements CartService {
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Cart cart = (Cart) redisUtil.getMapValue(redisKey, form.getSkuId());
 
-        if (ObjectUtils.isEmpty(cart))
+        if (ObjectUtils.isEmpty(cart.getSkuId()))
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "购物车无此商品");
 
         if (form.getQuantity() != null && form.getQuantity() >= 0)

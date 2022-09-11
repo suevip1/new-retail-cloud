@@ -1,7 +1,6 @@
 package com.zhihao.newretail.user.service.impl;
 
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
-import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;

@@ -177,7 +177,7 @@ public class OrderServiceImpl implements OrderService {
         String orderToken = form.getOrderToken();
         Long result = redisUtil.executeScript(REDIS_SCRIPT, redisKey, orderToken);
         if (result == 0) {
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "订单唯一标识错误");
+            throw new ServiceException("订单唯一标识错误");
         }
         Integer couponsId = form.getCouponsId();                    // 优惠券id
         Long orderNo = getOrderNo(uuid);                            // 订单号

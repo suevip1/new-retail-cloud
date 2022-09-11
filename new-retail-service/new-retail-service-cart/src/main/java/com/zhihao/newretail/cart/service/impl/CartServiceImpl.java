@@ -130,8 +130,7 @@ public class CartServiceImpl implements CartService {
     public CartVO deleteCart(Integer userId, Integer skuId) {
         String redisKey = String.format(CART_REDIS_KEY, userId);
         Cart cart = (Cart) redisUtil.getMapValue(redisKey, skuId);
-
-        if (ObjectUtils.isEmpty(cart))
+        if (ObjectUtils.isEmpty(cart.getSkuId()))
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "购物车无此商品");
         redisUtil.deleteEntry(redisKey, skuId);
         return getCartVO(userId);

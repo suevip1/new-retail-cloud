@@ -83,7 +83,7 @@ public class CartServiceImpl implements CartService {
         GoodsApiVO goodsApiVO = productFeignService.getGoodsApiVO(form.getSkuId());
         try {
             if (ObjectUtils.isEmpty(goodsApiVO.getId())) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品下架或删除");
+                throw new ServiceException("商品下架或删除");
             }
         } catch (NullPointerException e) {
             /*

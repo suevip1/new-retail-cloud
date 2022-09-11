@@ -7,7 +7,9 @@ import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -25,6 +27,9 @@ public class CartController {
         CartVO cartVO = cartService.getCartVO(userId);
         UserLoginContext.clean();
 
+        if (CollectionUtils.isEmpty(cartVO.getCartProductVOList())) {
+            return R.error(HttpStatus.SC_NO_CONTENT, "购物车为空").put("data", cartVO);
+        }
         return R.ok().put("data", cartVO);
     }
 

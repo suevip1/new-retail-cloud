@@ -36,7 +36,6 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartVO getCartVO(Integer userId) {
         /* 初始化购物车显示信息 */
-        CartVO cartVO = new CartVO();
         boolean selectedAll = true;     // 是否全选
         Integer totalQuantity = 0;      // 购物车商品总数
         BigDecimal cartTotalPrice = BigDecimal.ZERO;    // 总金额
@@ -50,7 +49,8 @@ public class CartServiceImpl implements CartService {
         Set<Integer> skuIdSet = new HashSet<>();
         redisMap.forEach((k, v) -> {skuIdSet.add((Integer) k);});
         if (CollectionUtils.isEmpty(skuIdSet)) {
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "购物车为空");
+            // throw new ServiceException(HttpStatus.SC_NO_CONTENT, "购物车为空");
+            return buildCartVO(selectedAll, totalQuantity, cartTotalPrice, cartProductVOList);
         }
         /* 获取购物车商品 */
         List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(skuIdSet);
@@ -75,12 +75,7 @@ public class CartServiceImpl implements CartService {
                 cartTotalPrice = cartTotalPrice.add(cartProductVO.getTotalPrice());
             }
         }
-
-        cartVO.setSelectedAll(selectedAll);
-        cartVO.setTotalQuantity(totalQuantity);
-        cartVO.setCartTotalPrice(cartTotalPrice);
-        cartVO.setCartProductVOList(cartProductVOList);
-        return cartVO;
+        return buildCartVO(selectedAll, totalQuantity, cartTotalPrice, cartProductVOList);
     }
 
     @Override
@@ -190,6 +185,15 @@ public class CartServiceImpl implements CartService {
                 redisUtil.deleteEntry(redisKey, cart.getSkuId());
             }
         }
+    }
+
+    private CartVO buildCartVO(boolean selectedAll, Integer totalQuantity, BigDecimal cartTotalPrice, List<CartProductVO> cartProductVOList) {
+        CartVO cartVO = new CartVO();
+        cartVO.setSelectedAll(selectedAll);
+        cartVO.setTotalQuantity(totalQuantity);
+        cartVO.setCartTotalPrice(cartTotalPrice);
+        cartVO.setCartProductVOList(cartProductVOList);
+        return cartVO;
     }
 
     private List<Cart> listCartS(Integer userId) {

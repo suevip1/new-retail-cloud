@@ -9,7 +9,9 @@ import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -48,6 +50,9 @@ public class OrderController {
         OrderVO orderVO = orderService.getOrderVO(userId, orderId);
         UserLoginContext.clean();
 
+        if (ObjectUtils.isEmpty(orderVO.getId())) {
+            return R.error(HttpStatus.SC_NOT_FOUND, "订单不存在").put("data", orderVO);
+        }
         return R.ok().put("data", orderVO);
     }
 

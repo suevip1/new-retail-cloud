@@ -508,7 +508,7 @@ public class OrderServiceImpl implements OrderService {
     public void takeAnOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
         if (ObjectUtils.isEmpty(order) || !userId.equals(order.getUserId())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
+            throw new ServiceException("订单不存在");
         } else if (OrderStatusEnum.NOT_TAKE.getCode().equals(order.getStatus())) {
             order.setStatus(OrderStatusEnum.TAKE_SUCCEED.getCode());
             orderMapper.updateByPrimaryKeySelective(order);

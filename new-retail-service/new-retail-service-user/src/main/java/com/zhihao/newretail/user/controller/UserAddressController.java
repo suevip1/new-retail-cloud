@@ -25,7 +25,7 @@ public class UserAddressController {
     @GetMapping("/address/list")
     public R getAddresses() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOs(userId);
+        List<UserAddressVO> listUserAddressVOs = userAddressService.listUserAddressVOS(userId);
         UserLoginContext.clean();
 
         if (!CollectionUtils.isEmpty(listUserAddressVOs)) {

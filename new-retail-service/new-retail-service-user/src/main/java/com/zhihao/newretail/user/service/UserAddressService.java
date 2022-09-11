@@ -13,7 +13,7 @@ public interface UserAddressService {
     /*
     * 用户收货地址列表
     * */
-    List<UserAddressVO> listUserAddressVOs(Integer userId);
+    List<UserAddressVO> listUserAddressVOS(Integer userId);
 
     /*
     * 用户收货地址

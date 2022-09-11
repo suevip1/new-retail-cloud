@@ -2,6 +2,7 @@ package com.zhihao.newretail.user.service.impl;
 
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.BeanCopyUtil;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
@@ -25,14 +26,10 @@ public class UserAddressServiceImpl implements UserAddressService {
     private UserAddressMapper userAddressMapper;
 
     @Override
-    public List<UserAddressVO> listUserAddressVOs(Integer userId) {
-        List<UserAddress> userAddresses = userAddressMapper.selectListByUserId(userId);
-        return userAddresses.stream()
-                .map(userAddress -> {
-                    UserAddressVO userAddressVO = new UserAddressVO();
-                    BeanUtils.copyProperties(userAddress, userAddressVO);
-                    return userAddressVO;
-                }).collect(Collectors.toList());
+    public List<UserAddressVO> listUserAddressVOS(Integer userId) {
+        return userAddressMapper.selectListByUserId(userId).stream()
+                .map(userAddress -> BeanCopyUtil.source2Target(userAddress, UserAddressVO.class))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -42,9 +39,7 @@ public class UserAddressServiceImpl implements UserAddressService {
         if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
             throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
         }
-        UserAddressVO userAddressVO = new UserAddressVO();
-        BeanUtils.copyProperties(userAddress, userAddressVO);
-        return userAddressVO;
+        return BeanCopyUtil.source2Target(userAddress, UserAddressVO.class);
     }
 
     @Override

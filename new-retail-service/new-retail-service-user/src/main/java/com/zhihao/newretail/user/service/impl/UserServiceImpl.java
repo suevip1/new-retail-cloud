@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
                 return userId;
             }
         }
-        throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
+        throw new ServiceException("用户已存在");
     }
 
     /*

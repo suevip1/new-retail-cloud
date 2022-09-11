@@ -1,6 +1,6 @@
 package com.zhihao.newretail.auth.controller;
 
-import com.zhihao.newretail.auth.controller.enums.TokenTypeEnum;
+import com.zhihao.newretail.auth.enums.TokenTypeEnum;
 import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.util.R;
 import org.springframework.beans.factory.annotation.Autowired;

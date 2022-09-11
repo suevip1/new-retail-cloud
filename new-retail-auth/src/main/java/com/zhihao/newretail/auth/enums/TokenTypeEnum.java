@@ -1,4 +1,4 @@
-package com.zhihao.newretail.auth.controller.enums;
+package com.zhihao.newretail.auth.enums;
 
 public enum TokenTypeEnum {
 

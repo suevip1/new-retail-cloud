@@ -1,7 +1,7 @@
 package com.zhihao.newretail.auth.service.impl;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
-import com.zhihao.newretail.auth.controller.enums.TokenTypeEnum;
+import com.zhihao.newretail.auth.enums.TokenTypeEnum;
 import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
@@ -47,9 +47,8 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public R verifierToken(String token, TokenTypeEnum tokenTypeEnum) {
         if (StringUtils.isEmpty(token)) {
-            return R.error(HttpStatus.SC_UNAUTHORIZED, "用户未登录").put("token", token);
+            return R.ok().put("token", token);
         }
-
         /*
         * 验证 token 类型
         * */

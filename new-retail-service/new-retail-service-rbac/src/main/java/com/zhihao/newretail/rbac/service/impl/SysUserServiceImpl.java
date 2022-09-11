@@ -151,7 +151,7 @@ public class SysUserServiceImpl implements SysUserService {
     private void countUsername(String username) {
         int count = sysUserMapper.countByUsername(username);
         if (count > 0) {
-            throw new ServiceException(HttpStatus.SC_CREATED, "用户已存在");
+            throw new ServiceException("用户已存在");
         }
     }
 

@@ -492,7 +492,7 @@ public class OrderServiceImpl implements OrderService {
                 || !userId.equals(order.getUserId())
                 || !OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())
                 || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
+            throw new ServiceException("订单不存在");
         }
         /* 取消订单，发送消息直接关闭订单 */
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);

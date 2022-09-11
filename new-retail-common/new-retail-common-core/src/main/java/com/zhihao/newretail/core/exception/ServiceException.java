@@ -5,7 +5,7 @@ package com.zhihao.newretail.core.exception;
 * */
 public class ServiceException extends RuntimeException {
 
-    private Integer code;
+    private Integer code = 500;
 
     private String msg;
 

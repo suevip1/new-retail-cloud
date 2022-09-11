@@ -11,6 +11,7 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,6 +89,9 @@ public class OrderController {
         PageUtil<OrderVO> pageData = orderService.listOrderVOS(userId, status, pageNum, pageSize);
         UserLoginContext.clean();
 
+        if (CollectionUtils.isEmpty(pageData.getList())) {
+            return R.error(HttpStatus.SC_NO_CONTENT, "暂无订单").put("data", pageData);
+        }
         return R.ok().put("data", pageData);
     }
 

@@ -1,4 +1,4 @@
-package com.zhihao.newretail.rbac.pojo.dto;
+package com.zhihao.newretail.rbac.form;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
-public class SysRoleAddDTO {
+public class SysRoleForm {
 
     @NotBlank(message = "角色名不能为空")
     private String name;

@@ -4,8 +4,7 @@ import com.zhihao.newretail.core.enums.DeleteEnum;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.rbac.dao.SysRoleMapper;
 import com.zhihao.newretail.rbac.pojo.SysRole;
-import com.zhihao.newretail.rbac.pojo.dto.SysRoleAddDTO;
-import com.zhihao.newretail.rbac.pojo.dto.SysRoleUpdateDTO;
+import com.zhihao.newretail.rbac.form.SysRoleForm;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.service.SysRoleService;
 import org.apache.http.HttpStatus;
@@ -47,11 +46,11 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public int insertRole(SysRoleAddDTO roleAddDTO) {
+    public int insertRole(SysRoleForm form) {
         SysRole sysRole = new SysRole();
-        sysRole.setName(roleAddDTO.getName());
-        sysRole.setKey(roleAddDTO.getKey());
-        sysRole.setScope(roleAddDTO.getScope());
+        sysRole.setName(form.getName());
+        sysRole.setKey(form.getKey());
+        sysRole.setScope(form.getScope());
         int insertRow = sysRoleMapper.insertSelective(sysRole);
 
         if (insertRow <= 0) {
@@ -61,14 +60,14 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public int updateRole(Integer roleId, SysRoleUpdateDTO roleUpdateDTO) {
+    public int updateRole(Integer roleId, SysRoleForm form) {
         SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
         if (ObjectUtils.isEmpty(sysRole) || DeleteEnum.DELETE.getCode().equals(sysRole.getIsDelete())) {
             throw new ServiceException("角色不存在");
         }
-        sysRole.setName(roleUpdateDTO.getName());
-        sysRole.setKey(roleUpdateDTO.getKey());
-        sysRole.setScope(roleUpdateDTO.getScope());
+        sysRole.setName(form.getName());
+        sysRole.setKey(form.getKey());
+        sysRole.setScope(form.getScope());
         int updateRow = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
 
         if (updateRow <= 0) {

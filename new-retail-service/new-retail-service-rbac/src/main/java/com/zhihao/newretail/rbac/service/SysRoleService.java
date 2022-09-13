@@ -1,7 +1,6 @@
 package com.zhihao.newretail.rbac.service;
 
-import com.zhihao.newretail.rbac.pojo.dto.SysRoleAddDTO;
-import com.zhihao.newretail.rbac.pojo.dto.SysRoleUpdateDTO;
+import com.zhihao.newretail.rbac.form.SysRoleForm;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 
 import java.util.List;
@@ -26,12 +25,12 @@ public interface SysRoleService {
     /*
     * 新增角色
     * */
-    int insertRole(SysRoleAddDTO roleAddDTO);
+    int insertRole(SysRoleForm form);
 
     /*
     * 更新角色
     * */
-    int updateRole(Integer roleId, SysRoleUpdateDTO roleUpdateDTO);
+    int updateRole(Integer roleId, SysRoleForm form);
 
     /*
     * 删除角色

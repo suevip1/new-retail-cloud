@@ -2,8 +2,7 @@ package com.zhihao.newretail.rbac.service;
 
 import com.zhihao.newretail.api.rbac.vo.SysUserApiVO;
 import com.zhihao.newretail.rbac.pojo.SysUser;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserUpdateDTO;
+import com.zhihao.newretail.rbac.form.SysUserForm;
 import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
 
 import java.util.List;
@@ -18,17 +17,17 @@ public interface SysUserService {
     /*
     * 系统用户列表
     * */
-    List<SysUserVO> listSysUserVOs();
+    List<SysUserVO> listSysUserVOS();
 
     /*
     * 新增系统用户
     * */
-    int insertSysUser(SysUserAddDTO userAddDTO);
+    int insertSysUser(SysUserForm form);
 
     /*
     * 修改系统用户
     * */
-    int updateSysUser(Integer userId, SysUserUpdateDTO userUpdateDTO);
+    int updateSysUser(Integer userId, SysUserForm form);
 
     /*
     * 删除系统用户

@@ -1,8 +1,7 @@
 package com.zhihao.newretail.rbac.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserUpdateDTO;
+import com.zhihao.newretail.rbac.form.SysUserForm;
 import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
 import com.zhihao.newretail.rbac.service.SysUserService;
 import org.apache.http.HttpStatus;
@@ -26,7 +25,7 @@ public class SysUserController {
 
     @GetMapping("/user/list")
     public R userList() {
-        List<SysUserVO> sysUserVOList = sysUserService.listSysUserVOs();
+        List<SysUserVO> sysUserVOList = sysUserService.listSysUserVOS();
         if (CollectionUtils.isEmpty(sysUserVOList)) {
             return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", sysUserVOList);
         }
@@ -34,8 +33,8 @@ public class SysUserController {
     }
 
     @PostMapping("/user")
-    public R userCreate(@Valid @RequestBody SysUserAddDTO userAddDTO) {
-        int insertRow = sysUserService.insertSysUser(userAddDTO);
+    public R userCreate(@Valid @RequestBody SysUserForm form) {
+        int insertRow = sysUserService.insertSysUser(form);
         if (insertRow <= 0) {
             return R.error("创建失败");
         }
@@ -43,8 +42,8 @@ public class SysUserController {
     }
 
     @PutMapping("/user/{userId}")
-    public R userUpdate(@PathVariable Integer userId, @Valid @RequestBody SysUserUpdateDTO userUpdateDTO) {
-        int updateRow = sysUserService.updateSysUser(userId, userUpdateDTO);
+    public R userUpdate(@PathVariable Integer userId, @Valid @RequestBody SysUserForm form) {
+        int updateRow = sysUserService.updateSysUser(userId, form);
         if (updateRow <= 0) {
             return R.error("修改失败");
         }

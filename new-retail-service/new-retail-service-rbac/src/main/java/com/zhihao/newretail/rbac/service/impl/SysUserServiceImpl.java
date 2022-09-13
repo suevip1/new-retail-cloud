@@ -9,8 +9,7 @@ import com.zhihao.newretail.rbac.dao.SysUserRoleMapper;
 import com.zhihao.newretail.rbac.pojo.SysRole;
 import com.zhihao.newretail.rbac.pojo.SysUser;
 import com.zhihao.newretail.rbac.pojo.SysUserRoleKey;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserAddDTO;
-import com.zhihao.newretail.rbac.pojo.dto.SysUserUpdateDTO;
+import com.zhihao.newretail.rbac.form.SysUserForm;
 import com.zhihao.newretail.rbac.pojo.vo.SysRoleVO;
 import com.zhihao.newretail.rbac.pojo.vo.SysUserVO;
 import com.zhihao.newretail.rbac.service.SysUserService;
@@ -40,7 +39,7 @@ public class SysUserServiceImpl implements SysUserService {
     private SysUserRoleMapper sysUserRoleMapper;
 
     @Override
-    public List<SysUserVO> listSysUserVOs() {
+    public List<SysUserVO> listSysUserVOS() {
         List<SysUser> sysUserList = sysUserMapper.selectListByAll();
         List<SysUserVO> sysUserVOList = new ArrayList<>();
         sysUserList.stream()
@@ -56,10 +55,10 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int insertSysUser(SysUserAddDTO userAddDTO) {
-        String username = userAddDTO.getUsername();
-        String password = userAddDTO.getPassword();
-        Integer roleId = userAddDTO.getRoleId();
+    public int insertSysUser(SysUserForm form) {
+        String username = form.getUsername();
+        String password = form.getPassword();
+        Integer roleId = form.getRoleId();
 
         countUsername(username);        // 校验用户是否存在
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);      // 密码MD5加盐
@@ -77,10 +76,10 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int updateSysUser(Integer userId, SysUserUpdateDTO userUpdateDTO) {
-        String username = userUpdateDTO.getUsername();
-        String password = userUpdateDTO.getPassword();
-        Integer roleId = userUpdateDTO.getRoleId();
+    public int updateSysUser(Integer userId, SysUserForm form) {
+        String username = form.getUsername();
+        String password = form.getPassword();
+        Integer roleId = form.getRoleId();
 
         SysUser sysUser = sysUserMapper.selectByPrimaryKey(userId);
         if (ObjectUtils.isEmpty(sysUser) || DeleteEnum.DELETE.getCode().equals(sysUser.getIsDelete())) {

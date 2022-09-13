@@ -1,4 +1,4 @@
-package com.zhihao.newretail.rbac.pojo.dto;
+package com.zhihao.newretail.rbac.form;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -8,12 +8,12 @@ import javax.validation.constraints.NotNull;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
-public class SysUserAddDTO {
+public class SysUserForm {
 
-    @NotBlank(message = "用户名不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String username;
 
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String password;
 
     @NotNull(message = "请选择角色")

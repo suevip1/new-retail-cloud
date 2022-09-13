@@ -4,10 +4,10 @@ import javax.validation.constraints.NotBlank;
 
 public class UserRegisterForm {
 
-    @NotBlank(message = "用户名不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String username;
 
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String password;
 
     public String getUsername() {

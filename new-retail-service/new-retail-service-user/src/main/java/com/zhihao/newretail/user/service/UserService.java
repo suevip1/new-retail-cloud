@@ -2,9 +2,9 @@ package com.zhihao.newretail.user.service;
 
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
+import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.User;
-import com.zhihao.newretail.user.pojo.dto.UpdateNickNameDTO;
-import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
+import com.zhihao.newretail.user.form.UpdateNickNameForm;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,7 +18,7 @@ public interface UserService {
     * 新增用户
     * 基于用户名、密码注册
     * */
-    Integer insertUser(UserRegisterDTO userRegisterDTO);
+    Integer insertUser(UserRegisterForm form);
 
     /*
     * 获取用户基本信息
@@ -38,7 +38,7 @@ public interface UserService {
     /*
     * 用户修改昵称
     * */
-    UserInfoVO updateUserInfo(Integer userId, UpdateNickNameDTO updateNickNameDTO);
+    UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form);
 
     /*
     * 批量获取用户信息

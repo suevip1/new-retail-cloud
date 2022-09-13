@@ -9,10 +9,10 @@ import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
 import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
+import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.pojo.UserInfo;
-import com.zhihao.newretail.user.pojo.dto.UpdateNickNameDTO;
-import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
+import com.zhihao.newretail.user.form.UpdateNickNameForm;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -49,15 +49,9 @@ public class UserServiceImpl implements UserService {
      * */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer insertUser(UserRegisterDTO userRegisterDTO) {
-        String username = userRegisterDTO.getUsername();
-        String password = userRegisterDTO.getPassword();
-
-        /* 前置条件失败 */
-        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(password)) {
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户名或密码不能为空");
-        }
-
+    public Integer insertUser(UserRegisterForm form) {
+        String username = form.getUsername();
+        String password = form.getPassword();
         String uuid = getUserUUID();    // 获取分布式唯一id
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, uuid);  // 密码md5盐值加密
 
@@ -137,9 +131,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserInfoVO updateUserInfo(Integer userId, UpdateNickNameDTO updateNickNameDTO) {
+    public UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form) {
         UserInfo userInfo = userInfoMapper.selectByUserId(userId);
-        userInfo.setNickName(updateNickNameDTO.getNickName());
+        userInfo.setNickName(form.getNickName());
         int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
         if (updateRow <= 0) {
             throw new ServiceException("修改昵称失败");

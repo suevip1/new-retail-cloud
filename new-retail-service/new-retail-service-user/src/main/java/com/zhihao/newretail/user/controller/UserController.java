@@ -4,8 +4,8 @@ import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
-import com.zhihao.newretail.user.pojo.dto.UpdateNickNameDTO;
-import com.zhihao.newretail.user.pojo.dto.UserRegisterDTO;
+import com.zhihao.newretail.user.form.UserRegisterForm;
+import com.zhihao.newretail.user.form.UpdateNickNameForm;
 import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +23,8 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public R register(@RequestBody UserRegisterDTO userRegisterDTO) {
-        Integer insertRow = userService.insertUser(userRegisterDTO);
+    public R register(@Valid @RequestBody UserRegisterForm form) {
+        Integer insertRow = userService.insertUser(form);
         if (insertRow <= 0 || ObjectUtils.isEmpty(insertRow)) {
             throw new ServiceException("注册失败");
         } else {
@@ -54,9 +54,9 @@ public class UserController {
 
     @RequiresLogin
     @PutMapping("/userInfo/nickName")
-    public R userInfo(@Valid @RequestBody UpdateNickNameDTO updateNickNameDTO) {
+    public R userInfo(@Valid @RequestBody UpdateNickNameForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        UserInfoVO userInfoVO = userService.updateUserInfo(userId, updateNickNameDTO);
+        UserInfoVO userInfoVO = userService.updateUserInfo(userId, form);
         UserLoginContext.clean();
 
         return R.ok().put("data", userInfoVO);

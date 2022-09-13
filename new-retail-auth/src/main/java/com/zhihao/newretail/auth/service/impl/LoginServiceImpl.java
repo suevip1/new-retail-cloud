@@ -16,7 +16,6 @@ import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -60,9 +59,9 @@ public class LoginServiceImpl implements LoginService {
                 }
                 throw new ServiceException("登录失败");
             }
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
+            throw new ServiceException("密码错误");
         }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+        throw new ServiceException("用户不存在");
     }
 
     @Override
@@ -76,9 +75,9 @@ public class LoginServiceImpl implements LoginService {
         String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
 
         if (ObjectUtils.isEmpty(sysUserApiVO.getId())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+            throw new ServiceException("用户不存在");
         } else if (!secretPassword.equals(sysUserApiVO.getPassword())) {
-            throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "密码错误");
+            throw new ServiceException("密码错误");
         } else {
             SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
             sysUserLoginVO.setUserToken(MyUUIDUtil.getUUID());

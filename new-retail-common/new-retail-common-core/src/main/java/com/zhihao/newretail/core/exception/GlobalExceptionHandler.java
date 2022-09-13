@@ -2,10 +2,12 @@ package com.zhihao.newretail.core.exception;
 
 import com.zhihao.newretail.core.util.R;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 /*
  * 全局异常处理
@@ -23,6 +25,17 @@ public class GlobalExceptionHandler {
         String msg = e.getMsg();
         log.error(e.getMsg(), e);
         return R.error(code, msg);
+    }
+
+    /*
+    * Validation 异常
+    * */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public R handlerMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String message = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
+        log.error("请求地址'{}',表单校验异常'{}'.", requestURI, message);
+        return R.error(message);
     }
 
     /*

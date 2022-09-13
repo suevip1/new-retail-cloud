@@ -4,10 +4,10 @@ import javax.validation.constraints.NotBlank;
 
 public class UserLoginForm {
 
-    @NotBlank(message = "用户名不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String username;
 
-    @NotBlank(message = "密码不能为空")
+    @NotBlank(message = "用户名或密码不能为空")
     private String password;
 
     public String getUsername() {
@@ -24,14 +24,6 @@ public class UserLoginForm {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "UserLoginDTO{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                '}';
     }
 
 }

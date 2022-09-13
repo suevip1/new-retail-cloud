@@ -11,7 +11,6 @@ import com.zhihao.newretail.cart.pojo.vo.CartVO;
 import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

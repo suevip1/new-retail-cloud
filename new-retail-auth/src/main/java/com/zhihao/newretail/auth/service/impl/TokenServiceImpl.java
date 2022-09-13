@@ -32,7 +32,7 @@ public class TokenServiceImpl implements TokenService {
             cacheUserInfo(userId, userLoginVO);
             return JwtUtil.createToken(userId, uuid);
         }
-        throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
+        throw new ServiceException("用户登录信息不能为空");
     }
 
     @Override
@@ -41,7 +41,7 @@ public class TokenServiceImpl implements TokenService {
             cacheSysUserInfo(sysUserLoginVO.getUserToken(), sysUserLoginVO);
             return JwtUtil.createToken(sysUserLoginVO.getUserToken());
         }
-        throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "用户登录信息不能为空");
+        throw new ServiceException("用户登录信息不能为空");
     }
 
     @Override

@@ -20,6 +20,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -40,6 +42,9 @@ public class PayNotifyMsgListener {
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
 
+    @Autowired
+    private ThreadPoolExecutor executor;
+
     @RabbitListener(queues = RabbitMQConst.PAY_SUCCESS_QUEUE)
     public void payNotifyQueue(String msgStr, Message message, Channel channel) throws IOException {
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
@@ -58,10 +63,14 @@ public class PayNotifyMsgListener {
                 order.setStatus(payNotifyMQDTO.getStatus());
                 order.setMqVersion(orderVersion.get());
                 try {
-                    orderService.updateOrder(order);
-                    /* 通知删减库存 */
-                    String content = stockSubLockMessageContent(order.getId());
-                    sendStockSubLockNotifyMessage(content);
+                    CompletableFuture<Void> updateOrderFuture = CompletableFuture.runAsync(() -> {
+                        orderService.updateOrder(order);
+                    }, executor);
+                    CompletableFuture<Void> sendStockSubLockNotifyMessageFuture = CompletableFuture.runAsync(() -> {
+                        String content = stockSubLockMessageContent(order.getId());
+                        sendStockSubLockNotifyMessage(content);     // 通知删减库存
+                    }, executor);
+                    CompletableFuture.allOf(updateOrderFuture, sendStockSubLockNotifyMessageFuture).join();
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                     log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
                 } catch (Exception e) {

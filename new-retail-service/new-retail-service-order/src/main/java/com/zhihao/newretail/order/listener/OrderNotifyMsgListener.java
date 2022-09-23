@@ -23,6 +23,8 @@ import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -43,6 +45,9 @@ public class OrderNotifyMsgListener {
     @Autowired
     private MyRabbitMQUtil rabbitMQUtil;
 
+    @Autowired
+    private ThreadPoolExecutor executor;
+
     @RabbitListener(queues = RabbitMQConst.ORDER_CLOSE_QUEUE)
     public void orderCloseQueue(String msgStr, Message message, Channel channel) throws IOException {
         OrderCloseMQDTO orderCloseMQDTO = GsonUtil.json2Obj(msgStr, OrderCloseMQDTO.class);
@@ -59,12 +64,21 @@ public class OrderNotifyMsgListener {
                 order.setIsDelete(DeleteEnum.DELETE.getCode());
                 order.setMqVersion(orderVersion.get());
                 try {
-                    orderService.updateOrder(order);
-                    sendStockUnLockNotifyMessage(order.getId());    // 发送消息解锁库存
-                    sendPayCloseNotifyMessage(order);               // 发送消息关闭支付通道
-                    if (!ObjectUtils.isEmpty(order.getCouponsId())) {
-                        sendCouponsUnSubNotifyMessage(order.getCouponsId());    // 发送消息回滚优惠券
-                    }
+                    CompletableFuture<Void> updateOrderFuture = CompletableFuture.runAsync(() -> {
+                        orderService.updateOrder(order);
+                    }, executor);
+                    CompletableFuture<Void> sendStockUnLockNotifyMessageFuture = CompletableFuture.runAsync(() -> {
+                        sendStockUnLockNotifyMessage(order.getId());    // 发送消息解锁库存
+                    }, executor);
+                    CompletableFuture<Void> sendPayCloseNotifyMessageFuture = CompletableFuture.runAsync(() -> {
+                        sendPayCloseNotifyMessage(order);               // 发送消息关闭支付通道
+                    }, executor);
+                    CompletableFuture<Void> sendCouponsUnSubNotifyMessageFuture = CompletableFuture.runAsync(() -> {
+                        if (!ObjectUtils.isEmpty(order.getCouponsId())) {
+                            sendCouponsUnSubNotifyMessage(order.getCouponsId());    // 发送消息回滚优惠券
+                        }
+                    }, executor);
+                    CompletableFuture.allOf(updateOrderFuture, sendStockUnLockNotifyMessageFuture, sendPayCloseNotifyMessageFuture, sendCouponsUnSubNotifyMessageFuture).join();
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                     log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
                 } catch (Exception e) {

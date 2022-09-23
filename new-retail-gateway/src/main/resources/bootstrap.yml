@@ -67,8 +67,8 @@ spring:
           filters:
             - RewritePath=/api/coupons/?(?<segment>.*), /coupons/$\{segment}
 
-        - id: new-retail-rbac
-          uri: lb://new-retail-rbac
+        - id: new-retail-admin
+          uri: lb://new-retail-admin
           predicates:
             - Path=/api/admin/**
           filters:

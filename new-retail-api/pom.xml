@@ -17,7 +17,7 @@
         <module>new-retail-api-coupons</module>
         <module>new-retail-api-cart</module>
         <module>new-retail-api-order</module>
-        <module>new-retail-api-rbac</module>
+        <module>new-retail-api-admin</module>
         <module>new-retail-api-file</module>
         <module>new-retail-api-pay</module>
     </modules>

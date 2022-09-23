@@ -43,7 +43,7 @@
 
         <dependency>
             <groupId>com.zhihao</groupId>
-            <artifactId>new-retail-api-rbac</artifactId>
+            <artifactId>new-retail-api-admin</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

@@ -1,8 +1,8 @@
 package com.zhihao.newretail.auth.service.impl;
 
-import com.zhihao.newretail.api.rbac.dto.SysUserApiDTO;
-import com.zhihao.newretail.api.rbac.feign.SysUserFeignService;
-import com.zhihao.newretail.api.rbac.vo.SysUserApiVO;
+import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
+import com.zhihao.newretail.api.admin.feign.SysUserFeignService;
+import com.zhihao.newretail.api.admin.vo.SysUserApiVO;
 import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;

@@ -43,7 +43,6 @@ import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,7 +301,7 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             /* 发送库存解锁消息 */
             String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);     // 发送内容
-            sendDirectMessage(RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);     // 发送消息
+            sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
             e.printStackTrace();
             throw e;
         }
@@ -317,10 +316,10 @@ public class OrderServiceImpl implements OrderService {
                 }
             } catch (Exception e) {
                 String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);
-                sendDirectMessage(RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
+                sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
                 /* 发送优惠券回退消息 */
                 String couponsUnSubMessageContent = buildCouponsUnSubMessageContent(order.getCouponsId());
-                sendDirectMessage(RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY, couponsUnSubMessageContent);
+                sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY, couponsUnSubMessageContent);
                 e.printStackTrace();
                 throw e;
             }
@@ -329,7 +328,7 @@ public class OrderServiceImpl implements OrderService {
         /* 发送定时消息，未支付订单定时关闭 */
         int delay = 1800000;    // 30分钟
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
-        sendDelayMessage(orderCloseMessageContent, delay);                          // 发送定时消息
+        sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent, delay);
         return orderNo;
     }
 
@@ -496,7 +495,7 @@ public class OrderServiceImpl implements OrderService {
         }
         /* 取消订单，发送消息直接关闭订单 */
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);
-        sendDirectMessage(RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
+        sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
     }
 
     @Override
@@ -744,38 +743,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /*
-    * 发送延迟消息
+    * 发送消息
     * */
-    private void sendDelayMessage(String content, Integer delay) {
-        Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
-        /* 发送消息之前持久化，保证可靠性投递 */
-        orderMqLogService.insetMessage(
-                messageId,
-                content,
-                RabbitMQConst.ORDER_NOTIFY_EXCHANGE,
-                RabbitMQConst.ORDER_CLOSE_ROUTING_KEY
-        );
-        rabbitMQUtil.sendMessage(
-                RabbitMQConst.ORDER_NOTIFY_EXCHANGE,
-                RabbitMQConst.ORDER_CLOSE_ROUTING_KEY,
-                content,
-                delay,
-                new CorrelationData(String.valueOf(messageId))
-        );
+    private void sendMessage(String exchange, String routingKey, String content) {
+        sendMessage(exchange, routingKey, content, null);
     }
 
-    /*
-    * 发送普通消息
-    * */
-    private void sendDirectMessage(String routingKey, String content) {
-        Long messageId = orderMqLogService.getMessageId();
-        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey);
-        rabbitMQUtil.sendMessage(
-                RabbitMQConst.ORDER_NOTIFY_EXCHANGE,
-                routingKey,
-                content,
-                new CorrelationData(String.valueOf(messageId))
-        );
+    private void sendMessage(String exchange, String routingKey, String content, Integer delay) {
+        Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
+        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);       // 发送消息之前持久化，保证可靠性投递
+        if (delay != null) {
+            rabbitMQUtil.sendMessage(exchange, routingKey, content, delay, new CorrelationData(String.valueOf(messageId)));
+        } else {
+            rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+        }
     }
 
 }

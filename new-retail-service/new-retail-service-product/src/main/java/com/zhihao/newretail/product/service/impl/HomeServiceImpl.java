@@ -77,8 +77,8 @@ public class HomeServiceImpl implements HomeService {
         try {
             String str = (String) redisUtil.getObject(cacheKey);
             if (StringUtils.isEmpty(str)) {
-                /* 返回结果为空，key存null值解决缓存穿透 */
                 List<HomeProductVO> homeProductVOList = resourcesFactory.getResources(cacheKey).listHomeProductVOS();
+                /* 返回结果为空，key存null值解决缓存穿透 */
                 if (CollectionUtils.isEmpty(homeProductVOList)) {
                     redisUtil.setObject(cacheKey, PRESENT, 43200L);
                 } else {

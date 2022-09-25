@@ -1,6 +1,6 @@
 package com.zhihao.newretail.product.service.impl;
 
-import com.zhihao.newretail.product.consts.ProductCacheConst;
+import com.zhihao.newretail.product.consts.ProductCacheKeyConst;
 import com.zhihao.newretail.product.factory.HomeProductResourcesFactory;
 import com.zhihao.newretail.product.pojo.Category;
 import com.zhihao.newretail.product.pojo.Spu;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service(ProductCacheConst.HOME_CATEGORY_PRODUCT_LIST)
+@Service(ProductCacheKeyConst.HOME_CATEGORY_PRODUCT_LIST)
 public class HomeCategoryProductServiceImpl implements HomeProductResourcesService {
 
     @Autowired

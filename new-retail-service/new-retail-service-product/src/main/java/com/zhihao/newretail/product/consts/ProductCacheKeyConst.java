@@ -1,6 +1,6 @@
 package com.zhihao.newretail.product.consts;
 
-public class ProductCacheConst {
+public class ProductCacheKeyConst {
 
     public static final String PRESENT = null;
 

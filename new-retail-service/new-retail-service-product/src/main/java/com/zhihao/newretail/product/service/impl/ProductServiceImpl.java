@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
-import static com.zhihao.newretail.product.consts.ProductCacheConst.*;
+import static com.zhihao.newretail.product.consts.ProductCacheKeyConst.*;
 
 @Service
 public class ProductServiceImpl implements ProductService {

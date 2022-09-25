@@ -38,6 +38,12 @@ public class RabbitMQConfig {
         return new DirectExchange(RabbitMQConst.PAY_NOTIFY_EXCHANGE);
     }
 
+    /* canal */
+    @Bean(name = "canalExchange")
+    public DirectExchange canalExchange() {
+        return new DirectExchange(RabbitMQConst.CANAL_EXCHANGE);
+    }
+
     /* 订单关闭消息队列 */
     @Bean(name = "orderCloseQueue")
     public Queue orderCloseQueue() {
@@ -72,6 +78,12 @@ public class RabbitMQConfig {
     @Bean(name = "paySuccessQueue")
     public Queue paySuccessQueue() {
         return new Queue(RabbitMQConst.PAY_SUCCESS_QUEUE);
+    }
+
+    /* canal */
+    @Bean(name = "canalQueue")
+    public Queue canalQueue() {
+        return new Queue(RabbitMQConst.CANAL_QUEUE);
     }
 
     /* 订单关闭消息队列绑定订单异步通知交换机 */
@@ -114,6 +126,13 @@ public class RabbitMQConfig {
     public Binding paySuccessQueueBindPayNotifyExchange(@Qualifier("paySuccessQueue") Queue paySuccessQueue,
                                                         @Qualifier("payNotifyExchange") DirectExchange payNotifyExchange) {
         return BindingBuilder.bind(paySuccessQueue).to(payNotifyExchange).with(RabbitMQConst.PAY_SUCCESS_ROUTING_KEY);
+    }
+
+    /* canal */
+    @Bean(name = "canalQueueBindCanalExchange")
+    public Binding canalQueueBindCanalExchange(@Qualifier("canalQueue") Queue canalQueue,
+                                               @Qualifier("canalExchange") DirectExchange canalExchange) {
+        return BindingBuilder.bind(canalQueue).to(canalExchange).with(RabbitMQConst.CANAL_ROUTING_KEY);
     }
 
 }

@@ -18,7 +18,7 @@ import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.zhihao.newretail.product.consts.ProductCacheConst.*;
+import static com.zhihao.newretail.product.consts.ProductCacheKeyConst.*;
 
 @Service
 public class HomeServiceImpl implements HomeService {

@@ -24,16 +24,22 @@ public class CanalMsgListener {
     private static final Gson gson = new GsonBuilder().create();
 
     @RabbitListener(queues = RabbitMQConst.CANAL_PRODUCT_QUEUE)
-    public void stockUnLockQueue(String msgStr, Message message, Channel channel) throws IOException {
+    public void canalMsgQueue(String msgStr, Message message, Channel channel) throws IOException {
         log.info("接受canal消息: {}", msgStr);
         JsonObject jsonObject = gson.fromJson(msgStr, JsonObject.class);
         String tableName = gson.fromJson(jsonObject.get("table"), String.class);
-        JsonArray array = jsonObject.get("data").getAsJsonArray();
-        for (JsonElement element : array) {
+        JsonArray data = jsonObject.get("data").getAsJsonArray();
+        for (JsonElement element : data) {
             if (!TableNameConst.TB_CATEGORY.equals(tableName)) {
-                HashMap<String, Object> hashMap = gson.fromJson(element, HashMap.class);
-                Integer spuId = Integer.valueOf(String.valueOf(hashMap.get("spu_id")));
+                HashMap<String, Object> dataMap = gson.fromJson(element, HashMap.class);
+                Integer spuId = Integer.valueOf(String.valueOf(dataMap.get("spu_id")));
                 productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(spuId);
+                JsonArray old = jsonObject.get("old").getAsJsonArray();
+                for (JsonElement oldData : old) {
+                    HashMap<String, Object> oldDataMap = gson.fromJson(oldData, HashMap.class);
+                    Integer oldSpuId = Integer.valueOf(String.valueOf(oldDataMap.get("spu_id")));
+                    productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(oldSpuId);
+                }
             } else {
                 productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(null);
             }

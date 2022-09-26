@@ -2,7 +2,7 @@ package com.zhihao.newretail.product.consts;
 
 public class ProductCacheKeyConst {
 
-    public static final String PRESENT = null;
+    public static final String PRESENT = "null";
 
     public static final String HOME_SLIDE_LIST = "home_slide_list";     // 首页轮播图缓存key
 

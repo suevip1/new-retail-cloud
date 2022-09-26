@@ -16,7 +16,7 @@ public class RabbitMQConst {
     /* 支付成功通知交换机 */
     public static final String PAY_NOTIFY_EXCHANGE = "pay.notify";
 
-    /* canal */
+    /* canal 监听交换机 */
     public static final String CANAL_EXCHANGE = "canal.direct";
 
     /* 订单异步通知交换机类型 */
@@ -40,8 +40,10 @@ public class RabbitMQConst {
     /* 支付成功路由key */
     public static final String PAY_SUCCESS_ROUTING_KEY = "pay.success";
 
-    /* canal */
-    public static String CANAL_ROUTING_KEY = "canal.routing.key";
+    /* canal 监听指定 routingKey */
+    public static final String CANAL_PRODUCT_ROUTING_KEY = "new_retail_product";
+
+    public static final String CANAL_USER_ROUTING_KEY = "new_retail_user";
 
     /* 订单延迟队列名 */
     public static final String ORDER_CLOSE_QUEUE = "order.close.queue";
@@ -61,7 +63,9 @@ public class RabbitMQConst {
     /* 支付成功通知队列 */
     public static final String PAY_SUCCESS_QUEUE = "pay.success.queue";
 
-    /* canal */
-    public static final String CANAL_QUEUE = "canal.queue";
+    /* canal 监听指定队列 */
+    public static final String CANAL_PRODUCT_QUEUE = "canal.product.queue";
+
+    public static final String CANAL_USER_QUEUE = "canal.user.queue";
 
 }

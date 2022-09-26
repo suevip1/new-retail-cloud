@@ -4,6 +4,8 @@ public class TableNameConst {
 
     public static final String TB_CATEGORY = "tb_category";
 
+    public static final String TB_SLIDE = "tb_slide";
+
     public static final String TB_SPU = "tb_spu";
 
     public static final String TB_SKU = "tb_sku";

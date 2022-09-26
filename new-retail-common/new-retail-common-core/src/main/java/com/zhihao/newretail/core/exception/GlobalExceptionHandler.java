@@ -20,10 +20,11 @@ public class GlobalExceptionHandler {
     * 业务异常、自定义异常
     * */
     @ExceptionHandler(ServiceException.class)
-    public R handlerServiceException(ServiceException e) {
+    public R handlerServiceException(ServiceException e, HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
         Integer code = e.getCode();
         String msg = e.getMsg();
-        log.error(e.getMsg(), e);
+        log.error("请求地址'{}','{}'", requestURI, msg);
         return R.error(code, msg);
     }
 
@@ -34,7 +35,7 @@ public class GlobalExceptionHandler {
     public R handlerMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         String message = Objects.requireNonNull(e.getBindingResult().getFieldError()).getDefaultMessage();
-        log.error("请求地址'{}',表单校验异常'{}'.", requestURI, message);
+        log.error("请求地址'{}','{}'", requestURI, message);
         return R.error(message);
     }
 

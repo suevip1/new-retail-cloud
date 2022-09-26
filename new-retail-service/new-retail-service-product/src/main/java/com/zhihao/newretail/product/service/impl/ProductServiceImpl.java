@@ -2,8 +2,10 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
+import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.core.util.PageUtil;
+import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.vo.GoodsVO;
@@ -15,6 +17,7 @@ import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -83,7 +86,11 @@ public class ProductServiceImpl implements ProductService {
                 }
                 return productDetailVO;
             }
-            return GsonUtil.json2Obj(str, ProductDetailVO.class);
+            ProductDetailVO productDetailVO = GsonUtil.json2Obj(str, ProductDetailVO.class);
+            if (ObjectUtils.isEmpty(productDetailVO)) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品不存在");
+            }
+            return productDetailVO;
         } finally {
             lock.unlock();
         }

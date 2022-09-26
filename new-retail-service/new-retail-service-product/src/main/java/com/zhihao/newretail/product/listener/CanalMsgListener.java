@@ -10,6 +10,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,8 +38,10 @@ public class CanalMsgListener {
                 JsonArray old = jsonObject.get("old").getAsJsonArray();
                 for (JsonElement oldData : old) {
                     HashMap<String, Object> oldDataMap = gson.fromJson(oldData, HashMap.class);
-                    Integer oldSpuId = Integer.valueOf(String.valueOf(oldDataMap.get("spu_id")));
-                    productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(oldSpuId);
+                    Object oldSpuId = oldDataMap.get("spu_id");
+                    if (!ObjectUtils.isEmpty(oldSpuId)) {
+                        productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(Integer.valueOf(String.valueOf(oldSpuId)));
+                    }
                 }
             } else {
                 productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(null);

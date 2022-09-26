@@ -9,6 +9,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -37,8 +38,11 @@ public class CanalMsgListener {
             /* 删除旧数据 */
             for (JsonElement oldData : old) {
                 HashMap<String, Object> oldDataMap = gson.fromJson(oldData, HashMap.class);
-                Integer oldUserId = Integer.valueOf(String.valueOf(oldDataMap.get("user_id")));
-                redisUtil.deleteObject(String.format(USER_INFO, oldUserId));
+                /* 抽取关键字段，删除旧 id 数据 */
+                Object oldUserId = oldDataMap.get("user_id");
+                if (!ObjectUtils.isEmpty(oldUserId)) {
+                    redisUtil.deleteObject(String.format(USER_INFO, Integer.valueOf(String.valueOf(oldUserId))));
+                }
             }
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

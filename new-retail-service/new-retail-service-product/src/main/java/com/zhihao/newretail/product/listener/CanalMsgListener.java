@@ -23,7 +23,7 @@ public class CanalMsgListener {
 
     private static final Gson gson = new GsonBuilder().create();
 
-    @RabbitListener(queues = RabbitMQConst.CANAL_QUEUE)
+    @RabbitListener(queues = RabbitMQConst.CANAL_PRODUCT_QUEUE)
     public void stockUnLockQueue(String msgStr, Message message, Channel channel) throws IOException {
         log.info("接受canal消息: {}", msgStr);
         JsonObject jsonObject = gson.fromJson(msgStr, JsonObject.class);

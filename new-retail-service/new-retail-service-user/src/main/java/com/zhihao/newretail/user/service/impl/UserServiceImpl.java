@@ -4,9 +4,11 @@ import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
+import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.file.consts.FileUploadDirConst;
+import com.zhihao.newretail.redis.util.MyRedisUtil;
 import com.zhihao.newretail.user.dao.UserInfoMapper;
 import com.zhihao.newretail.user.dao.UserMapper;
 import com.zhihao.newretail.user.form.UserRegisterForm;
@@ -18,6 +20,8 @@ import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +34,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.zhihao.newretail.user.consts.UserCacheKeyConst.*;
+
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -39,6 +45,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserInfoMapper userInfoMapper;
+
+    @Autowired
+    private MyRedisUtil redisUtil;
+
+    @Autowired
+    private RedissonClient redissonClient;
 
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
@@ -108,14 +120,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserInfoVO getUserInfoVO(Integer userId) {
-        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
-
-        if (!ObjectUtils.isEmpty(userInfo)) {
-            UserInfoVO userInfoVO = new UserInfoVO();
-            BeanUtils.copyProperties(userInfo, userInfoVO);
+        RLock lock = redissonClient.getLock(String.format(USER_INFO_LOCK, userId));
+        lock.lock();
+        try {
+            String redisKey = String.format(USER_INFO, userId);
+            String str = (String) redisUtil.getObject(redisKey);
+            if (StringUtils.isEmpty(str)) {
+                UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+                if (ObjectUtils.isEmpty(userInfo)) {
+                    redisUtil.setObject(redisKey, PRESENT, 43200L);
+                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户信息不存在");
+                } else {
+                    UserInfoVO userInfoVO = new UserInfoVO();
+                    BeanUtils.copyProperties(userInfo, userInfoVO);
+                    redisUtil.setObject(redisKey, GsonUtil.obj2Json(userInfoVO));
+                    return userInfoVO;
+                }
+            }
+            UserInfoVO userInfoVO = GsonUtil.json2Obj(str, UserInfoVO.class);
+            if (ObjectUtils.isEmpty(userInfoVO)) {
+                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户信息不存在");
+            }
             return userInfoVO;
+        } finally {
+            lock.unlock();
         }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
     }
 
     @Override

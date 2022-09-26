@@ -50,6 +50,9 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     default-property-inclusion: non_null
+  redis:
+    host: localhost
+    port: 6379
   rabbitmq:
     host: localhost
     port: 5672
@@ -77,3 +80,5 @@ user:
     max-pool-size: 24
     work-queue-size: 1000
     keep-alive-seconds: 300
+  redisson:
+    address: redis://127.0.0.1:6379

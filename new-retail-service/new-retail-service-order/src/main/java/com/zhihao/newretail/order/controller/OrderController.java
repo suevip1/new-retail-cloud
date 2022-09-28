@@ -38,10 +38,10 @@ public class OrderController {
     public R orderSubmit(@Valid @RequestBody OrderSubmitForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         String uuid = UserLoginContext.getUserLoginInfo().getUuid();
-        Long orderNo = orderService.insertOrder(userId, uuid, form);
+        OrderVO orderVO = orderService.insertOrder(userId, uuid, form);
         UserLoginContext.clean();
 
-        return R.ok().put("data", orderNo);
+        return R.ok().put("data", orderVO);
     }
 
     @RequiresLogin

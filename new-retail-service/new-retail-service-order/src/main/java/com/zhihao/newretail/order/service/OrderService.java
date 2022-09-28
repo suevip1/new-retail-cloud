@@ -18,7 +18,7 @@ public interface OrderService {
     /*
     * 创建新订单
     * */
-    Long insertOrder(Integer userId, String uuid, OrderSubmitForm form);
+    OrderVO insertOrder(Integer userId, String uuid, OrderSubmitForm form);
 
     /*
     * 获取订单详情

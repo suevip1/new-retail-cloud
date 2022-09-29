@@ -20,19 +20,19 @@ public class PayInfoMQLogServiceImpl implements PayInfoMQLogService {
     private PayInfoMQLogMapper payInfoMqLogMapper;
 
     @Override
-    public void insetMessage(Long messageId, String content, String exchange, String routingKey) {
+    public int insetMessage(Long messageId, String content, String exchange, String routingKey) {
         PayInfoMQLog payInfoMqLog = new PayInfoMQLog();
         payInfoMqLog.setMessageId(messageId);
         payInfoMqLog.setContent(content);
         payInfoMqLog.setExchange(exchange);
         payInfoMqLog.setRoutingKey(routingKey);
         payInfoMqLog.setStatus(MessageStatusEnum.NEW_MESSAGE.getCode());
-        payInfoMqLogMapper.insertSelective(payInfoMqLog);
+        return payInfoMqLogMapper.insertSelective(payInfoMqLog);
     }
 
     @Override
-    public void updateMessage(PayInfoMQLog payInfoMqLog) {
-        payInfoMqLogMapper.updateByPrimaryKeySelective(payInfoMqLog);
+    public int updateMessage(PayInfoMQLog payInfoMqLog) {
+        return payInfoMqLogMapper.updateByPrimaryKeySelective(payInfoMqLog);
     }
 
     @Override

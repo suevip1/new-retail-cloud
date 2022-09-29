@@ -20,11 +20,11 @@ import com.zhihao.newretail.pay.pojo.PayInfo;
 import com.zhihao.newretail.pay.service.PayInfoMQLogService;
 import com.zhihao.newretail.pay.service.PayInfoService;
 import com.zhihao.newretail.pay.service.PayService;
-import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
-import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -33,11 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 
+import static com.zhihao.newretail.rabbitmq.consts.RabbitMQConst.*;
+
 /*
  * @Project: NewRetail-Cloud
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
+@Slf4j
 @Service
 public class PayServiceImpl implements PayService {
 
@@ -54,7 +57,7 @@ public class PayServiceImpl implements PayService {
     private PayInfoMQLogService payInfoMqLogService;
 
     @Autowired
-    private MyRabbitMQUtil rabbitMQUtil;
+    private RabbitTemplate rabbitTemplate;
 
     private static final String PAY_SUCCESS = "TRADE_SUCCESS";
 
@@ -130,12 +133,7 @@ public class PayServiceImpl implements PayService {
 
             /* 发送消息，更新订单状态 */
             PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);
-            String content = GsonUtil.obj2Json(payNotifyMQDTO);
-            Long messageId = payInfoMqLogService.getMessageId();
-            String exchange = RabbitMQConst.PAY_NOTIFY_EXCHANGE;
-            String routingKey = RabbitMQConst.PAY_SUCCESS_ROUTING_KEY;
-            payInfoMqLogService.insetMessage(messageId, content, exchange, routingKey);
-            sendPaySuccessMessage(exchange, routingKey, content, messageId);
+            sendPaySuccessMessage(GsonUtil.obj2Json(payNotifyMQDTO));
         }
     }
 
@@ -157,12 +155,17 @@ public class PayServiceImpl implements PayService {
         payNotifyMQDTO.setPayAmount(payInfo.getPayAmount());
         payNotifyMQDTO.setPayPlatform(payInfo.getPayPlatform());
         payNotifyMQDTO.setStatus(payInfo.getStatus());
-        payNotifyMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        payNotifyMQDTO.setMqVersion(CONSUME_VERSION);
         return payNotifyMQDTO;
     }
 
-    private void sendPaySuccessMessage(String exchange, String routingKey, String content, Long messageId) {
-        rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+    private void sendPaySuccessMessage(String content) {
+        Long messageId = payInfoMqLogService.getMessageId();
+        int insetMessageRow = payInfoMqLogService.insetMessage(messageId, content, PAY_NOTIFY_EXCHANGE, PAY_SUCCESS_ROUTING_KEY);
+        if (insetMessageRow > 0) {
+            rabbitTemplate.convertAndSend(PAY_NOTIFY_EXCHANGE, PAY_SUCCESS_ROUTING_KEY, content, new CorrelationData(String.valueOf(messageId)));
+            log.info("支付服务，发送支付成功通知消息：{}", content);
+        }
     }
 
 }

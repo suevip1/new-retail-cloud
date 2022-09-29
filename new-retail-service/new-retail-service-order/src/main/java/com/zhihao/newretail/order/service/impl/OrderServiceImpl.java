@@ -168,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public OrderVO insertOrder(Integer userId, String uuid, OrderSubmitForm form) {
+    public Long insertOrder(Integer userId, String uuid, OrderSubmitForm form) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 
         /* 防止重复下单 */
@@ -329,7 +329,7 @@ public class OrderServiceImpl implements OrderService {
         int delay = 1800000;    // 30分钟
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
         sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent, delay);
-        return getOrderVO(userId, orderNo);
+        return orderNo;
     }
 
     @Override

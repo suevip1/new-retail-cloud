@@ -27,7 +27,7 @@ public class CanalMsgListener {
 
     @RabbitListener(queues = RabbitMQConst.CANAL_USER_QUEUE)
     public void canalMsgQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("接受canal消息: {}", msgStr);
+        log.info("用户服务，接收canal消息: {}", msgStr);
         JsonObject jsonObject = gson.fromJson(msgStr, JsonObject.class);
         JsonArray data = jsonObject.get("data").getAsJsonArray();
         JsonArray old = jsonObject.get("old").getAsJsonArray();

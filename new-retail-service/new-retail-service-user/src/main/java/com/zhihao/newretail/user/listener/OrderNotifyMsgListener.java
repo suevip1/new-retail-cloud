@@ -31,6 +31,7 @@ public class OrderNotifyMsgListener {
 
     @RabbitListener(queues = RabbitMQConst.ORDER_COUPONS_UNSUB_QUEUE)
     public void couponsUnSubQueue(String msgStr, Message message, Channel channel) throws IOException {
+        log.info("用户服务，接收优惠券回退消息：{}", msgStr);
         CouponsUnSubMQDTO couponsUnSubMQDTO = GsonUtil.json2Obj(msgStr, CouponsUnSubMQDTO.class);
         Integer version = couponsUnSubMQDTO.getMqVersion();
         UserCoupons userCoupons = userCouponsService.getUserCouponsByCouponsId(couponsUnSubMQDTO.getCouponsId());

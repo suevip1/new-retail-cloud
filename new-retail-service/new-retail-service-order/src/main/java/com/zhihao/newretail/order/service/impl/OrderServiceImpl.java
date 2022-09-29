@@ -212,22 +212,19 @@ public class OrderServiceImpl implements OrderService {
             }
         }, executor);
 
-        /* 购物车选中的商品 */
-        CompletableFuture<List<CartApiVO>> cartListFuture = CompletableFuture.supplyAsync(() -> {
-            RequestContextHolder.setRequestAttributes(requestAttributes);
-            return cartFeignService.listCartApiVOS();
-        }, executor);
-
-        /* 构造订单项(订单商品) */
+        /* 构造订单 */
         ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
         ThreadLocal<Set<Integer>> skuIdSetThreadLocal = new ThreadLocal<>();
-        CompletableFuture<Void> buildOrderItemFuture = cartListFuture.thenApplyAsync((res) -> {
-                    List<CartApiVO> cartApiVOList = cartListFuture.join();
-                    cartListThreadLocal.set(cartApiVOList);
-                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(cartApiVOList);
+        CompletableFuture<Order> buildOrderFuture = CompletableFuture.supplyAsync(() -> {
+                    RequestContextHolder.setRequestAttributes(requestAttributes);
+                    return cartFeignService.listCartApiVOS();
+                }, executor)
+                .thenApply((res) -> {
+                    cartListThreadLocal.set(res);
+                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
                     skuIdSetThreadLocal.set(skuIdSet);
                     return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取商品信息
-                }, executor)
+                })
                 .thenAccept((res) -> {
                     List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
                     Set<Integer> skuIdSet = skuIdSetThreadLocal.get();
@@ -255,9 +252,7 @@ public class OrderServiceImpl implements OrderService {
                         if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
                             cartListThreadLocal.remove();
                             skuIdSetThreadLocal.remove();
-                            throw new CompletionException("商品:" + goodsApiVO.getTitle()
-                                    + "商品规格ID:" + goodsApiVO.getId()
-                                    + "商品下架或删除", new RuntimeException());
+                            throw new CompletionException("商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除", new RuntimeException());
                         }
                         /* 库存校验 */
                         SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
@@ -274,61 +269,84 @@ public class OrderServiceImpl implements OrderService {
                     }
                     cartListThreadLocal.remove();
                     skuIdSetThreadLocal.remove();
+                })
+                .thenApply((Void) -> {
+                    /* 订单信息保存数据库 */
+                    Order order;
+                    if (ObjectUtils.isEmpty(orderCouponsVO.getId())) {
+                        order = buildOrder(orderNo, userId, orderItemList);     // 无优惠券
+                    } else {
+                        order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);     // 有优惠券
+                    }
+                    order.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+                    return order;
                 });
-        CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, cartListFuture, buildOrderItemFuture).join();
 
-        /* 订单信息保存数据库 */
-        Order order;
-        if (ObjectUtils.isEmpty(orderCouponsVO.getId())) {
-            order = buildOrder(orderNo, userId, orderItemList);     // 无优惠券
-        } else {
-            order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);     // 有优惠券
-        }
-        order.setMqVersion(RabbitMQConst.CONSUME_VERSION);
-        int insertOrderRow = orderMapper.insertSelective(order);
-        int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
-        int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
-        if (insertOrderRow <= 0 || insertBatchOrderItemRow <= 0 || insertOrderAddressRow <=0) {
-            throw new ServiceException("订单确认失败");
-        }
-
-        /* 锁定商品库存 */
-        try {
-            int batchStockLockRow = stockFeignService.batchStockLock(skuStockLockApiDTOList);
-            if (batchStockLockRow <= 0) {
-                throw new ServiceException("库存锁定失败");
+        CompletableFuture<Void> insertOrderFuture = buildOrderFuture.thenAcceptAsync((res) -> {
+            int insertOrderRow = orderMapper.insertSelective(res);
+            if (insertOrderRow <= 0) {
+                throw new CompletionException("订单确认失败", new RuntimeException());
             }
-        } catch (Exception e) {
-            /* 发送库存解锁消息 */
-            String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);     // 发送内容
-            sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
-            e.printStackTrace();
-            throw e;
-        }
+        }, executor);
 
-        /* 优惠券存在，扣除优惠券 */
-        if (!ObjectUtils.isEmpty(orderCouponsVO.getId())) {
-            UserCouponsApiDTO userCouponsApiDTO = buildUserCouponsApiDTO(orderCouponsVO.getId());
+        CompletableFuture<Void> insertOrderItemFuture = buildOrderFuture.thenRunAsync(() -> {
+            int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
+            if (insertBatchOrderItemRow <= 0) {
+                throw new CompletionException("订单确认失败", new RuntimeException());
+            }
+        }, executor);
+
+        CompletableFuture<Void> insertOrderAddressFuture = buildOrderFuture.thenRunAsync(() -> {
+            int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
+            if (insertOrderAddressRow <= 0) {
+                throw new CompletionException("订单确认失败", new RuntimeException());
+            }
+        }, executor);
+
+        CompletableFuture<Void> stockLockAndConsumeCouponFuture = buildOrderFuture.thenAcceptAsync((res) -> {
+            /* 锁定商品库存 */
             try {
-                int consumeCouponsRow = userCouponsFeignService.consumeCoupons(userCouponsApiDTO);
-                if (consumeCouponsRow <= 0) {
-                    throw new ServiceException("优惠券扣除异常");
+                int batchStockLockRow = stockFeignService.batchStockLock(skuStockLockApiDTOList);
+                if (batchStockLockRow <= 0) {
+                    throw new CompletionException("库存锁定失败", new RuntimeException());
                 }
             } catch (Exception e) {
-                String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);
-                sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
-                /* 发送优惠券回退消息 */
-                String couponsUnSubMessageContent = buildCouponsUnSubMessageContent(order.getCouponsId());
-                sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY, couponsUnSubMessageContent);
+                /* 发送库存解锁消息 */
+                String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);     // 发送内容
+                sendMessage(RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
                 e.printStackTrace();
                 throw e;
             }
-        }
+            /* 优惠券存在，扣除优惠券 */
+            if (!ObjectUtils.isEmpty(orderCouponsVO.getId())) {
+                UserCouponsApiDTO userCouponsApiDTO = buildUserCouponsApiDTO(orderCouponsVO.getId());
+                try {
+                    int consumeCouponsRow = userCouponsFeignService.consumeCoupons(userCouponsApiDTO);
+                    if (consumeCouponsRow <= 0) {
+                        throw new CompletionException("优惠券扣除异常", new RuntimeException());
+                    }
+                } catch (Exception e) {
+                    String stockUnLockMessageContent = buildStockUnLockMessageContent(orderNo);
+                    sendMessage(RabbitMQConst.ORDER_STOCK_UNLOCK_ROUTING_KEY, stockUnLockMessageContent);
+                    /* 发送优惠券回退消息 */
+                    String couponsUnSubMessageContent = buildCouponsUnSubMessageContent(res.getCouponsId());
+                    sendMessage(RabbitMQConst.ORDER_COUPONS_UNSUB_ROUTING_KEY, couponsUnSubMessageContent);
+                    e.printStackTrace();
+                    throw e;
+                }
+            }
+        }, executor);
+
+        CompletableFuture<Void> sendOrderDelayMessageFuture = buildOrderFuture.thenAcceptAsync((res) -> {
+            /* 发送定时消息，未支付订单定时关闭 */
+            //int delay = 1800000;    // 30分钟
+            int delay = 10000;
+            String orderCloseMessageContent = buildOrderCloseMessageContent(res);     // 发送内容
+            sendMessage(orderCloseMessageContent, delay);
+        }, executor);
+
+        CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderFuture, insertOrderFuture, insertOrderItemFuture, insertOrderAddressFuture, stockLockAndConsumeCouponFuture, sendOrderDelayMessageFuture).join();
         cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
-        /* 发送定时消息，未支付订单定时关闭 */
-        int delay = 1800000;    // 30分钟
-        String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
-        sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent, delay);
         return orderNo;
     }
 
@@ -495,7 +513,7 @@ public class OrderServiceImpl implements OrderService {
         }
         /* 取消订单，发送消息直接关闭订单 */
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);
-        sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
+        sendMessage(RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
     }
 
     @Override
@@ -745,18 +763,16 @@ public class OrderServiceImpl implements OrderService {
     /*
     * 发送消息
     * */
-    private void sendMessage(String exchange, String routingKey, String content) {
-        sendMessage(exchange, routingKey, content, null);
+    private void sendMessage(String routingKey, String content) {
+        Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
+        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey);       // 发送消息之前持久化，保证可靠性投递
+        rabbitMQUtil.sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey, content, new CorrelationData(String.valueOf(messageId)));
     }
 
-    private void sendMessage(String exchange, String routingKey, String content, Integer delay) {
+    private void sendMessage(String content, Integer delay) {
         Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
-        orderMqLogService.insetMessage(messageId, content, exchange, routingKey);       // 发送消息之前持久化，保证可靠性投递
-        if (delay != null) {
-            rabbitMQUtil.sendMessage(exchange, routingKey, content, delay, new CorrelationData(String.valueOf(messageId)));
-        } else {
-            rabbitMQUtil.sendMessage(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
-        }
+        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY);       // 发送消息之前持久化，保证可靠性投递
+        rabbitMQUtil.sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, content, delay, new CorrelationData(String.valueOf(messageId)));
     }
 
 }

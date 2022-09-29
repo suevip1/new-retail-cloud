@@ -348,7 +348,7 @@ public class OrderServiceImpl implements OrderService {
         }, executor);
 
         CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderFuture, insertOrderFuture, insertOrderItemFuture, insertOrderAddressFuture, stockLockAndConsumeCouponFuture, sendOrderDelayMessageFuture).join();
-        //cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
+        cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
         return orderNo;
     }
 

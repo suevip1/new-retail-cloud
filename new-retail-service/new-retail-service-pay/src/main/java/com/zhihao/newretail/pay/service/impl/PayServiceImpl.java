@@ -144,6 +144,7 @@ public class PayServiceImpl implements PayService {
         payInfo.setPayAmount(orderPayInfoApiVO.getActualAmount());
         payInfo.setPayPlatform(PayPlatformEnum.ALIPAY_PC.getCode());
         payInfo.setStatus(OrderStatusEnum.NOT_PAY.getCode());
+        payInfo.setMqVersion(CONSUME_VERSION);
         return payInfo;
     }
 

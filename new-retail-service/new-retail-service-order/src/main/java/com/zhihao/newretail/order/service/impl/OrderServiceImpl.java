@@ -99,26 +99,28 @@ public class OrderServiceImpl implements OrderService {
     public OrderCreateVO getOrderCreateVO(Integer userId) {
         OrderCreateVO orderCreateVO = new OrderCreateVO();
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-
-        /* 获取购物车选中的商品 */
-        CompletableFuture<List<CartApiVO>> cartListFuture = CompletableFuture.supplyAsync(() -> {
-            RequestContextHolder.setRequestAttributes(requestAttributes);
-            return cartFeignService.listCartApiVOS();
-        }, executor);
-
-        CompletableFuture<Void> orderItemCreateListFuture = cartListFuture.thenApplyAsync((res) -> {
-                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
-                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
+        ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
+        CompletableFuture<Void> orderItemCreateFuture = CompletableFuture.supplyAsync(() -> {
+                    RequestContextHolder.setRequestAttributes(requestAttributes);
+                    List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOS();
+                    cartListThreadLocal.set(cartApiVOList);
+                    return cartApiVOList;
                 }, executor)
                 .thenApply((res) -> {
+                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
+                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
+                })
+                .thenApply((res) -> {
                     if (!CollectionUtils.isEmpty(res)) {
-                        List<CartApiVO> cartApiVOList = cartListFuture.join();
+                        //List<CartApiVO> cartApiVOList = cartListFuture.join();
+                        List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
                         List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
                         cartApiVOList.forEach(cartApiVO -> {
                             OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
                             buildOrderItemCreateVO(cartApiVO, res, orderItemCreateVO);      // 构造订单项
                             orderItemCreateVOList.add(orderItemCreateVO);
                         });
+                        cartListThreadLocal.remove();
                         /* 计算商品总价格 */
                         BigDecimal totalPrice = orderItemCreateVOList.stream()
                                 .map(OrderItemCreateVO::getTotalPrice)
@@ -130,7 +132,6 @@ public class OrderServiceImpl implements OrderService {
                     return BigDecimal.ZERO;
                 })
                 .thenAccept((res) -> {
-                    RequestContextHolder.setRequestAttributes(requestAttributes);
                     List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOS();
                     if (!CollectionUtils.isEmpty(userCouponsApiVOList)) {
                         Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
@@ -162,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
             orderCreateVO.setOrderToken(orderToken);
         }, executor);
 
-        CompletableFuture.allOf(cartListFuture, orderItemCreateListFuture, userAddressListFuture, orderTokenFuture).join();
+        CompletableFuture.allOf(orderItemCreateFuture, userAddressListFuture, orderTokenFuture).join();
         return orderCreateVO;
     }
 

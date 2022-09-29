@@ -12,12 +12,12 @@ public interface OrderMQLogService {
     /*
      * 保存消息
      * */
-    void insetMessage(Long messageId, String content, String exchange, String routingKey);
+    int insetMessage(Long messageId, String content, String exchange, String routingKey);
 
     /*
      * 更新消息
      * */
-    void updateMessage(OrderMQLog orderMqLog);
+    int updateMessage(OrderMQLog orderMqLog);
 
     /*
      * 删除消息

@@ -20,19 +20,19 @@ public class OrderMQLogServiceImpl implements OrderMQLogService {
     private OrderMQLogMapper orderMqLogMapper;
 
     @Override
-    public void insetMessage(Long messageId, String content, String exchange, String routingKey) {
+    public int insetMessage(Long messageId, String content, String exchange, String routingKey) {
         OrderMQLog orderMqLog = new OrderMQLog();
         orderMqLog.setMessageId(messageId);
         orderMqLog.setContent(content);
         orderMqLog.setExchange(exchange);
         orderMqLog.setRoutingKey(routingKey);
         orderMqLog.setStatus(MessageStatusEnum.NEW_MESSAGE.getCode());
-        orderMqLogMapper.insertSelective(orderMqLog);
+        return orderMqLogMapper.insertSelective(orderMqLog);
     }
 
     @Override
-    public void updateMessage(OrderMQLog orderMqLog) {
-        orderMqLogMapper.updateByPrimaryKeySelective(orderMqLog);
+    public int updateMessage(OrderMQLog orderMqLog) {
+        return orderMqLogMapper.updateByPrimaryKeySelective(orderMqLog);
     }
 
     @Override

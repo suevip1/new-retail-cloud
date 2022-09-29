@@ -38,6 +38,7 @@ public class OrderNotifyMsgListener {
     * */
     @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_UNLOCK_QUEUE)
     public void stockUnLockQueue(String msgStr, Message message, Channel channel) throws IOException {
+        log.info("商品服务，接收解锁库存消息：{}", msgStr);
         StockUnLockMQDTO stockUnLockMQDTO = GsonUtil.json2Obj(msgStr, StockUnLockMQDTO.class);
         Long orderNo = stockUnLockMQDTO.getOrderNo();
         Integer version = stockUnLockMQDTO.getMqVersion();
@@ -58,6 +59,7 @@ public class OrderNotifyMsgListener {
     * */
     @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_SUB_QUEUE)
     public void stockSubQueue(String msgStr, Message message, Channel channel) throws IOException {
+        log.info("商品服务，接收删减库存消息：{}", msgStr);
         StockSubLockMQDTO stockSubLockMQDTO = GsonUtil.json2Obj(msgStr, StockSubLockMQDTO.class);
         Long orderNo = stockSubLockMQDTO.getOrderNo();
         Integer version = stockSubLockMQDTO.getMqVersion();

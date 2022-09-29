@@ -39,11 +39,11 @@ import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
-import com.zhihao.newretail.rabbitmq.util.MyRabbitMQUtil;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,6 +57,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
+
+import static com.zhihao.newretail.rabbitmq.consts.RabbitMQConst.*;
 
 @Slf4j
 @Service
@@ -83,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private MyRedisUtil redisUtil;
     @Autowired
-    private MyRabbitMQUtil rabbitMQUtil;
+    private RabbitTemplate rabbitTemplate;
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
@@ -177,7 +179,7 @@ public class OrderServiceImpl implements OrderService {
         String orderToken = form.getOrderToken();
         Long result = redisUtil.executeScript(REDIS_SCRIPT, redisKey, orderToken);
         if (result == 0) {
-            throw new ServiceException("订单唯一标识错误");
+            throw new ServiceException("订单唯一标识错误，请刷新页面");
         }
         Integer couponsId = form.getCouponsId();                    // 优惠券id
         Long orderNo = getOrderNo(uuid);                            // 订单号
@@ -279,7 +281,7 @@ public class OrderServiceImpl implements OrderService {
                     } else {
                         order = buildOrder(orderNo, userId, orderCouponsVO, orderItemList);     // 有优惠券
                     }
-                    order.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+                    order.setMqVersion(CONSUME_VERSION);
                     return order;
                 });
 
@@ -340,14 +342,13 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture<Void> sendOrderDelayMessageFuture = buildOrderFuture.thenAcceptAsync((res) -> {
             /* 发送定时消息，未支付订单定时关闭 */
-            //int delay = 1800000;    // 30分钟
-            int delay = 10000;
+            int delay = 1800000;    // 30分钟
             String orderCloseMessageContent = buildOrderCloseMessageContent(res);     // 发送内容
             sendMessage(orderCloseMessageContent, delay);
         }, executor);
 
         CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderFuture, insertOrderFuture, insertOrderItemFuture, insertOrderAddressFuture, stockLockAndConsumeCouponFuture, sendOrderDelayMessageFuture).join();
-        cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
+        //cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
         return orderNo;
     }
 
@@ -514,7 +515,7 @@ public class OrderServiceImpl implements OrderService {
         }
         /* 取消订单，发送消息直接关闭订单 */
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);
-        sendMessage(RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
+        sendMessage(ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
     }
 
     @Override
@@ -702,7 +703,7 @@ public class OrderServiceImpl implements OrderService {
         skuStockLockApiDTO.setSkuId(goodsApiVO.getId());
         skuStockLockApiDTO.setOrderId(orderNo);
         skuStockLockApiDTO.setCount(quantity);
-        skuStockLockApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        skuStockLockApiDTO.setMqVersion(CONSUME_VERSION);
         return skuStockLockApiDTO;
     }
 
@@ -713,7 +714,7 @@ public class OrderServiceImpl implements OrderService {
         UserCouponsApiDTO userCouponsApiDTO = new UserCouponsApiDTO();
         userCouponsApiDTO.setCouponsId(couponsId);
         userCouponsApiDTO.setQuantity(1);
-        userCouponsApiDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        userCouponsApiDTO.setMqVersion(CONSUME_VERSION);
         return userCouponsApiDTO;
     }
 
@@ -736,7 +737,7 @@ public class OrderServiceImpl implements OrderService {
         OrderCloseMQDTO orderCloseMQDTO = new OrderCloseMQDTO();
         orderCloseMQDTO.setOrderNo(order.getId());
         orderCloseMQDTO.setCouponsId(order.getCouponsId());
-        orderCloseMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        orderCloseMQDTO.setMqVersion(CONSUME_VERSION);
         return GsonUtil.obj2Json(orderCloseMQDTO);
     }
 
@@ -746,7 +747,7 @@ public class OrderServiceImpl implements OrderService {
     private String buildStockUnLockMessageContent(Long orderNo) {
         StockUnLockMQDTO stockUnLockMQDTO = new StockUnLockMQDTO();
         stockUnLockMQDTO.setOrderNo(orderNo);
-        stockUnLockMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        stockUnLockMQDTO.setMqVersion(CONSUME_VERSION);
         return GsonUtil.obj2Json(stockUnLockMQDTO);
     }
 
@@ -757,7 +758,7 @@ public class OrderServiceImpl implements OrderService {
         CouponsUnSubMQDTO couponsUnSubMQDTO = new CouponsUnSubMQDTO();
         couponsUnSubMQDTO.setCouponsId(couponsId);
         couponsUnSubMQDTO.setQuantity(1);
-        couponsUnSubMQDTO.setMqVersion(RabbitMQConst.CONSUME_VERSION);
+        couponsUnSubMQDTO.setMqVersion(CONSUME_VERSION);
         return GsonUtil.obj2Json(couponsUnSubMQDTO);
     }
 
@@ -766,14 +767,24 @@ public class OrderServiceImpl implements OrderService {
     * */
     private void sendMessage(String routingKey, String content) {
         Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
-        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey);       // 发送消息之前持久化，保证可靠性投递
-        rabbitMQUtil.sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+        /* 发送消息之前持久化，保证可靠性投递 */
+        int insetMessageRow = orderMqLogService.insetMessage(messageId, content, ORDER_NOTIFY_EXCHANGE, routingKey);
+        if (insetMessageRow > 0) {
+            rabbitTemplate.convertAndSend(ORDER_NOTIFY_EXCHANGE, routingKey, content, new CorrelationData(String.valueOf(messageId)));
+            log.info("订单服务，发送普通消息");
+        }
     }
 
     private void sendMessage(String content, Integer delay) {
         Long messageId = orderMqLogService.getMessageId();       // 消息唯一id
-        orderMqLogService.insetMessage(messageId, content, RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY);       // 发送消息之前持久化，保证可靠性投递
-        rabbitMQUtil.sendMessage(RabbitMQConst.ORDER_NOTIFY_EXCHANGE, RabbitMQConst.ORDER_CLOSE_ROUTING_KEY, content, delay, new CorrelationData(String.valueOf(messageId)));
+        int insetMessageRow = orderMqLogService.insetMessage(messageId, content, ORDER_NOTIFY_EXCHANGE, ORDER_CLOSE_ROUTING_KEY);
+        if (insetMessageRow > 0) {
+            rabbitTemplate.convertAndSend(ORDER_NOTIFY_EXCHANGE, ORDER_CLOSE_ROUTING_KEY, content, message -> {
+                message.getMessageProperties().setDelay(delay);
+                return message;
+            }, new CorrelationData(String.valueOf(messageId)));
+            log.info("订单服务，发送延迟消息");
+        }
     }
 
 }

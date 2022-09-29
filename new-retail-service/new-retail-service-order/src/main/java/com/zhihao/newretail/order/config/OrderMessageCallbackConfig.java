@@ -38,12 +38,15 @@ public class OrderMessageCallbackConfig {
             if (ack) {
                 orderMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
                 orderMqLogService.updateMessage(orderMqLog);
-                log.info("messageId:{},messageContent:{},消息发送成功", messageId, orderMqLog.getContent());
+                log.info("订单服务，消息发送成功，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
             } else {
                 /* 发送失败，重新发送 */
                 orderMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                orderMqLogService.updateMessage(orderMqLog);
-                rabbitTemplate.convertAndSend(orderMqLog.getExchange(), orderMqLog.getRoutingKey(), orderMqLog.getContent());
+                int updateMessageRow = orderMqLogService.updateMessage(orderMqLog);
+                if (updateMessageRow > 0) {
+                    rabbitTemplate.convertAndSend(orderMqLog.getExchange(), orderMqLog.getRoutingKey(), orderMqLog.getContent());
+                    log.info("订单服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
+                }
             }
         });
 
@@ -53,6 +56,7 @@ public class OrderMessageCallbackConfig {
             String replyText = returnedMessage.getReplyText();
             String exchange = returnedMessage.getExchange();
             String routingKey = returnedMessage.getRoutingKey();
+            log.info("订单服务，消息回退");
             log.info("time:{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
         });
     }

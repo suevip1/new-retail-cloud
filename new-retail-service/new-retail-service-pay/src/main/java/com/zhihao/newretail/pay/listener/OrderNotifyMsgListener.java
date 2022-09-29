@@ -33,6 +33,7 @@ public class OrderNotifyMsgListener {
     @RabbitListener(queues = RabbitMQConst.ORDER_CLOSE_PAY_QUEUE)
     public void orderClosePayQueue(Message message, Channel channel) throws IOException {
         String msgStr = new String(message.getBody());
+        log.info("支付服务，接收关闭支付消息：{}", msgStr);
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
         Integer version = payNotifyMQDTO.getMqVersion();
         PayInfo payInfo = payInfoService.getPayInfo(payNotifyMQDTO.getOrderNo());

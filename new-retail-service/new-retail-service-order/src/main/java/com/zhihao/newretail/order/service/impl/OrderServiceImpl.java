@@ -342,7 +342,8 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture<Void> sendOrderDelayMessageFuture = buildOrderFuture.thenAcceptAsync((res) -> {
             /* 发送定时消息，未支付订单定时关闭 */
-            int delay = 1800000;    // 30分钟
+            //int delay = 1800000;    // 30分钟
+            int delay = 10000;
             String orderCloseMessageContent = buildOrderCloseMessageContent(res);     // 发送内容
             sendMessage(orderCloseMessageContent, delay);
         }, executor);

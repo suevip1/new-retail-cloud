@@ -81,3 +81,5 @@ order:
     max-pool-size: 24
     work-queue-size: 1000
     keep-alive-seconds: 300
+  redisson:
+    address: redis://127.0.0.1:6379

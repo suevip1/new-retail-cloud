@@ -33,21 +33,22 @@ public class PayMessageCallbackConfig {
     public void initRabbitTemplate() {
         /* 消息发布确认 */
         rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
-            assert correlationData != null;
-            Long messageId = Long.valueOf(correlationData.getId());
-            PayInfoMQLog payInfoMqLog = payInfoMqLogService.getMQLog(messageId);
-            if (!ObjectUtils.isEmpty(payInfoMqLog)) {
-                if (ack) {
-                    payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
-                    payInfoMqLogService.updateMessage(payInfoMqLog);
-                    log.info("支付服务，消息发送成功，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
-                } else {
-                    /* 发送失败，重新发送 */
-                    payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                    int updateMessageRow = payInfoMqLogService.updateMessage(payInfoMqLog);
-                    if (updateMessageRow > 0) {
-                        rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
-                        log.info("支付服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+            if (!ObjectUtils.isEmpty(correlationData)) {
+                Long messageId = Long.valueOf(correlationData.getId());
+                PayInfoMQLog payInfoMqLog = payInfoMqLogService.getMQLog(messageId);
+                if (!ObjectUtils.isEmpty(payInfoMqLog)) {
+                    if (ack) {
+                        payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
+                        payInfoMqLogService.updateMessage(payInfoMqLog);
+                        log.info("支付服务，消息发送成功，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                    } else {
+                        /* 发送失败，重新发送 */
+                        payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
+                        int updateMessageRow = payInfoMqLogService.updateMessage(payInfoMqLog);
+                        if (updateMessageRow > 0) {
+                            rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
+                            log.info("支付服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                        }
                     }
                 }
             }

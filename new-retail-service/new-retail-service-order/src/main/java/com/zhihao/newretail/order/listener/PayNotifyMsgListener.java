@@ -9,6 +9,7 @@ import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.rabbitmq.dto.pay.PayNotifyMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockSubLockMQDTO;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
@@ -53,7 +54,8 @@ public class PayNotifyMsgListener {
                 && payNotifyMQDTO.getUserId().equals(order.getUserId())
                 && payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
             AtomicInteger orderVersion = new AtomicInteger(order.getMqVersion());
-            if (orderVersion.compareAndSet(version, orderVersion.get() + CONSUME_VERSION)) {
+            if (orderVersion.compareAndSet(version, orderVersion.get() + CONSUME_VERSION)
+                    || StringUtils.isEmpty(order.getOrderCode())) {
                 /* 更新订单状态 */
                 order.setOrderCode(payNotifyMQDTO.getPlatformNumber());
                 order.setPaymentType(payNotifyMQDTO.getPayPlatform());

@@ -1,8 +1,12 @@
 package com.zhihao.newretail.pay.config;
 
+import com.alipay.api.AlipayClient;
+import com.alipay.api.DefaultAlipayClient;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
 
 /*
  * @Project: NewRetail-Cloud
@@ -74,16 +78,9 @@ public class AliPayPCPramConfig {
         this.alipayPublicKey = alipayPublicKey;
     }
 
-    @Override
-    public String toString() {
-        return "AliPayPCPramConfig{" +
-                "gateway='" + gateway + '\'' +
-                ", returnUrl='" + returnUrl + '\'' +
-                ", notifyUrl='" + notifyUrl + '\'' +
-                ", appId='" + appId + '\'' +
-                ", privateKey='" + privateKey + '\'' +
-                ", alipayPublicKey='" + alipayPublicKey + '\'' +
-                '}';
+    @PostConstruct
+    public AlipayClient alipayClient() {
+        return new DefaultAlipayClient(gateway, appId, privateKey, "json", "utf-8", alipayPublicKey, "RSA2");
     }
 
 }

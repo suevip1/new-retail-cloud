@@ -1,7 +1,6 @@
 package com.zhihao.newretail.pay.service;
 
 import com.alipay.api.AlipayApiException;
-import com.alipay.api.response.AlipayTradePagePayResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

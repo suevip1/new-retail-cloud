@@ -2,8 +2,6 @@ package com.zhihao.newretail.pay.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
-import com.alipay.api.AlipayClient;
-import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.request.AlipayTradeQueryRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
@@ -32,6 +30,7 @@ import org.springframework.util.ObjectUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 
 import static com.zhihao.newretail.rabbitmq.consts.RabbitMQConst.*;
 
@@ -70,27 +69,7 @@ public class PayServiceImpl implements PayService {
         if (!OrderStatusEnum.NOT_PAY.getCode().equals(orderPayInfoApiVO.getStatus())) {
             throw new ServiceException("订单已关闭支付");
         }
-
-        AlipayClient alipayClient = new DefaultAlipayClient(
-                aliPayPCPramConfig.getGateway(),
-                aliPayPCPramConfig.getAppId(),
-                aliPayPCPramConfig.getPrivateKey(),
-                "json",
-                "utf-8",
-                aliPayPCPramConfig.getAlipayPublicKey(),
-                "RSA2"
-        );
-        AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
-        request.setReturnUrl(aliPayPCPramConfig.getReturnUrl());
-        request.setNotifyUrl(aliPayPCPramConfig.getNotifyUrl());
-        JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", orderPayInfoApiVO.getId());
-        bizContent.put("total_amount", orderPayInfoApiVO.getActualAmount());
-        bizContent.put("subject", "商品消费");
-        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
-        request.setBizContent(bizContent.toString());
-        AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
-
+        AlipayTradePagePayResponse response = pagePay(orderPayInfoApiVO.getId(), orderPayInfoApiVO.getActualAmount());
         if (response.isSuccess()) {
             PayInfo payInfo = payInfoService.getPayInfo(orderId);
             if (ObjectUtils.isEmpty(payInfo)) {
@@ -106,25 +85,11 @@ public class PayServiceImpl implements PayService {
     @Override
     public void asyncNotify(HttpServletRequest req, HttpServletResponse resp) throws UnsupportedEncodingException, AlipayApiException {
         req.setCharacterEncoding("utf-8");
-        String tradeNo = req.getParameter("trade_no");          // 支付宝流水号
-        String outTradeNo = req.getParameter("out_trade_no");   // 订单号
-        AlipayClient alipayClient = new DefaultAlipayClient(
-                aliPayPCPramConfig.getGateway(),
-                aliPayPCPramConfig.getAppId(),
-                aliPayPCPramConfig.getPrivateKey(),
-                "json",
-                "utf-8",
-                aliPayPCPramConfig.getAlipayPublicKey(),
-                "RSA2"
-        );
-        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
-        JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", outTradeNo);
-        request.setBizContent(bizContent.toString());
-        AlipayTradeQueryResponse response = alipayClient.execute(request);
-        String tradeStatus = response.getTradeStatus();
+        String outTradeNo = req.getParameter("out_trade_no");       // 订单号
+        AlipayTradeQueryResponse response = query(Long.valueOf(outTradeNo));
 
-        if (PAY_SUCCESS.equals(tradeStatus)) {
+        if (response.isSuccess() && PAY_SUCCESS.equals(response.getTradeStatus())) {
+            String tradeNo = response.getTradeNo();
             /* 支付成功，更新数据库支付信息 */
             PayInfo payInfo = payInfoService.getPayInfo(Long.valueOf(outTradeNo));
             payInfo.setStatus(OrderStatusEnum.PAY_SUCCEED.getCode());
@@ -136,6 +101,33 @@ public class PayServiceImpl implements PayService {
                 sendPaySuccessMessage(GsonUtil.obj2Json(payNotifyMQDTO));
             }
         }
+    }
+
+    /*
+    * 电脑网站支付
+    * */
+    private AlipayTradePagePayResponse pagePay(Long orderId, BigDecimal amount) throws AlipayApiException {
+        AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
+        request.setReturnUrl(aliPayPCPramConfig.getReturnUrl());
+        request.setNotifyUrl(aliPayPCPramConfig.getNotifyUrl());
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderId);
+        bizContent.put("total_amount", amount);
+        bizContent.put("subject", "商品消费");
+        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+        request.setBizContent(bizContent.toString());
+        return aliPayPCPramConfig.alipayClient().pageExecute(request);
+    }
+
+    /*
+    * 交易查询
+    * */
+    private AlipayTradeQueryResponse query(Long orderId) throws AlipayApiException {
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderId);
+        request.setBizContent(bizContent.toString());
+        return aliPayPCPramConfig.alipayClient().execute(request);
     }
 
     private PayInfo buildPayInfo(OrderPayInfoApiVO orderPayInfoApiVO) {

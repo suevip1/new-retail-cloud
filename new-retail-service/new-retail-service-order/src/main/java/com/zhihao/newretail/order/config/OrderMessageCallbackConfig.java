@@ -9,6 +9,7 @@ import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
@@ -35,17 +36,19 @@ public class OrderMessageCallbackConfig {
             assert correlationData != null;
             Long messageId = Long.valueOf(correlationData.getId());
             OrderMQLog orderMqLog = orderMqLogService.getMQLog(messageId);
-            if (ack) {
-                orderMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
-                orderMqLogService.updateMessage(orderMqLog);
-                log.info("订单服务，消息发送成功，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
-            } else {
-                /* 发送失败，重新发送 */
-                orderMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                int updateMessageRow = orderMqLogService.updateMessage(orderMqLog);
-                if (updateMessageRow > 0) {
-                    rabbitTemplate.convertAndSend(orderMqLog.getExchange(), orderMqLog.getRoutingKey(), orderMqLog.getContent());
-                    log.info("订单服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
+            if (!ObjectUtils.isEmpty(orderMqLog)) {
+                if (ack) {
+                    orderMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
+                    orderMqLogService.updateMessage(orderMqLog);
+                    log.info("订单服务，消息发送成功，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
+                } else {
+                    /* 发送失败，重新发送 */
+                    orderMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
+                    int updateMessageRow = orderMqLogService.updateMessage(orderMqLog);
+                    if (updateMessageRow > 0) {
+                        rabbitTemplate.convertAndSend(orderMqLog.getExchange(), orderMqLog.getRoutingKey(), orderMqLog.getContent());
+                        log.info("订单服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, orderMqLog.getContent());
+                    }
                 }
             }
         });

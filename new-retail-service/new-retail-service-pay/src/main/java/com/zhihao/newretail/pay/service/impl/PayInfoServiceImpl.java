@@ -51,8 +51,8 @@ public class PayInfoServiceImpl implements PayInfoService {
     }
 
     @Override
-    public void updatePayInfo(PayInfo payInfo) {
-        payInfoMapper.updateByPrimaryKeySelective(payInfo);
+    public int updatePayInfo(PayInfo payInfo) {
+        return payInfoMapper.updateByPrimaryKeySelective(payInfo);
     }
 
     private PayInfoApiVO PayInfo2PayInfoApiVO(PayInfo payInfo) {

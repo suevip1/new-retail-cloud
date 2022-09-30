@@ -129,11 +129,12 @@ public class PayServiceImpl implements PayService {
             PayInfo payInfo = payInfoService.getPayInfo(Long.valueOf(outTradeNo));
             payInfo.setStatus(OrderStatusEnum.PAY_SUCCEED.getCode());
             payInfo.setPlatformNumber(tradeNo);
-            payInfoService.updatePayInfo(payInfo);
-
-            /* 发送消息，更新订单状态 */
-            PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);
-            sendPaySuccessMessage(GsonUtil.obj2Json(payNotifyMQDTO));
+            int updateRow = payInfoService.updatePayInfo(payInfo);
+            if (updateRow > 0) {
+                /* 发送消息，更新订单状态 */
+                PayNotifyMQDTO payNotifyMQDTO = buildPayNotifyMQDTO(payInfo);
+                sendPaySuccessMessage(GsonUtil.obj2Json(payNotifyMQDTO));
+            }
         }
     }
 

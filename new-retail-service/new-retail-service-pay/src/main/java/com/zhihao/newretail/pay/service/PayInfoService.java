@@ -30,6 +30,6 @@ public interface PayInfoService {
     /*
     * 更新支付信息
     * */
-    void updatePayInfo(PayInfo payInfo);
+    int updatePayInfo(PayInfo payInfo);
 
 }

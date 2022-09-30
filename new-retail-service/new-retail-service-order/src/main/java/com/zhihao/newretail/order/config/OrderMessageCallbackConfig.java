@@ -41,7 +41,7 @@ public class OrderMessageCallbackConfig {
     public void initRabbitTemplate() {
         /* 消息发布确认 */
         rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
-            RLock lock = redissonClient.getLock("rabbitmq-confirm-callback-lock");
+            RLock lock = redissonClient.getLock("order-rabbitmq-confirm-callback-lock");
             lock.lock();
             try {
                 if (!ObjectUtils.isEmpty(correlationData)) {
@@ -69,7 +69,7 @@ public class OrderMessageCallbackConfig {
         });
         /* 回退消息 */
         rabbitTemplate.setReturnsCallback((ReturnedMessage returnedMessage) -> {
-            RLock lock = redissonClient.getLock("rabbitmq-returns-callback-lock");
+            RLock lock = redissonClient.getLock("order-rabbitmq-returns-callback-lock");
             lock.lock();
             try {
                 String message = new String(returnedMessage.getMessage().getBody());

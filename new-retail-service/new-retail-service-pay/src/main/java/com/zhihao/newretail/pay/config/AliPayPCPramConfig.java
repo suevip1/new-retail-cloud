@@ -15,7 +15,7 @@ import javax.annotation.PostConstruct;
  * */
 @RefreshScope
 @Configuration
-@ConfigurationProperties(prefix = "alipay.pc")
+@ConfigurationProperties(prefix = "pay.alipay.pc")
 public class AliPayPCPramConfig {
 
     private String gateway;

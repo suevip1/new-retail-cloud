@@ -4,6 +4,8 @@ import com.zhihao.newretail.pay.pojo.PayInfoMQLog;
 import com.zhihao.newretail.pay.service.PayInfoMQLogService;
 import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.amqp.core.ReturnedMessage;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,39 +31,54 @@ public class PayMessageCallbackConfig {
     @Autowired
     private PayInfoMQLogService payInfoMqLogService;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     @PostConstruct
     public void initRabbitTemplate() {
         /* 消息发布确认 */
         rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
-            if (!ObjectUtils.isEmpty(correlationData)) {
-                Long messageId = Long.valueOf(correlationData.getId());
-                PayInfoMQLog payInfoMqLog = payInfoMqLogService.getMQLog(messageId);
-                if (!ObjectUtils.isEmpty(payInfoMqLog)) {
-                    if (ack) {
-                        payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
-                        payInfoMqLogService.updateMessage(payInfoMqLog);
-                        log.info("支付服务，消息发送成功，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
-                    } else {
-                        /* 发送失败，重新发送 */
-                        payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
-                        int updateMessageRow = payInfoMqLogService.updateMessage(payInfoMqLog);
-                        if (updateMessageRow > 0) {
-                            rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
-                            log.info("支付服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+            RLock lock = redissonClient.getLock("pay-rabbitmq-confirm-callback-lock");
+            lock.lock();
+            try {
+                if (!ObjectUtils.isEmpty(correlationData)) {
+                    Long messageId = Long.valueOf(correlationData.getId());
+                    PayInfoMQLog payInfoMqLog = payInfoMqLogService.getMQLog(messageId);
+                    if (!ObjectUtils.isEmpty(payInfoMqLog)) {
+                        if (ack) {
+                            payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
+                            payInfoMqLogService.updateMessage(payInfoMqLog);
+                            log.info("支付服务，消息发送成功，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                        } else {
+                            /* 发送失败，重新发送 */
+                            payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
+                            int updateMessageRow = payInfoMqLogService.updateMessage(payInfoMqLog);
+                            if (updateMessageRow > 0) {
+                                rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
+                                log.info("支付服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                            }
                         }
                     }
                 }
+            } finally {
+                lock.unlock();
             }
         });
 
         /* 回退消息 */
         rabbitTemplate.setReturnsCallback((ReturnedMessage returnedMessage) -> {
-            String message = new String(returnedMessage.getMessage().getBody());
-            String replyText = returnedMessage.getReplyText();
-            String exchange = returnedMessage.getExchange();
-            String routingKey = returnedMessage.getRoutingKey();
-            log.info("支付服务，消息回退");
-            log.info("time:{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
+            RLock lock = redissonClient.getLock("pay-rabbitmq-returns-callback-lock");
+            lock.lock();
+            try {
+                String message = new String(returnedMessage.getMessage().getBody());
+                String replyText = returnedMessage.getReplyText();
+                String exchange = returnedMessage.getExchange();
+                String routingKey = returnedMessage.getRoutingKey();
+                log.info("支付服务，消息回退");
+                log.info("time:{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
+            } finally {
+                lock.unlock();
+            }
         });
     }
 

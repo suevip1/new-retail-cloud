@@ -70,11 +70,14 @@ management:
 feign:
   sentinel:
     enabled: true
-alipay:
-  pc:
-    gateway: gatewayUrl
-    return-url: returnUrl
-    notify-url: notifyUrl
-    app-id: yourAppId
-    private-key: yourPrivateKey
-    alipay-public-key: yourAlipayPublicKey
+pay:
+  alipay:
+    pc:
+      gateway: gatewayUrl
+      return-url: returnUrl
+      notify-url: notifyUrl
+      app-id: yourAppId
+      private-key: yourPrivateKey
+      alipay-public-key: yourAlipayPublicKey
+  redisson:
+    address: redis://127.0.0.1:6379

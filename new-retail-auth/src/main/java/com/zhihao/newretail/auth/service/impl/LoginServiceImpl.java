@@ -12,7 +12,6 @@ import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.MyUUIDUtil;
-import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
 import org.apache.commons.lang3.StringUtils;
@@ -33,7 +32,7 @@ public class LoginServiceImpl implements LoginService {
     private SysUserFeignService sysUserFeignService;
 
     @Override
-    public R login(UserLoginForm form) {
+    public String login(UserLoginForm form) {
         String username = form.getUsername();
         String password = form.getPassword();
 
@@ -42,30 +41,27 @@ public class LoginServiceImpl implements LoginService {
         UserApiVO userInfo = userFeignService.getUserApiVO(userApiDTO);
         if (ObjectUtils.isEmpty(userInfo)) {
             throw new ServiceException("用户服务繁忙");
-        }
-        if (!ObjectUtils.isEmpty(userInfo.getId())) {
-            String secretPassword = MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid());
-
-            if (userInfo.getPassword().equals(secretPassword)) {
-                UserLoginVO userLoginVO = new UserLoginVO();
-                userLoginVO.setUserId(userInfo.getId());
-                userLoginVO.setUuid(userInfo.getUuid());
-                userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
-                userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
-                String token = tokenService.getToken(userLoginVO);
-
-                if (!StringUtils.isEmpty(token)) {
-                    return R.ok("登录成功").put("token", token);
-                }
-                throw new ServiceException("登录失败");
-            }
+        } else if (ObjectUtils.isEmpty(userInfo.getId())) {
+            throw new ServiceException("用户不存在");
+        } else if (!userInfo.getPassword().equals(MyMD5SecretUtil.getSecretPassword(password, userInfo.getUuid()))) {
             throw new ServiceException("密码错误");
+        } else {
+            UserLoginVO userLoginVO = new UserLoginVO();
+            userLoginVO.setUserId(userInfo.getId());
+            userLoginVO.setUuid(userInfo.getUuid());
+            userLoginVO.setNickName(userInfo.getUserInfoApiVO().getNickName());
+            userLoginVO.setPhoto(userInfo.getUserInfoApiVO().getPhoto());
+
+            String token = tokenService.getToken(userLoginVO);
+            if (!StringUtils.isEmpty(token)) {
+                return token;
+            }
+            throw new ServiceException("登录失败");
         }
-        throw new ServiceException("用户不存在");
     }
 
     @Override
-    public R loginAdmin(UserLoginForm form) {
+    public String loginAdmin(UserLoginForm form) {
         SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
         if (ObjectUtils.isEmpty(sysUserApiVO)) {
             throw new ServiceException("系统服务繁忙");
@@ -84,9 +80,10 @@ public class LoginServiceImpl implements LoginService {
             sysUserLoginVO.setId(sysUserApiVO.getId());
             sysUserLoginVO.setUsername(sysUserApiVO.getUsername());
             sysUserLoginVO.setName(sysUserApiVO.getName());
+
             String token = tokenService.getToken(sysUserLoginVO);
             if (!StringUtils.isEmpty(token)) {
-                return R.ok("登录成功").put("token", token);
+                return token;
             }
             throw new ServiceException("登录失败");
         }

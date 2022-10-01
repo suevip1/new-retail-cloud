@@ -20,7 +20,8 @@ public class LoginAdminController {
 
     @PostMapping("/login")
     public R login(@Valid @RequestBody UserLoginForm form) {
-        return loginService.loginAdmin(form);
+        String token = loginService.loginAdmin(form);
+        return R.ok().put("token", token);
     }
 
 }

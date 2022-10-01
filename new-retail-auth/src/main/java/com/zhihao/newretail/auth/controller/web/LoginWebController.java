@@ -18,7 +18,8 @@ public class LoginWebController {
 
     @PostMapping("/login")
     public R login(@Valid @RequestBody UserLoginForm form) {
-        return loginService.login(form);
+        String token = loginService.login(form);
+        return R.ok().put("token", token);
     }
 
 }

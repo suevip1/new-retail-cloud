@@ -4,7 +4,6 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zhihao.newretail.auth.enums.TokenTypeEnum;
 import com.zhihao.newretail.auth.service.TokenService;
 import com.zhihao.newretail.core.exception.ServiceException;
-import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import com.zhihao.newretail.security.util.JwtUtil;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
@@ -45,25 +44,15 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public R verifierToken(String token, TokenTypeEnum tokenTypeEnum) {
-        if (StringUtils.isEmpty(token)) {
-            return R.ok().put("token", token);
-        }
+    public String verifierToken(String token, TokenTypeEnum tokenTypeEnum) {
+        if (StringUtils.isEmpty(token)) { return token; }   // 未登录直接返回
         /*
         * 验证 token 类型
         * */
         if (TokenTypeEnum.SYS_USER.equals(tokenTypeEnum)) {
-            String sysUserToken = sysUserToken(token);
-            if (StringUtils.isEmpty(sysUserToken)) {
-                return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", sysUserToken);
-            }
-            return R.ok().put("token", sysUserToken);
+            return sysUserToken(token);
         } else {
-            String consumerUserToken = consumerUserToken(token);
-            if (StringUtils.isEmpty(consumerUserToken)) {
-                return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", consumerUserToken);
-            }
-            return R.ok().put("token", consumerUserToken);
+            return consumerUserToken(token);
         }
     }
 
@@ -82,14 +71,15 @@ public class TokenServiceImpl implements TokenService {
                  * token 有效、缓存用户信息失效
                  * 证明信息缓存30天已到期，需要重新登录、清除token
                  * */
-                return null;
+                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
             }
         } catch (TokenExpiredException e) {
             /* token 失效，重新生成 token */
             if (redisUtil.isExist(String.valueOf(userId))) {
                 return JwtUtil.createToken(userId, uuid);
+            } else {
+                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
             }
-            return null;
         }
     }
 
@@ -98,20 +88,21 @@ public class TokenServiceImpl implements TokenService {
     * */
     private String sysUserToken(String token) {
         String userToken = JwtUtil.getUserToken(token);
-
         try {
             /* token 有效，直接返回 */
             JwtUtil.verifierToken(token);
             if (redisUtil.isExist(userToken)) {
                 return token;
+            } else {
+                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
             }
-            return null;
         } catch (TokenExpiredException e) {
             /* token 失效，重新生成 token */
             if (redisUtil.isExist(userToken)) {
                 return JwtUtil.createToken(userToken);
+            } else {
+                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
             }
-            return null;
         }
     }
 

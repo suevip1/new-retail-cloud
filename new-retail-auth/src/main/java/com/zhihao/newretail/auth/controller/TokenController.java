@@ -18,7 +18,8 @@ public class TokenController {
     @PostMapping("/verifierToken")
     public R verifierToken(@RequestHeader("token") String token,
                            @RequestParam(value = "tokenType", required = false) TokenTypeEnum tokenTypeEnum) {
-        return tokenService.verifierToken(token, tokenTypeEnum);
+        String newToken = tokenService.verifierToken(token, tokenTypeEnum);
+        return R.ok().put("token", newToken);
     }
 
 }

@@ -53,7 +53,7 @@ public class RequiresLoginAspect {
                 UserLoginContext.setSysUserLoginVO(sysUserLoginVO);
             }
         } catch (TokenExpiredException e) {
-            throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "令牌已失效");
+            throw new ServiceException("长时间未操作，请返回首页刷新页面");
         }
     }
 

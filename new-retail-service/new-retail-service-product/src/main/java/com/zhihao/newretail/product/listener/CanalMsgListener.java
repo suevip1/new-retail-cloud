@@ -10,10 +10,8 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 @Slf4j
 @Component
@@ -27,25 +25,30 @@ public class CanalMsgListener {
     @RabbitListener(queues = RabbitMQConst.CANAL_PRODUCT_QUEUE)
     public void canalMsgQueue(String msgStr, Message message, Channel channel) throws IOException {
         log.info("商品服务，接收canal消息: {}", msgStr);
-        JsonObject jsonObject = gson.fromJson(msgStr, JsonObject.class);
-        String tableName = gson.fromJson(jsonObject.get("table"), String.class);
-        JsonArray data = jsonObject.get("data").getAsJsonArray();
-        for (JsonElement element : data) {
-            if (!TableNameConst.TB_CATEGORY.equals(tableName)) {
-                HashMap<String, Object> dataMap = gson.fromJson(element, HashMap.class);
-                Integer spuId = Integer.valueOf(String.valueOf(dataMap.get("spu_id")));
-                productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(spuId);
-                JsonArray old = jsonObject.get("old").getAsJsonArray();
-                for (JsonElement oldData : old) {
-                    HashMap<String, Object> oldDataMap = gson.fromJson(oldData, HashMap.class);
-                    Object oldSpuId = oldDataMap.get("spu_id");
-                    if (!ObjectUtils.isEmpty(oldSpuId)) {
-                        productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(Integer.valueOf(String.valueOf(oldSpuId)));
+        JsonObject json = gson.fromJson(msgStr, JsonObject.class);
+        JsonElement data = json.get("data");
+        if (!data.isJsonNull()) {
+            for (JsonElement element : data.getAsJsonArray()) {
+                JsonObject jsonData = element.getAsJsonObject();
+                String table = json.get("table").getAsString();
+                if (!TableNameConst.TB_CATEGORY.equals(table)) {
+                    productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonData.get("spu_id").getAsInt());
+                    log.info("商品服务，当前同步数据处理完成");
+                    JsonElement old = json.get("old");
+                    if (!old.isJsonNull()) {
+                        for (JsonElement oldData : old.getAsJsonArray()) {
+                            JsonObject jsonOldData = oldData.getAsJsonObject();
+                            productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonOldData.get("spu_id").getAsInt());
+                            log.info("商品服务，旧数据删除成功");
+                        }
                     }
+                } else {
+                    productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(null);
+                    log.info("商品服务，首页缓存同步数据处理完成");
                 }
-            } else {
-                productCacheSyncFactory.productCacheSyncService(tableName).productCacheRemove(null);
             }
+        } else {
+            log.info("商品服务，同步数据为空，无需处理");
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }

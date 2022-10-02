@@ -71,14 +71,16 @@ public class TokenServiceImpl implements TokenService {
                  * token 有效、缓存用户信息失效
                  * 证明信息缓存30天已到期，需要重新登录、清除token
                  * */
-                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                // throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                return null;
             }
         } catch (TokenExpiredException e) {
             /* token 失效，重新生成 token */
             if (redisUtil.isExist(String.valueOf(userId))) {
                 return JwtUtil.createToken(userId, uuid);
             } else {
-                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                // throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                return null;
             }
         }
     }
@@ -94,14 +96,16 @@ public class TokenServiceImpl implements TokenService {
             if (redisUtil.isExist(userToken)) {
                 return token;
             } else {
-                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                // throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                return null;
             }
         } catch (TokenExpiredException e) {
             /* token 失效，重新生成 token */
             if (redisUtil.isExist(userToken)) {
                 return JwtUtil.createToken(userToken);
             } else {
-                throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                // throw new ServiceException(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录");
+                return null;
             }
         }
     }

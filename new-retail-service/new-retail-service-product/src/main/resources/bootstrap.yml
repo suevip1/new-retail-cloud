@@ -23,6 +23,8 @@ spring:
         jdbc-url: jdbc:mysql://127.0.0.1:3306/new_retail_product?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC&useSSL=false&allowMultiQueries=true
         username: root
         password: root
+        data-source-properties:
+          useLocalSessionState: false
       slave-01:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.cj.jdbc.Driver

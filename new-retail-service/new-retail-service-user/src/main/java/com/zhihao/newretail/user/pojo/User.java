@@ -24,6 +24,8 @@ public class User {
 
     private Date updateTime;
 
+    private UserInfo userInfo;
+
     public Integer getId() {
         return id;
     }
@@ -37,7 +39,7 @@ public class User {
     }
 
     public void setUuid(String uuid) {
-        this.uuid = uuid == null ? null : uuid.trim();
+        this.uuid = uuid;
     }
 
     public String getUsername() {
@@ -45,7 +47,7 @@ public class User {
     }
 
     public void setUsername(String username) {
-        this.username = username == null ? null : username.trim();
+        this.username = username;
     }
 
     public String getPassword() {
@@ -53,7 +55,7 @@ public class User {
     }
 
     public void setPassword(String password) {
-        this.password = password == null ? null : password.trim();
+        this.password = password;
     }
 
     public String getWeChat() {
@@ -61,7 +63,7 @@ public class User {
     }
 
     public void setWeChat(String weChat) {
-        this.weChat = weChat == null ? null : weChat.trim();
+        this.weChat = weChat;
     }
 
     public String getTel() {
@@ -69,7 +71,7 @@ public class User {
     }
 
     public void setTel(String tel) {
-        this.tel = tel == null ? null : tel.trim();
+        this.tel = tel;
     }
 
     public Integer getLevelId() {
@@ -104,6 +106,14 @@ public class User {
         this.updateTime = updateTime;
     }
 
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public void setUserInfo(UserInfo userInfo) {
+        this.userInfo = userInfo;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -117,6 +127,7 @@ public class User {
                 ", isDelete=" + isDelete +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
+                ", userInfo=" + userInfo +
                 '}';
     }
 

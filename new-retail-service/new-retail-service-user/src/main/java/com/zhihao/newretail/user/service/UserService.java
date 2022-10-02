@@ -1,5 +1,6 @@
 package com.zhihao.newretail.user.service;
 
+import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.user.form.UserRegisterForm;
@@ -24,6 +25,11 @@ public interface UserService {
     * 获取用户基本信息
     * */
     UserApiVO getUserApiVO(User scope);
+
+    /*
+    * 支付宝用户id获取用户信息
+    * */
+    UserApiVO aliPayUserIdGetUserApiVO(UserApiDTO userApiDTO);
 
     /*
     * 用户基本信息

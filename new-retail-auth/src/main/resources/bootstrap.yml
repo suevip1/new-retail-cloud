@@ -25,6 +25,9 @@ management:
 feign:
   sentinel:
     enabled: true
-my:
-  name: zhangsan
-  age: 20
+auth:
+  alipay:
+    app-id: yourAppId
+    app-private-key: youurAppPrivateKey
+    alipay-public-key: youraliPayPublicKey
+    gateway: https://openapi.alipay.com/gateway.do

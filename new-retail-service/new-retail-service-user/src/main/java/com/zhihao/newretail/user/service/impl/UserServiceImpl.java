@@ -1,6 +1,7 @@
 package com.zhihao.newretail.user.service.impl;
 
 import com.zhihao.newretail.api.file.feign.FileUploadFeignService;
+import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
@@ -119,6 +120,43 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserApiVO aliPayUserIdGetUserApiVO(UserApiDTO userApiDTO) {
+        User scope = userApiDTO2User(userApiDTO);
+        User user = userMapper.selectByScope(scope);
+        if (ObjectUtils.isEmpty(user)) {
+            insertUser(userApiDTO);
+            user = userMapper.selectByScope(scope);
+            return user2UserApiVO(user);
+        } else {
+            return user2UserApiVO(user);
+        }
+    }
+
+    private void insertUser(UserApiDTO userApiDTO) {
+        String uuid = getUserUUID();
+        String weChat = userApiDTO.getWeChat();
+        String nickName = userApiDTO.getNickName();
+        String photo = userApiDTO.getPhoto();
+        User user = new User();
+        user.setUuid(uuid);
+        user.setWeChat(weChat);
+        int insertUserRow = userMapper.insertSelective(user);
+        if (insertUserRow > 0) {
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUserId(user.getId());
+            userInfo.setNickName(nickName);
+            userInfo.setPhoto(photo);
+            int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
+            if (insertUserInfoRow <= 0) {
+                throw new ServiceException("保存用户信息失败");
+            }
+        } else {
+            throw new ServiceException("保存用户失败");
+        }
+    }
+
+    @Override
     public UserInfoVO getUserInfoVO(Integer userId) {
         RLock lock = redissonClient.getLock(String.format(USER_INFO_LOCK, userId));
         lock.lock();
@@ -188,10 +226,25 @@ public class UserServiceImpl implements UserService {
         return StringUtils.substring(String.valueOf(snowflakeIdWorker.nextId()), 4);
     }
 
+    private User userApiDTO2User(UserApiDTO userApiDTO) {
+        User user = new User();
+        BeanUtils.copyProperties(userApiDTO, user);
+        return user;
+    }
+
     private UserInfoVO userInfo2UserInfoVO(UserInfo userInfo) {
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtils.copyProperties(userInfo, userInfoVO);
         return userInfoVO;
+    }
+
+    private UserApiVO user2UserApiVO(User user) {
+        UserApiVO userApiVO = new UserApiVO();
+        UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
+        BeanUtils.copyProperties(user, userApiVO);
+        BeanUtils.copyProperties(user.getUserInfo(), userInfoApiVO);
+        userApiVO.setUserInfoApiVO(userInfoApiVO);
+        return userApiVO;
     }
 
 }

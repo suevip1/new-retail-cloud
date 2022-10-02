@@ -8,9 +8,13 @@ public class UserApiDTO {
 
     private String username;
 
-    private String password;
-
     private String weChat;
+
+    private String tel;
+
+    private String nickName;
+
+    private String photo;
 
     public Integer getId() {
         return id;
@@ -36,14 +40,6 @@ public class UserApiDTO {
         this.username = username;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getWeChat() {
         return weChat;
     }
@@ -52,15 +48,28 @@ public class UserApiDTO {
         this.weChat = weChat;
     }
 
-    @Override
-    public String toString() {
-        return "UserApiDTO{" +
-                "id=" + id +
-                ", uuid='" + uuid + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", weChat='" + weChat + '\'' +
-                '}';
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
 }

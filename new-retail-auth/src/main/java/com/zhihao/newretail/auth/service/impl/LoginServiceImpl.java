@@ -1,11 +1,20 @@
 package com.zhihao.newretail.auth.service.impl;
 
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.request.AlipaySystemOauthTokenRequest;
+import com.alipay.api.request.AlipayUserInfoShareRequest;
+import com.alipay.api.response.AlipaySystemOauthTokenResponse;
+import com.alipay.api.response.AlipayUserInfoShareResponse;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
 import com.zhihao.newretail.api.admin.feign.SysUserFeignService;
 import com.zhihao.newretail.api.admin.vo.SysUserApiVO;
 import com.zhihao.newretail.api.user.dto.UserApiDTO;
 import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserApiVO;
+import com.zhihao.newretail.auth.config.AuthAliPayParamConfig;
 import com.zhihao.newretail.auth.form.UserLoginForm;
 import com.zhihao.newretail.auth.service.LoginService;
 import com.zhihao.newretail.auth.service.TokenService;
@@ -14,11 +23,13 @@ import com.zhihao.newretail.core.util.MyMD5SecretUtil;
 import com.zhihao.newretail.core.util.MyUUIDUtil;
 import com.zhihao.newretail.security.vo.SysUserLoginVO;
 import com.zhihao.newretail.security.vo.UserLoginVO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+@Slf4j
 @Service
 public class LoginServiceImpl implements LoginService {
 
@@ -30,6 +41,11 @@ public class LoginServiceImpl implements LoginService {
 
     @Autowired
     private SysUserFeignService sysUserFeignService;
+
+    @Autowired
+    private AuthAliPayParamConfig authAliPayParamConfig;
+
+    private static final Gson gson = new GsonBuilder().create();
 
     @Override
     public String login(UserLoginForm form) {
@@ -61,6 +77,20 @@ public class LoginServiceImpl implements LoginService {
     }
 
     @Override
+    public String aliPayPCLogin(String code) throws AlipayApiException {
+        AlipaySystemOauthTokenResponse oauthTokenResponse = oauthToken(code);
+        AlipayUserInfoShareResponse userInfoShareResponse = userInfoShare(oauthTokenResponse.getAccessToken());
+        String body = userInfoShareResponse.getBody();
+        UserApiVO userApiVO = userFeignService.getUserApiVO(alipayUserInfoShareResponse2UserApiDTO(body));
+        UserLoginVO userLoginVO = userApiVOBuildUserLoginVO(userApiVO);
+        String token = tokenService.getToken(userLoginVO);
+        if (!StringUtils.isEmpty(token)) {
+            return token;
+        }
+        throw new ServiceException("登录失败");
+    }
+
+    @Override
     public String loginAdmin(UserLoginForm form) {
         SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
         if (ObjectUtils.isEmpty(sysUserApiVO)) {
@@ -87,6 +117,44 @@ public class LoginServiceImpl implements LoginService {
             }
             throw new ServiceException("登录失败");
         }
+    }
+
+    private AlipaySystemOauthTokenResponse oauthToken(String code) throws AlipayApiException {
+        AlipaySystemOauthTokenRequest request = new AlipaySystemOauthTokenRequest();
+        request.setCode(code);
+        request.setGrantType("authorization_code");
+        return authAliPayParamConfig.alipayClient().execute(request);
+    }
+
+    private AlipayUserInfoShareResponse userInfoShare(String authToken) throws AlipayApiException {
+        AlipayUserInfoShareRequest request = new AlipayUserInfoShareRequest();
+        return authAliPayParamConfig.alipayClient().execute(request, authToken);
+    }
+
+    private UserApiDTO alipayUserInfoShareResponse2UserApiDTO(String body) {
+        UserApiDTO userApiDTO = new UserApiDTO();
+        JsonObject json = gson.fromJson(body, JsonObject.class);
+        JsonObject jsonObject = json.getAsJsonObject("alipay_user_info_share_response");
+        if (!jsonObject.isJsonNull()) {
+            String aliPayUserId = jsonObject.get("user_id").getAsString();
+            String aliPayNickName = jsonObject.get("nick_name").getAsString();
+            String aliPayPhoto = jsonObject.get("avatar").getAsString();
+            userApiDTO.setWeChat(aliPayUserId);
+            userApiDTO.setNickName(aliPayNickName);
+            userApiDTO.setPhoto(aliPayPhoto);
+            return userApiDTO;
+        } else {
+            return userApiDTO;
+        }
+    }
+
+    private UserLoginVO userApiVOBuildUserLoginVO(UserApiVO userApiVO) {
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setUserId(userApiVO.getId());
+        userLoginVO.setUuid(userApiVO.getUuid());
+        userLoginVO.setNickName(userApiVO.getUserInfoApiVO().getNickName());
+        userLoginVO.setPhoto(userApiVO.getUserInfoApiVO().getPhoto());
+        return userLoginVO;
     }
 
 }

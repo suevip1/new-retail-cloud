@@ -14,8 +14,39 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
 
+  <resultMap id="UserAndUserInfo" type="com.zhihao.newretail.user.pojo.User">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="uuid" jdbcType="VARCHAR" property="uuid" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="we_chat" jdbcType="VARCHAR" property="weChat" />
+    <result column="tel" jdbcType="CHAR" property="tel" />
+    <result column="level_id" jdbcType="INTEGER" property="levelId" />
+    <result column="is_delete" jdbcType="TINYINT" property="isDelete" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <association column="tb_user_info" javaType="com.zhihao.newretail.user.pojo.UserInfo" property="userInfo" resultMap="UserInfo" />
+  </resultMap>
+
+  <resultMap id="UserInfo" type="com.zhihao.newretail.user.pojo.UserInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="photo" jdbcType="VARCHAR" property="photo" />
+    <result column="gender" jdbcType="VARCHAR" property="gender" />
+    <result column="Integral" jdbcType="INTEGER" property="integral" />
+  </resultMap>
+
   <sql id="Base_Column_List">
     id, uuid, username, password, we_chat, tel, level_id, is_delete, create_time, update_time
+  </sql>
+
+  <sql id="User_User_Info">
+      u.id, u.uuid, u.username, u.password, u.we_chat, u.tel, u.level_id, u.is_delete, u.create_time, u.update_time,
+      ui.id as user_info_id, ui.user_id, ui.nick_name, ui.photo, ui.gender, ui.integral
+    from
+      tb_user as u
+        left join tb_user_info as ui on u.id = ui.user_id
   </sql>
 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -170,16 +201,22 @@
     </if>
   </select>
 
-  <select id="selectByScope" parameterType="com.zhihao.newretail.user.pojo.User" resultMap="BaseResultMap">
+  <select id="selectByScope" parameterType="com.zhihao.newretail.user.pojo.User" resultMap="UserAndUserInfo">
     select
-    <include refid="Base_Column_List" />
-    from tb_user
-    where is_delete = 0
+    <include refid="User_User_Info" />
+    where
+    <if test="id != null">
+      u.id = #{id,jdbcType=INTEGER} and
+    </if>
+    <if test="uuid != null">
+      u.uuid = #{uuid,jdbcType=VARCHAR} and
+    </if>
     <if test="username != null">
-      and username = #{username,jdbcType=VARCHAR}
+      u.username = #{username,jdbcType=VARCHAR} and
     </if>
     <if test="weChat != null">
-      and we_chat = #{weChat,jdbcType=VARCHAR}
+      u.we_chat = #{weChat,jdbcType=VARCHAR} and
     </if>
+    u.is_delete = 0
   </select>
 </mapper>

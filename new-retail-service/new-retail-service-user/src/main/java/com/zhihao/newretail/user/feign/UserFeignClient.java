@@ -25,18 +25,15 @@ public class UserFeignClient {
 
     @PostMapping("/api/userInfo")
     public UserApiVO getUserApiVO(@RequestBody UserApiDTO userApiDTO) {
-        String uuid = userApiDTO.getUuid();
-        String username = userApiDTO.getUsername();
-        String weChat = userApiDTO.getWeChat();
-
-        if (StringUtils.isEmpty(uuid)
-                && StringUtils.isEmpty(username)
-                && StringUtils.isEmpty(weChat)) {
+        if (!StringUtils.isEmpty(userApiDTO.getWeChat())) {
+            return userService.aliPayUserIdGetUserApiVO(userApiDTO);
+        } else if (!StringUtils.isEmpty(userApiDTO.getUsername())) {
+            User user = new User();
+            BeanUtils.copyProperties(userApiDTO, user);
+            return userService.getUserApiVO(user);
+        } else {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "该项不能为空");
         }
-        User user = new User();
-        BeanUtils.copyProperties(userApiDTO, user);
-        return userService.getUserApiVO(user);
     }
 
     @PostMapping("/api/userInfo/list")

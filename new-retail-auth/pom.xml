@@ -47,6 +47,12 @@
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.31.84.ALL</version>
+        </dependency>
+
         <!-- sentinel 组件 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

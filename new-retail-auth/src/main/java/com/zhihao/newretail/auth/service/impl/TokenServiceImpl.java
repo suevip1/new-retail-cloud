@@ -20,8 +20,8 @@ public class TokenServiceImpl implements TokenService {
     @Autowired
     private MyRedisUtil redisUtil;
 
-    /* 用户信息缓存30天 */
-    private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 30;
+    /* 用户信息缓存15天 */
+    private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 15;
 
     @Override
     public String getToken(UserLoginVO userLoginVO) {

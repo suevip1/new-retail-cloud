@@ -56,6 +56,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
 
+    /* 用户信息缓存15天 */
+    private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 15;
+
     /*
      * 新增用户
      * 基于用户名、密码注册
@@ -171,7 +174,7 @@ public class UserServiceImpl implements UserService {
                 } else {
                     UserInfoVO userInfoVO = new UserInfoVO();
                     BeanUtils.copyProperties(userInfo, userInfoVO);
-                    redisUtil.setObject(redisKey, GsonUtil.obj2Json(userInfoVO));
+                    redisUtil.setObject(redisKey, GsonUtil.obj2Json(userInfoVO), CACHE_EXPIRE_TIMEOUT);
                     return userInfoVO;
                 }
             }

@@ -132,7 +132,6 @@ public class LoginServiceImpl implements LoginService {
     }
 
     private UserApiDTO alipayUserInfoShareResponse2UserApiDTO(String body) {
-        UserApiDTO userApiDTO = new UserApiDTO();
         JsonObject json = gson.fromJson(body, JsonObject.class);
         JsonObject jsonObject = json.getAsJsonObject("alipay_user_info_share_response");
         if (!jsonObject.isJsonNull()) {
@@ -140,6 +139,7 @@ public class LoginServiceImpl implements LoginService {
             String aliPayNickName = jsonObject.get("nick_name").getAsString();
             String aliPayPhoto = jsonObject.get("avatar").getAsString();
             if (!StringUtils.isEmpty(aliPayUserId) && !StringUtils.isEmpty(aliPayNickName) && !StringUtils.isEmpty(aliPayPhoto)) {
+                UserApiDTO userApiDTO = new UserApiDTO();
                 userApiDTO.setWeChat(aliPayUserId);
                 userApiDTO.setNickName(aliPayNickName);
                 userApiDTO.setPhoto(aliPayPhoto);

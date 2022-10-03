@@ -139,12 +139,16 @@ public class LoginServiceImpl implements LoginService {
             String aliPayUserId = jsonObject.get("user_id").getAsString();
             String aliPayNickName = jsonObject.get("nick_name").getAsString();
             String aliPayPhoto = jsonObject.get("avatar").getAsString();
-            userApiDTO.setWeChat(aliPayUserId);
-            userApiDTO.setNickName(aliPayNickName);
-            userApiDTO.setPhoto(aliPayPhoto);
-            return userApiDTO;
+            if (!StringUtils.isEmpty(aliPayUserId) && !StringUtils.isEmpty(aliPayNickName) && !StringUtils.isEmpty(aliPayPhoto)) {
+                userApiDTO.setWeChat(aliPayUserId);
+                userApiDTO.setNickName(aliPayNickName);
+                userApiDTO.setPhoto(aliPayPhoto);
+                return userApiDTO;
+            } else {
+                throw new ServiceException("临时授权已过期");
+            }
         } else {
-            return userApiDTO;
+            throw new ServiceException("临时授权已过期");
         }
     }
 

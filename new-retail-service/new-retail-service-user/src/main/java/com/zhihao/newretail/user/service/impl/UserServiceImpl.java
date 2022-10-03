@@ -148,7 +148,11 @@ public class UserServiceImpl implements UserService {
         if (insertUserRow > 0) {
             UserInfo userInfo = new UserInfo();
             userInfo.setUserId(user.getId());
-            userInfo.setNickName(nickName);
+            if (StringUtils.isEmpty(nickName)) {
+                userInfo.setNickName("用户" + uuid);
+            } else {
+                userInfo.setNickName(nickName);
+            }
             userInfo.setPhoto(photo);
             int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
             if (insertUserInfoRow <= 0) {

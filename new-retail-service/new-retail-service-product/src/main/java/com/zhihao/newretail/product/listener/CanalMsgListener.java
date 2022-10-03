@@ -6,6 +6,7 @@ import com.zhihao.newretail.product.consts.TableNameConst;
 import com.zhihao.newretail.product.factory.ProductCacheSyncFactory;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +39,12 @@ public class CanalMsgListener {
                     if (!old.isJsonNull()) {
                         for (JsonElement oldData : old.getAsJsonArray()) {
                             JsonObject jsonOldData = oldData.getAsJsonObject();
-                            productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonOldData.get("spu_id").getAsInt());
-                            log.info("商品服务，旧数据删除成功");
+                            if (!ObjectUtils.isEmpty(jsonOldData.get("spu_id"))) {
+                                productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonOldData.get("spu_id").getAsInt());
+                                log.info("商品服务，旧数据删除成功");
+                            } else {
+                                log.info("商品服务，同步数据为空，无需处理");
+                            }
                         }
                     }
                 } else {

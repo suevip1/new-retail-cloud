@@ -67,8 +67,8 @@ public class OrderNotifyMsgListener {
                     if (!ObjectUtils.isEmpty(order.getCouponsId())) {
                         sendCouponsUnSubNotifyMessage(order.getCouponsId());    // 发送消息回滚优惠券
                     }
-                    log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                    log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 }

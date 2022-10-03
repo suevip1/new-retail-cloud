@@ -9,6 +9,7 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -51,8 +52,12 @@ public class CanalMsgListener {
                 JsonArray oldDataList = old.getAsJsonArray();
                 for (JsonElement jsonElement : oldDataList) {
                     JsonObject oldData = jsonElement.getAsJsonObject();
-                    redisUtil.deleteObject(String.format(USER_INFO, oldData.get("user_id").getAsInt()));
-                    log.info("用户服务，旧数据删除成功");
+                    if (!ObjectUtils.isEmpty(oldData.get("user_id"))) {
+                        redisUtil.deleteObject(String.format(USER_INFO, oldData.get("user_id").getAsInt()));
+                        log.info("用户服务，旧数据删除成功");
+                    } else {
+                        log.info("用户服务，旧数据为空，无需处理");
+                    }
                 }
             } else {
                 log.info("用户服务，旧数据为空，无需处理");

@@ -7,6 +7,7 @@ import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
 import com.zhihao.newretail.api.admin.feign.SysUserFeignService;
@@ -134,19 +135,12 @@ public class LoginServiceImpl implements LoginService {
     private UserApiDTO alipayUserInfoShareResponse2UserApiDTO(String body) {
         JsonObject json = gson.fromJson(body, JsonObject.class);
         JsonObject jsonObject = json.getAsJsonObject("alipay_user_info_share_response");
-        if (!jsonObject.isJsonNull()) {
-            String aliPayUserId = jsonObject.get("user_id").getAsString();
-            String aliPayNickName = jsonObject.get("nick_name").getAsString();
-            String aliPayPhoto = jsonObject.get("avatar").getAsString();
-            if (!StringUtils.isEmpty(aliPayUserId) && !StringUtils.isEmpty(aliPayNickName) && !StringUtils.isEmpty(aliPayPhoto)) {
-                UserApiDTO userApiDTO = new UserApiDTO();
-                userApiDTO.setWeChat(aliPayUserId);
-                userApiDTO.setNickName(aliPayNickName);
-                userApiDTO.setPhoto(aliPayPhoto);
-                return userApiDTO;
-            } else {
-                throw new ServiceException("临时授权已过期");
-            }
+        if (!ObjectUtils.isEmpty(jsonObject.get("user_id"))) {
+            UserApiDTO userApiDTO = new UserApiDTO();
+            userApiDTO.setWeChat(jsonObject.get("user_id").getAsString());
+            userApiDTO.setNickName(jsonObject.get("nick_name").getAsString());
+            userApiDTO.setPhoto(jsonObject.get("avatar").getAsString());
+            return userApiDTO;
         } else {
             throw new ServiceException("临时授权已过期");
         }

@@ -132,4 +132,11 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where message_id = #{messageId,jdbcType=BIGINT}
   </update>
+
+  <select id="selectListBySendErrorStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from message_queue_log
+    where `status` = #{status,jdbcType=INTEGER} and now() > subdate(update_time,interval -16 minute)
+  </select>
 </mapper>

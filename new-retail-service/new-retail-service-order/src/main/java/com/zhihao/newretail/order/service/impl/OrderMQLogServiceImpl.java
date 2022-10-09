@@ -8,6 +8,8 @@ import com.zhihao.newretail.rabbitmq.enums.MessageStatusEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /*
  * @Project: NewRetail-Cloud
  * @Author: Zhihao
@@ -43,6 +45,11 @@ public class OrderMQLogServiceImpl implements OrderMQLogService {
     @Override
     public OrderMQLog getMQLog(Long messageId) {
         return orderMqLogMapper.selectByPrimaryKey(messageId);
+    }
+
+    @Override
+    public List<OrderMQLog> listOrderMQLogS(Integer status) {
+        return orderMqLogMapper.selectListBySendErrorStatus(status);
     }
 
     @Override

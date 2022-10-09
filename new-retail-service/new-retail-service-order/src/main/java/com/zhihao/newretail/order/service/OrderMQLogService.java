@@ -2,6 +2,8 @@ package com.zhihao.newretail.order.service;
 
 import com.zhihao.newretail.order.pojo.OrderMQLog;
 
+import java.util.List;
+
 /*
  * @Project: NewRetail-Cloud
  * @Author: Zhihao
@@ -28,6 +30,11 @@ public interface OrderMQLogService {
      * 获取消息信息
      * */
     OrderMQLog getMQLog(Long messageId);
+
+    /*
+    * 获取发送状态异常消息
+    * */
+    List<OrderMQLog> listOrderMQLogS(Integer status);
 
     /*
     * 获取消息唯一id

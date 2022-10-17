@@ -115,10 +115,12 @@ public class SysUserServiceImpl implements SysUserService {
     public SysUserApiVO getSysUserApiVO(String username) {
         SysUser sysUser = sysUserMapper.selectUserRoleByUsername(username);
         SysUserApiVO sysUserApiVO = new SysUserApiVO();
-        BeanUtils.copyProperties(sysUser, sysUserApiVO);
-        sysUserApiVO.setName(sysUser.getSysRole().getName());
-        sysUserApiVO.setKey(sysUser.getSysRole().getKey());
-        sysUserApiVO.setScope(sysUser.getSysRole().getScope());
+        if (!ObjectUtils.isEmpty(sysUser)) {
+            BeanUtils.copyProperties(sysUser, sysUserApiVO);
+            sysUserApiVO.setName(sysUser.getSysRole().getName());
+            sysUserApiVO.setKey(sysUser.getSysRole().getKey());
+            sysUserApiVO.setScope(sysUser.getSysRole().getScope());
+        }
         return sysUserApiVO;
     }
 

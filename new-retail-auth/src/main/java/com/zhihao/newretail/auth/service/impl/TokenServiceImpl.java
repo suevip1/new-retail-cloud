@@ -23,6 +23,9 @@ public class TokenServiceImpl implements TokenService {
     /* 用户信息缓存15天 */
     private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 15;
 
+    /* 系统用户信息缓存1天 */
+    private final static long SYS_CACHE_EXPIRE_TIMEOUT = 3600 * 24;
+
     @Override
     public String getToken(UserLoginVO userLoginVO) {
         if (!ObjectUtils.isEmpty(userLoginVO)) {
@@ -121,7 +124,7 @@ public class TokenServiceImpl implements TokenService {
     * 缓存后台系统用户信息
     * */
     private void cacheSysUserInfo(String redisKey, SysUserLoginVO sysUserLoginVO) {
-        redisUtil.setObject(redisKey, sysUserLoginVO, CACHE_EXPIRE_TIMEOUT);
+        redisUtil.setObject(redisKey, sysUserLoginVO, SYS_CACHE_EXPIRE_TIMEOUT);
     }
 
 }

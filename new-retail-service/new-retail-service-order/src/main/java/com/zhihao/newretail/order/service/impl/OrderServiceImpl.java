@@ -35,7 +35,6 @@ import com.zhihao.newretail.order.pojo.vo.*;
 import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.core.util.PageUtil;
-import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
@@ -219,60 +218,53 @@ public class OrderServiceImpl implements OrderService {
         ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
         ThreadLocal<Set<Integer>> skuIdSetThreadLocal = new ThreadLocal<>();
         CompletableFuture<Void> buildOrderItemFuture = CompletableFuture.supplyAsync(() -> {
-                    RequestContextHolder.setRequestAttributes(requestAttributes);
-                    return cartFeignService.listCartApiVOS();
-                }, executor)
-                .thenApply((res) -> {
-                    cartListThreadLocal.set(res);
-                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
-                    skuIdSetThreadLocal.set(skuIdSet);
-                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取商品信息
-                })
-                .thenAccept((res) -> {
-                    List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
-                    Set<Integer> skuIdSet = skuIdSetThreadLocal.get();
-                    Map<Integer, GoodsApiVO> goodsApiVOMap;
-                    try {
-                        goodsApiVOMap = goodsApiVOList2Map(res);
-                    } catch (NullPointerException e) {
-                        cartListThreadLocal.remove();
-                        skuIdSetThreadLocal.remove();
-                        throw new CompletionException("商品服务繁忙", new RuntimeException());
-                    }
-                    /* 获取商品库存信息 */
-                    List<SkuStockApiVO> skuStockApiVOList = stockFeignService.listSkuStockApiVOS(skuIdSet);
-                    Map<Integer, SkuStockApiVO> skuStockApiVOMap;
-                    try {
-                        skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
-                    } catch (NullPointerException e) {
-                        cartListThreadLocal.remove();
-                        skuIdSetThreadLocal.remove();
-                        throw new CompletionException("商品库存服务繁忙", new RuntimeException());
-                    }
-                    for (CartApiVO cartApiVO : cartApiVOList) {
-                        /* 商品有效性校验 */
-                        GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
-                        if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
-                            cartListThreadLocal.remove();
-                            skuIdSetThreadLocal.remove();
-                            throw new CompletionException("商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除", new RuntimeException());
-                        }
-                        /* 库存校验 */
-                        SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
-                        if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
-                            cartListThreadLocal.remove();
-                            skuIdSetThreadLocal.remove();
-                            throw new CompletionException("商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足", new RuntimeException());
-                        }
-                        /* 构造订单项、锁定库存信息 */
-                        OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), goodsApiVO);
-                        orderItemList.add(orderItem);
-                        SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
-                        skuStockLockApiDTOList.add(skuStockLockApiDTO);
-                    }
-                    cartListThreadLocal.remove();
-                    skuIdSetThreadLocal.remove();
-                });
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            return cartFeignService.listCartApiVOS();
+        }, executor).thenApply((res) -> {
+            cartListThreadLocal.set(res);
+            Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
+            skuIdSetThreadLocal.set(skuIdSet);
+            return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取商品信息
+        }).thenAccept((res) -> {
+            List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
+            Set<Integer> skuIdSet = skuIdSetThreadLocal.get();
+            Map<Integer, GoodsApiVO> goodsApiVOMap;
+            try {
+                goodsApiVOMap = goodsApiVOList2Map(res);
+            } catch (NullPointerException e) {
+                throw new CompletionException("商品服务繁忙", new RuntimeException());
+            }
+            /* 获取商品库存信息 */
+            List<SkuStockApiVO> skuStockApiVOList = stockFeignService.listSkuStockApiVOS(skuIdSet);
+            Map<Integer, SkuStockApiVO> skuStockApiVOMap;
+            try {
+                skuStockApiVOMap = skuStockApiVOList2Map(skuStockApiVOList);
+            } catch (NullPointerException e) {
+                throw new CompletionException("商品库存服务繁忙", new RuntimeException());
+            }
+            for (CartApiVO cartApiVO : cartApiVOList) {
+                /* 商品有效性校验 */
+                GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
+                if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
+                    throw new CompletionException("商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除", new RuntimeException());
+                }
+                /* 库存校验 */
+                SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
+                if (skuStockApiVO.getStock() < cartApiVO.getQuantity()) {
+                    throw new CompletionException("商品规格ID:" + skuStockApiVO.getSkuId() + "库存不足", new RuntimeException());
+                }
+                /* 构造订单项、锁定库存信息 */
+                OrderItem orderItem = buildOrderItem(orderNo, cartApiVO.getQuantity(), goodsApiVO);
+                orderItemList.add(orderItem);
+                SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
+                skuStockLockApiDTOList.add(skuStockLockApiDTO);
+            }
+
+        }).whenComplete((res, e) -> {
+            cartListThreadLocal.remove();
+            skuIdSetThreadLocal.remove();
+            log.info("'insertOrder()', ThreadLocal清理完毕.");
+        });
         CompletableFuture.allOf(orderAddressFuture, orderCouponsFuture, buildOrderItemFuture).join();
         /* 订单信息保存数据库 */
         Order order;
@@ -428,65 +420,70 @@ public class OrderServiceImpl implements OrderService {
             pageUtil.setTotal((long) count);
         }, executor);
         CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
-                    List<Order> orderList = orderMapper.selectOrderOrderAddressList(orderNo, userId, status, pageNum, pageSize);
-                    if (!CollectionUtils.isEmpty(orderList)) {
-                        orderListThreadLocal.set(orderList);
-                        orderNoSetThreadLocal.set(orderList.stream().map(Order::getId).collect(Collectors.toSet()));
-                        userIdSetThreadLocal.set(orderList.stream().map(Order::getUserId).collect(Collectors.toSet()));
-                        couponsIdSetThreadLocal.set(orderList.stream().map(Order::getCouponsId).collect(Collectors.toSet()));
+            List<Order> orderList = orderMapper.selectOrderOrderAddressList(orderNo, userId, status, pageNum, pageSize);
+            if (!CollectionUtils.isEmpty(orderList)) {
+                orderListThreadLocal.set(orderList);
+                orderNoSetThreadLocal.set(orderList.stream().map(Order::getId).collect(Collectors.toSet()));
+                userIdSetThreadLocal.set(orderList.stream().map(Order::getUserId).collect(Collectors.toSet()));
+                couponsIdSetThreadLocal.set(orderList.stream().map(Order::getCouponsId).collect(Collectors.toSet()));
+            }
+        }, executor).thenApply((res) -> {
+            if (!CollectionUtils.isEmpty(orderListThreadLocal.get())) {
+                List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderNoSetThreadLocal.get());
+                List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet()));
+                return orderItemList.stream().map(orderItem -> {
+                    OrderItemApiVO orderItemApiVO = new OrderItemApiVO();
+                    BeanUtils.copyProperties(orderItem, orderItemApiVO);
+                    if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                        goodsApiVOList.stream()
+                                .filter(goodsApiVO -> orderItem.getSkuId().equals(goodsApiVO.getId()))
+                                .forEach(goodsApiVO -> {
+                                    orderItemApiVO.setSpuId(goodsApiVO.getSpuId());
+                                    orderItemApiVO.setTitle(goodsApiVO.getTitle());
+                                    orderItemApiVO.setSkuImage(goodsApiVO.getSkuImage());
+                                    orderItemApiVO.setParam(goodsApiVO.getParam());
+                                });
                     }
-                }, executor)
-                .thenApply((res) -> {
-                    if (!CollectionUtils.isEmpty(orderListThreadLocal.get())) {
-                        List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderNoSetThreadLocal.get());
-                        List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet()));
-                        return orderItemList.stream().map(orderItem -> {
-                            OrderItemApiVO orderItemApiVO = new OrderItemApiVO();
-                            BeanUtils.copyProperties(orderItem, orderItemApiVO);
-                            if (!CollectionUtils.isEmpty(goodsApiVOList)) {
-                                goodsApiVOList.stream()
-                                        .filter(goodsApiVO -> orderItem.getSkuId().equals(goodsApiVO.getId()))
-                                        .forEach(goodsApiVO -> {
-                                            orderItemApiVO.setSpuId(goodsApiVO.getSpuId());
-                                            orderItemApiVO.setTitle(goodsApiVO.getTitle());
-                                            orderItemApiVO.setSkuImage(goodsApiVO.getSkuImage());
-                                            orderItemApiVO.setParam(goodsApiVO.getParam());
-                                        });
-                            }
-                            return orderItemApiVO;
-                        }).collect(Collectors.toList());
+                    return orderItemApiVO;
+                }).collect(Collectors.toList());
+            }
+            return null;
+        }).thenAccept((res) -> {
+            if (!CollectionUtils.isEmpty(res)) {
+                List<UserInfoApiVO> userInfoApiVOList = userFeignService.listUserInfoApiVOS(userIdSetThreadLocal.get());
+                List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSetThreadLocal.get());
+                List<OrderApiVO> orderApiVOList = orderListThreadLocal.get().stream().map(order -> {
+                    OrderApiVO orderApiVO = new OrderApiVO();
+                    BeanUtils.copyProperties(order, orderApiVO);
+                    if (!CollectionUtils.isEmpty(userInfoApiVOList)) {
+                        userInfoApiVOList.stream()
+                                .filter(userInfoApiVO -> order.getUserId().equals(userInfoApiVO.getUserId()))
+                                .map(this::userInfoApiVO2OrderUserApiVO)
+                                .forEach(orderApiVO::setOrderUserApiVO);
                     }
-                    return null;
-                })
-                .thenAccept((res) -> {
-                    if (!CollectionUtils.isEmpty(res)) {
-                        List<UserInfoApiVO> userInfoApiVOList = userFeignService.listUserInfoApiVOS(userIdSetThreadLocal.get());
-                        List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSetThreadLocal.get());
-                        List<OrderApiVO> orderApiVOList = orderListThreadLocal.get().stream().map(order -> {
-                            OrderApiVO orderApiVO = new OrderApiVO();
-                            BeanUtils.copyProperties(order, orderApiVO);
-                            userInfoApiVOList.stream().filter(userInfoApiVO -> order.getUserId().equals(userInfoApiVO.getUserId())).map(this::userInfoApiVO2OrderUserApiVO).forEach(orderApiVO::setOrderUserApiVO);
-                            if (!CollectionUtils.isEmpty(couponsApiVOList)) {
-                                couponsApiVOList.stream().filter(couponsApiVO -> order.getCouponsId().equals(couponsApiVO.getId())).forEach(couponsApiVO -> {
+                    if (!CollectionUtils.isEmpty(couponsApiVOList)) {
+                        couponsApiVOList.stream()
+                                .filter(couponsApiVO -> order.getCouponsId().equals(couponsApiVO.getId()))
+                                .forEach(couponsApiVO -> {
                                     orderApiVO.setDeno(couponsApiVO.getDeno());
                                     orderApiVO.setCondition(couponsApiVO.getCondition());
                                 });
-                            }
-                            OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
-                            BeanUtils.copyProperties(order.getOrderAddress(), orderAddressApiVO);
-                            orderApiVO.setOrderAddressApiVO(orderAddressApiVO);
-                            orderApiVO.setOrderItemApiVOList(res);
-                            return orderApiVO;
-                        }).collect(Collectors.toList());
-                        pageUtil.setList(orderApiVOList);
                     }
-                })
-                .whenComplete((res, e) -> {
-                    orderListThreadLocal.remove();
-                    orderNoSetThreadLocal.remove();
-                    userIdSetThreadLocal.remove();
-                    couponsIdSetThreadLocal.remove();
-                });
+                    OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
+                    BeanUtils.copyProperties(order.getOrderAddress(), orderAddressApiVO);
+                    orderApiVO.setOrderAddressApiVO(orderAddressApiVO);
+                    orderApiVO.setOrderItemApiVOList(res);
+                    return orderApiVO;
+                }).collect(Collectors.toList());
+                pageUtil.setList(orderApiVOList);
+            }
+        }).whenComplete((res, e) -> {
+            orderListThreadLocal.remove();
+            orderNoSetThreadLocal.remove();
+            userIdSetThreadLocal.remove();
+            couponsIdSetThreadLocal.remove();
+            log.info("'listOrderApiVOS()', ThreadLocal清理完毕.");
+        });
         CompletableFuture.allOf(countTotalFuture, listFuture).join();
         return pageUtil;
     }

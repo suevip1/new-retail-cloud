@@ -18,6 +18,11 @@ public class UserFeignFallback implements UserFeignService {
     }
 
     @Override
+    public UserInfoApiVO getUserInfoApiVO(Integer userId) {
+        return null;
+    }
+
+    @Override
     public List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet) {
         return null;
     }

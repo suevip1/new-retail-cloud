@@ -6,6 +6,11 @@ import com.zhihao.newretail.core.util.PageUtil;
 public interface SysOrderService {
 
     /*
+    * 订单详情
+    * */
+    OrderApiVO getOrderApiVO(Long orderNo);
+
+    /*
     * 订单列表
     * */
     PageUtil<OrderApiVO> listOrderApiVOSByPage(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize);

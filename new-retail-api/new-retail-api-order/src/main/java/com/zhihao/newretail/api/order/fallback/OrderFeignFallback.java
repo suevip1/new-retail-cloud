@@ -15,6 +15,11 @@ public class OrderFeignFallback implements OrderFeignService {
     }
 
     @Override
+    public OrderApiVO getOrderApiVO(Long orderId) {
+        return null;
+    }
+
+    @Override
     public PageUtil<OrderApiVO> listOrderApiVOSByPage(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize) {
         return null;
     }

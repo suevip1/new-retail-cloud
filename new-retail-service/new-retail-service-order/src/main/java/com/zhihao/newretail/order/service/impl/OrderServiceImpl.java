@@ -13,6 +13,7 @@ import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
+import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
@@ -73,6 +74,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private UserCouponsFeignService userCouponsFeignService;
     @Autowired
+    private UserFeignService userFeignService;
+    @Autowired
     private CouponsFeignService couponsFeignService;
     @Autowired
     private OrderMQLogService orderMqLogService;
@@ -90,8 +93,6 @@ public class OrderServiceImpl implements OrderService {
     private OrderAddressMapper orderAddressMapper;
 
     private static final String ORDER_TOKEN_REDIS_KEY = "order_token_user_id_%d";
-
-    private static final String REDIS_SCRIPT = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
 
     @Override
     public OrderCreateVO getOrderCreateVO(Integer userId) {
@@ -171,7 +172,7 @@ public class OrderServiceImpl implements OrderService {
         /* 防止重复下单 */
         String redisKey = String.format(ORDER_TOKEN_REDIS_KEY, userId);
         String orderToken = form.getOrderToken();
-        Long result = redisUtil.executeScript(REDIS_SCRIPT, redisKey, orderToken);
+        Long result = redisUtil.executeScript(MyRedisUtil.REDIS_SCRIPT, redisKey, orderToken);
         if (result == 0) {
             throw new ServiceException("订单唯一标识错误，请刷新页面");
         }
@@ -241,7 +242,9 @@ public class OrderServiceImpl implements OrderService {
                 /* 商品有效性校验 */
                 GoodsApiVO goodsApiVO = goodsApiVOMap.get(cartApiVO.getSkuId());
                 if (ProductEnum.NOT_SALEABLE.getCode().equals(goodsApiVO.getIsSaleable())) {
-                    throw new CompletionException("商品:" + goodsApiVO.getTitle() + "商品规格ID:" + goodsApiVO.getId() + "商品下架或删除", new RuntimeException());
+                    throw new CompletionException("商品:" + goodsApiVO.getTitle() +
+                            "商品规格ID:" + goodsApiVO.getId() +
+                            "商品下架或删除", new RuntimeException());
                 }
                 /* 库存校验 */
                 SkuStockApiVO skuStockApiVO = skuStockApiVOMap.get(cartApiVO.getSkuId());
@@ -375,6 +378,38 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public OrderApiVO getOrderApiVO(Long orderNo) {
+        OrderApiVO orderApiVO = new OrderApiVO();
+        CompletableFuture<OrderApiVO> orderApiVOFuture = CompletableFuture.supplyAsync(() -> {
+            Order order = orderMapper.selectByPrimaryKey(orderNo);
+            BeanUtils.copyProperties(order, orderApiVO);
+            return orderApiVO;
+        }, executor);
+
+        CompletableFuture<Void> orderUserApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
+            UserInfoApiVO userInfoApiVO = userFeignService.getUserInfoApiVO(res.getUserId());
+            res.setOrderUserApiVO(userInfoApiVO2OrderUserApiVO(userInfoApiVO));
+        }, executor);
+
+        CompletableFuture<Void> orderAddressApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
+            OrderAddress orderAddress = orderAddressMapper.selectByPrimaryKey(orderNo);
+            OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
+            BeanUtils.copyProperties(orderAddress, orderAddressApiVO);
+            res.setOrderAddressApiVO(orderAddressApiVO);
+        }, executor);
+
+        CompletableFuture<Void> orderItemApiVOListFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
+            List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderNo);
+            List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
+            List<OrderItemApiVO> orderItemApiVOList = orderItemList2OrderItemApiVOList(orderItemList, goodsApiVOList);
+            res.setOrderItemApiVOList(orderItemApiVOList);
+        }, executor);
+        CompletableFuture.allOf(orderApiVOFuture, orderUserApiVOFuture, orderAddressApiVOFuture, orderItemApiVOListFuture).join();
+
+        return orderApiVO;
+    }
+
+    @Override
     public PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize) {
         PageUtil<OrderVO> pageUtil = new PageUtil<>();
         CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
@@ -423,22 +458,8 @@ public class OrderServiceImpl implements OrderService {
         }, executor).thenApply((res) -> {
             if (!CollectionUtils.isEmpty(orderListThreadLocal.get())) {
                 List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderNoSetThreadLocal.get());
-                List<GoodsApiVO> goodsApiVOList = productFeignService.listGoodsApiVOS(orderItemList.stream().map(OrderItem::getSkuId).collect(Collectors.toSet()));
-                return orderItemList.stream().map(orderItem -> {
-                    OrderItemApiVO orderItemApiVO = new OrderItemApiVO();
-                    BeanUtils.copyProperties(orderItem, orderItemApiVO);
-                    if (!CollectionUtils.isEmpty(goodsApiVOList)) {
-                        goodsApiVOList.stream()
-                                .filter(goodsApiVO -> orderItem.getSkuId().equals(goodsApiVO.getId()))
-                                .forEach(goodsApiVO -> {
-                                    orderItemApiVO.setSpuId(goodsApiVO.getSpuId());
-                                    orderItemApiVO.setTitle(goodsApiVO.getTitle());
-                                    orderItemApiVO.setSkuImage(goodsApiVO.getSkuImage());
-                                    orderItemApiVO.setParam(goodsApiVO.getParam());
-                                });
-                    }
-                    return orderItemApiVO;
-                }).collect(Collectors.toList());
+                List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
+                return orderItemList2OrderItemApiVOList(orderItemList, goodsApiVOList);
             }
             return null;
         }).thenAccept((res) -> {
@@ -624,6 +645,22 @@ public class OrderServiceImpl implements OrderService {
             orderItemVO.setPrice(goodsApiVO.getPrice());
             orderItemVO.setTotalPrice(goodsApiVO.getPrice().multiply(BigDecimal.valueOf(orderItemVO.getNum())));
             return orderItemVO;
+        }).collect(Collectors.toList());
+    }
+
+    private List<OrderItemApiVO> orderItemList2OrderItemApiVOList(List<OrderItem> orderItemList, List<GoodsApiVO> goodsApiVOList) {
+        return orderItemList.stream().map(orderItem -> {
+            OrderItemApiVO orderItemApiVO = new OrderItemApiVO();
+            BeanUtils.copyProperties(orderItem, orderItemApiVO);
+            if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                goodsApiVOList.stream().filter(goodsApiVO -> orderItem.getSkuId().equals(goodsApiVO.getId())).forEach(goodsApiVO -> {
+                    orderItemApiVO.setSpuId(goodsApiVO.getSpuId());
+                    orderItemApiVO.setTitle(goodsApiVO.getTitle());
+                    orderItemApiVO.setSkuImage(goodsApiVO.getSkuImage());
+                    orderItemApiVO.setParam(goodsApiVO.getParam());
+                });
+            }
+            return orderItemApiVO;
         }).collect(Collectors.toList());
     }
 

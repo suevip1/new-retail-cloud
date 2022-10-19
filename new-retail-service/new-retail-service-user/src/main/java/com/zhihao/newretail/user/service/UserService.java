@@ -47,6 +47,11 @@ public interface UserService {
     UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form);
 
     /*
+    * 获取用户信息(Feign)
+    * */
+    UserInfoApiVO getUserInfoApiVO(Integer userId);
+
+    /*
     * 批量获取用户信息
     * */
     List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet);

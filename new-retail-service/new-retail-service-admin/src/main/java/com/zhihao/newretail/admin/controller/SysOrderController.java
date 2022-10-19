@@ -18,6 +18,16 @@ public class SysOrderController {
     private SysOrderService sysOrderService;
 
     @RequiresLogin
+    @GetMapping("/order/{orderNo}")
+    public R orderDetail(@PathVariable Long orderNo) {
+        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+        SysUserTokenContext.setUserToken(userToken);
+        OrderApiVO orderApiVO = sysOrderService.getOrderApiVO(orderNo);
+        UserLoginContext.sysClean();
+        return R.ok().put("data", orderApiVO);
+    }
+
+    @RequiresLogin
     @GetMapping("/order/list")
     public R orderList(@RequestParam(required = false) Long orderNo,
                        @RequestParam(required = false) Integer userId,

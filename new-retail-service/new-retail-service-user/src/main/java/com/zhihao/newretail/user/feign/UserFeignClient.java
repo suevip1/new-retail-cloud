@@ -10,9 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -34,6 +32,11 @@ public class UserFeignClient {
         } else {
             throw new ServiceException(HttpStatus.SC_PRECONDITION_FAILED, "该项不能为空");
         }
+    }
+
+    @GetMapping("/api/userInfo/{userId}")
+    public UserInfoApiVO getUserInfoApiVO(@PathVariable Integer userId) {
+        return userService.getUserInfoApiVO(userId);
     }
 
     @PostMapping("/api/userInfo/list")

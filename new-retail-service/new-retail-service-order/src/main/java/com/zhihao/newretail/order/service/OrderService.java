@@ -26,6 +26,11 @@ public interface OrderService {
     OrderVO getOrderVO(Integer userId, Long orderId);
 
     /*
+    * 订单详情(后台)
+    * */
+    OrderApiVO getOrderApiVO(Long orderNo);
+
+    /*
      * 获取订单列表
      * */
     PageUtil<OrderVO> listOrderVOS(Integer userId, Integer status, Integer pageNum, Integer pageSize);

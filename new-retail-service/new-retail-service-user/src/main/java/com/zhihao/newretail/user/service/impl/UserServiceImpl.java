@@ -216,13 +216,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserInfoApiVO getUserInfoApiVO(Integer userId) {
+        UserInfo userInfo = userInfoMapper.selectByUserId(userId);
+        return userInfo2UserInfoApiVO(userInfo);
+    }
+
+    @Override
     public List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet) {
         List<UserInfo> userInfoList = userInfoMapper.selectListByUserIdSet(userIdSet);
-        return userInfoList.stream().map(userInfo -> {
-            UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
-            BeanUtils.copyProperties(userInfo, userInfoApiVO);
-            return userInfoApiVO;
-        }).collect(Collectors.toList());
+        return userInfoList.stream().map(this::userInfo2UserInfoApiVO).collect(Collectors.toList());
     }
 
     /*
@@ -252,6 +254,12 @@ public class UserServiceImpl implements UserService {
         BeanUtils.copyProperties(user.getUserInfo(), userInfoApiVO);
         userApiVO.setUserInfoApiVO(userInfoApiVO);
         return userApiVO;
+    }
+
+    private UserInfoApiVO userInfo2UserInfoApiVO(UserInfo userInfo) {
+        UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
+        BeanUtils.copyProperties(userInfo, userInfoApiVO);
+        return userInfoApiVO;
     }
 
 }

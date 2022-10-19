@@ -6,6 +6,8 @@ import com.zhihao.newretail.api.user.vo.UserApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -18,6 +20,9 @@ public interface UserFeignService {
 
     @PostMapping("/api/userInfo")
     UserApiVO getUserApiVO(@RequestBody UserApiDTO userApiDTO);
+
+    @GetMapping("/api/userInfo/{userId}")
+    UserInfoApiVO getUserInfoApiVO(@PathVariable Integer userId);
 
     @PostMapping("/api/userInfo/list")
     List<UserInfoApiVO> listUserInfoApiVOS(@RequestBody Set<Integer> userIdSet);

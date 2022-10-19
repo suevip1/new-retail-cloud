@@ -20,9 +20,17 @@ public class OrderFeignClient {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("/api/order/{orderId}")
+    @GetMapping("/api/orderPay/{orderId}")
     public OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId) {
         return orderService.getOrderPayInfoApiVO(orderId);
+    }
+
+    @RequiresLogin
+    @GetMapping("/api/order/{orderId}")
+    public OrderApiVO getOrderApiVO(@PathVariable Long orderId) {
+        OrderApiVO orderApiVO = orderService.getOrderApiVO(orderId);
+        UserLoginContext.sysClean();
+        return orderApiVO;
     }
 
     @RequiresLogin

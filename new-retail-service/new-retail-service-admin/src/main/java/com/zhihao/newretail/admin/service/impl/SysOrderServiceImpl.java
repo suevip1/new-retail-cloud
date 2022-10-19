@@ -17,6 +17,12 @@ public class SysOrderServiceImpl implements SysOrderService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.COMMON)
+    public OrderApiVO getOrderApiVO(Long orderNo) {
+        return orderFeignService.getOrderApiVO(orderNo);
+    }
+
+    @Override
+    @RequiresPermission(scope = AuthorizationConst.COMMON)
     public PageUtil<OrderApiVO> listOrderApiVOSByPage(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize) {
         return orderFeignService.listOrderApiVOSByPage(orderNo, userId, status, pageNum, pageSize);
     }

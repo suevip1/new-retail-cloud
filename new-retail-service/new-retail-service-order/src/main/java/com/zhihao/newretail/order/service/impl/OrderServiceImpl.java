@@ -388,7 +388,9 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture<Void> orderUserApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
             UserInfoApiVO userInfoApiVO = userFeignService.getUserInfoApiVO(res.getUserId());
-            res.setOrderUserApiVO(userInfoApiVO2OrderUserApiVO(userInfoApiVO));
+            if (!ObjectUtils.isEmpty(userInfoApiVO)) {
+                res.setOrderUserApiVO(userInfoApiVO2OrderUserApiVO(userInfoApiVO));
+            }
         }, executor);
 
         CompletableFuture<Void> orderAddressApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
@@ -401,8 +403,10 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> orderItemApiVOListFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
             List<OrderItem> orderItemList = orderItemMapper.selectListByOrderId(orderNo);
             List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
-            List<OrderItemApiVO> orderItemApiVOList = orderItemList2OrderItemApiVOList(orderItemList, goodsApiVOList);
-            res.setOrderItemApiVOList(orderItemApiVOList);
+            if (!CollectionUtils.isEmpty(goodsApiVOList)) {
+                List<OrderItemApiVO> orderItemApiVOList = orderItemList2OrderItemApiVOList(orderItemList, goodsApiVOList);
+                res.setOrderItemApiVOList(orderItemApiVOList);
+            }
         }, executor);
         CompletableFuture.allOf(orderApiVOFuture, orderUserApiVOFuture, orderAddressApiVOFuture, orderItemApiVOListFuture).join();
 

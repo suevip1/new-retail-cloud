@@ -13,7 +13,6 @@ import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
-import com.zhihao.newretail.api.user.feign.UserFeignService;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.api.user.vo.UserCouponsApiVO;
 import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
@@ -70,8 +69,6 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private StockFeignService stockFeignService;
     @Autowired
-    private UserFeignService userFeignService;
-    @Autowired
     private UserAddressFeignService userAddressFeignService;
     @Autowired
     private UserCouponsFeignService userCouponsFeignService;
@@ -102,52 +99,50 @@ public class OrderServiceImpl implements OrderService {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
         CompletableFuture<Void> orderItemCreateFuture = CompletableFuture.supplyAsync(() -> {
-                    RequestContextHolder.setRequestAttributes(requestAttributes);
-                    List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOS();
-                    cartListThreadLocal.set(cartApiVOList);
-                    return cartApiVOList;
-                }, executor)
-                .thenApply((res) -> {
-                    Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
-                    return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
-                })
-                .thenApply((res) -> {
-                    if (!CollectionUtils.isEmpty(res)) {
-                        //List<CartApiVO> cartApiVOList = cartListFuture.join();
-                        List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
-                        List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
-                        cartApiVOList.forEach(cartApiVO -> {
-                            OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
-                            buildOrderItemCreateVO(cartApiVO, res, orderItemCreateVO);      // 构造订单项
-                            orderItemCreateVOList.add(orderItemCreateVO);
-                        });
-                        cartListThreadLocal.remove();
-                        /* 计算商品总价格 */
-                        BigDecimal totalPrice = orderItemCreateVOList.stream()
-                                .map(OrderItemCreateVO::getTotalPrice)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-                        orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
-                        orderCreateVO.setTotalPrice(totalPrice);
-                        return totalPrice;
-                    }
-                    return BigDecimal.ZERO;
-                })
-                .thenAccept((res) -> {
-                    List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOS();
-                    if (!CollectionUtils.isEmpty(userCouponsApiVOList)) {
-                        Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
-                                .map(UserCouponsApiVO::getCouponsId)
-                                .collect(Collectors.toSet());
-                        List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSet);
-                        if (!CollectionUtils.isEmpty(couponsApiVOList)) {
-                            /* 筛选可用优惠券(满减) */
-                            List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
-                                    .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1)
-                                    .collect(Collectors.toList());
-                            orderCreateVO.setCouponsApiVOList(couponsApiVOS);
-                        }
-                    }
+            RequestContextHolder.setRequestAttributes(requestAttributes);
+            List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOS();
+            cartListThreadLocal.set(cartApiVOList);
+            return cartApiVOList;
+        }, executor).thenApply((res) -> {
+            Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
+            return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
+        }).thenApply((res) -> {
+            if (!CollectionUtils.isEmpty(res)) {
+                List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
+                List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
+                cartApiVOList.forEach(cartApiVO -> {
+                    OrderItemCreateVO orderItemCreateVO = new OrderItemCreateVO();
+                    buildOrderItemCreateVO(cartApiVO, res, orderItemCreateVO);      // 构造订单项
+                    orderItemCreateVOList.add(orderItemCreateVO);
                 });
+                /* 计算商品总价格 */
+                BigDecimal totalPrice = orderItemCreateVOList.stream()
+                        .map(OrderItemCreateVO::getTotalPrice)
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
+                orderCreateVO.setTotalPrice(totalPrice);
+                return totalPrice;
+            }
+            return BigDecimal.ZERO;
+        }).thenAccept((res) -> {
+            List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOS();
+            if (!CollectionUtils.isEmpty(userCouponsApiVOList)) {
+                Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
+                        .map(UserCouponsApiVO::getCouponsId)
+                        .collect(Collectors.toSet());
+                List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSet);
+                if (!CollectionUtils.isEmpty(couponsApiVOList)) {
+                    /* 筛选可用优惠券(满减) */
+                    List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
+                            .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1)
+                            .collect(Collectors.toList());
+                    orderCreateVO.setCouponsApiVOList(couponsApiVOS);
+                }
+            }
+        }).whenComplete((res, e) -> {
+            cartListThreadLocal.remove();
+            log.info("'getOrderCreateVO()', ThreadLocal清理完毕.");
+        });
 
         /* 用户收货地址 */
         CompletableFuture<Void> userAddressListFuture = CompletableFuture.runAsync(() -> {
@@ -410,7 +405,6 @@ public class OrderServiceImpl implements OrderService {
         PageUtil<OrderApiVO> pageUtil = new PageUtil<>();
         ThreadLocal<List<Order>> orderListThreadLocal = new ThreadLocal<>();
         ThreadLocal<Set<Long>> orderNoSetThreadLocal = new ThreadLocal<>();
-        ThreadLocal<Set<Integer>> userIdSetThreadLocal = new ThreadLocal<>();
         ThreadLocal<Set<Integer>> couponsIdSetThreadLocal = new ThreadLocal<>();
 
         CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
@@ -424,7 +418,6 @@ public class OrderServiceImpl implements OrderService {
             if (!CollectionUtils.isEmpty(orderList)) {
                 orderListThreadLocal.set(orderList);
                 orderNoSetThreadLocal.set(orderList.stream().map(Order::getId).collect(Collectors.toSet()));
-                userIdSetThreadLocal.set(orderList.stream().map(Order::getUserId).collect(Collectors.toSet()));
                 couponsIdSetThreadLocal.set(orderList.stream().map(Order::getCouponsId).collect(Collectors.toSet()));
             }
         }, executor).thenApply((res) -> {
@@ -450,17 +443,10 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }).thenAccept((res) -> {
             if (!CollectionUtils.isEmpty(res)) {
-                List<UserInfoApiVO> userInfoApiVOList = userFeignService.listUserInfoApiVOS(userIdSetThreadLocal.get());
                 List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSetThreadLocal.get());
                 List<OrderApiVO> orderApiVOList = orderListThreadLocal.get().stream().map(order -> {
                     OrderApiVO orderApiVO = new OrderApiVO();
                     BeanUtils.copyProperties(order, orderApiVO);
-                    if (!CollectionUtils.isEmpty(userInfoApiVOList)) {
-                        userInfoApiVOList.stream()
-                                .filter(userInfoApiVO -> order.getUserId().equals(userInfoApiVO.getUserId()))
-                                .map(this::userInfoApiVO2OrderUserApiVO)
-                                .forEach(orderApiVO::setOrderUserApiVO);
-                    }
                     if (!CollectionUtils.isEmpty(couponsApiVOList)) {
                         couponsApiVOList.stream()
                                 .filter(couponsApiVO -> order.getCouponsId().equals(couponsApiVO.getId()))
@@ -480,7 +466,6 @@ public class OrderServiceImpl implements OrderService {
         }).whenComplete((res, e) -> {
             orderListThreadLocal.remove();
             orderNoSetThreadLocal.remove();
-            userIdSetThreadLocal.remove();
             couponsIdSetThreadLocal.remove();
             log.info("'listOrderApiVOS()', ThreadLocal清理完毕.");
         });

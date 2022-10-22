@@ -141,6 +141,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <outputDirectory>D:\jar</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>

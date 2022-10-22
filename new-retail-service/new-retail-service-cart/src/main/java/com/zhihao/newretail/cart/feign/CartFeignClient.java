@@ -7,18 +7,20 @@ import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/feign")
 public class CartFeignClient {
 
     @Autowired
     private CartService cartService;
 
     @RequiresLogin
-    @GetMapping("/api/cart/list")
+    @GetMapping("/cart/list")
     public List<CartApiVO> listCartApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CartApiVO> cartApiVOList = cartService.listCartApiVOs(userId);
@@ -27,7 +29,7 @@ public class CartFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/cart")
+    @PutMapping("/cart")
     public void deleteCartBySelected() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         cartService.deleteCartBySelected(userId);

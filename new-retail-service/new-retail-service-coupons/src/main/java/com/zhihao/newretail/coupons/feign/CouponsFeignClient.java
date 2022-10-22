@@ -14,18 +14,19 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/feign")
 public class CouponsFeignClient {
 
     @Autowired
     private CouponsService couponsService;
 
-    @GetMapping("/api/coupons/{couponsId}")
+    @GetMapping("/coupons/{couponsId}")
     public CouponsApiVO getCouponsApiVO(@PathVariable Integer couponsId) {
         return couponsService.getCouponsApiVO(couponsId);
     }
 
     @RequiresLogin
-    @GetMapping("/api/coupons/list")
+    @GetMapping("/coupons/list")
     PageUtil<CouponsApiVO> listCouponsApiVOS(@RequestParam(required = false) Integer saleable,
                                              @RequestParam(defaultValue = "1") Integer pageNum,
                                              @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -34,13 +35,13 @@ public class CouponsFeignClient {
         return pageData;
     }
 
-    @PostMapping("/api/coupons/list")
+    @PostMapping("/coupons/list")
     public List<CouponsApiVO> listCouponsApiVOS(@RequestBody Set<Integer> couponsIdSet) {
         return couponsService.listCouponsApiVOS(couponsIdSet);
     }
 
     @RequiresLogin
-    @PostMapping("/api/coupons")
+    @PostMapping("/coupons")
     Integer insertCoupons(@RequestBody CouponsAddApiDTO couponsAddApiDTO) {
         int insertRow = couponsService.insertCoupons(couponsAddApiDTO);
         UserLoginContext.sysClean();
@@ -48,7 +49,7 @@ public class CouponsFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/coupons/{couponsId}")
+    @PutMapping("/coupons/{couponsId}")
     Integer updateCoupons(@PathVariable Integer couponsId, @RequestBody CouponsUpdateApiDTO couponsUpdateApiDTO) {
         int updateRow = couponsService.updateCoupons(couponsId, couponsUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -56,7 +57,7 @@ public class CouponsFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/coupons/{couponsId}")
+    @DeleteMapping("/coupons/{couponsId}")
     Integer deleteCoupons(@PathVariable Integer couponsId) {
         int deleteRow = couponsService.deleteCoupons(couponsId);
         UserLoginContext.sysClean();

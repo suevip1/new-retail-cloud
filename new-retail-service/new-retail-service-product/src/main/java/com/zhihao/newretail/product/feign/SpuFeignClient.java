@@ -10,13 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/feign")
 public class SpuFeignClient {
 
     @Autowired
     private SpuService spuService;
 
     @RequiresLogin
-    @GetMapping("/api/spu/{spuId}")
+    @GetMapping("/spu/{spuId}")
     public SpuApiVO getSpuApiVO(@PathVariable Integer spuId) {
         SpuApiVO spuApiVO = spuService.getSpuApiVO(spuId);
         UserLoginContext.sysClean();
@@ -24,7 +25,7 @@ public class SpuFeignClient {
     }
 
     @RequiresLogin
-    @PostMapping("/api/spu")
+    @PostMapping("/spu")
     public Integer addSpu(@RequestBody SpuAddApiDTO spuAddApiDTO) {
         int insertRow = spuService.insertSpu(spuAddApiDTO);
         UserLoginContext.sysClean();
@@ -32,7 +33,7 @@ public class SpuFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/spu/{spuId}")
+    @PutMapping("/spu/{spuId}")
     public Integer updateSpu(@PathVariable Integer spuId, @RequestBody SpuUpdateApiDTO spuUpdateApiDTO) {
         int updateRow = spuService.updateSpu(spuId, spuUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -40,7 +41,7 @@ public class SpuFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/spu/{spuId}")
+    @DeleteMapping("/spu/{spuId}")
     public Integer deleteSpu(@PathVariable Integer spuId) {
         int deleteRow = spuService.deleteSpu(spuId);
         UserLoginContext.sysClean();

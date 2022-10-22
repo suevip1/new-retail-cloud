@@ -20,13 +20,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "new-retail-order", path = "/order", fallback = OrderFeignFallback.class)
 public interface OrderFeignService {
 
-    @GetMapping("/api/orderPay/{orderId}")
+    @GetMapping("/feign/orderPay/{orderId}")
     OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId);
 
-    @GetMapping("/api/order/{orderId}")
+    @GetMapping("/feign/order/{orderId}")
     OrderApiVO getOrderApiVO(@PathVariable Long orderId);
 
-    @GetMapping("/api/order")
+    @GetMapping("/feign/order")
     PageUtil<OrderApiVO> listOrderApiVOSByPage(@RequestParam(required = false) Long orderNo,
                                                @RequestParam(required = false) Integer userId,
                                                @RequestParam(required = false) Integer status,
@@ -36,7 +36,7 @@ public interface OrderFeignService {
     /*
     * 订单发货
     * */
-    @PutMapping("/api/order/{orderNo}")
+    @PutMapping("/feign/order/{orderNo}")
     Integer deliverGoods(@PathVariable Long orderNo);
 
 }

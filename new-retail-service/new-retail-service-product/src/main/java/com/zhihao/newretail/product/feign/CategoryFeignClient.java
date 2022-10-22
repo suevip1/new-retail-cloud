@@ -11,13 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/feign")
 public class CategoryFeignClient {
 
     @Autowired
     private CategoryService categoryService;
 
     @RequiresLogin
-    @GetMapping("/api/category/list")
+    @GetMapping("/category/list")
     public PageUtil<CategoryApiVO> listCategoryApiVOS(@RequestParam(defaultValue = "1") Integer pageNum,
                                                       @RequestParam(defaultValue = "10") Integer pageSize) {
         PageUtil<CategoryApiVO> pageData = categoryService.listCategoryApiVOS(pageNum, pageSize);
@@ -26,7 +27,7 @@ public class CategoryFeignClient {
     }
 
     @RequiresLogin
-    @GetMapping("/api/category/{categoryId}")
+    @GetMapping("/category/{categoryId}")
     public CategoryApiVO getCategoryApiVO(@PathVariable Integer categoryId) {
         CategoryApiVO categoryApiVO = categoryService.getCategoryApiVO(categoryId);
         UserLoginContext.sysClean();
@@ -34,7 +35,7 @@ public class CategoryFeignClient {
     }
 
     @RequiresLogin
-    @PostMapping("/api/category")
+    @PostMapping("/category")
     public Integer addCategory(@RequestBody CategoryAddApiDTO categoryAddApiDTO) {
         int insertRow = categoryService.insertCategory(categoryAddApiDTO);
         UserLoginContext.sysClean();
@@ -42,7 +43,7 @@ public class CategoryFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/category/{categoryId}")
+    @PutMapping("/category/{categoryId}")
     public Integer updateCategory(@PathVariable Integer categoryId, @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO) {
         int updateRow = categoryService.updateCategory(categoryId, categoryUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -50,7 +51,7 @@ public class CategoryFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/category/{categoryId}")
+    @DeleteMapping("/category/{categoryId}")
     public Integer deleteCategory(@PathVariable Integer categoryId) {
         int deleteRow = categoryService.deleteCategory(categoryId);
         UserLoginContext.sysClean();

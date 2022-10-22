@@ -15,18 +15,19 @@ import org.springframework.web.bind.annotation.*;
  * @Email: cafebabe0508@163.com
  * */
 @RestController
+@RequestMapping("/feign")
 public class OrderFeignClient {
 
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("/api/orderPay/{orderId}")
+    @GetMapping("/orderPay/{orderId}")
     public OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId) {
         return orderService.getOrderPayInfoApiVO(orderId);
     }
 
     @RequiresLogin
-    @GetMapping("/api/order/{orderId}")
+    @GetMapping("/order/{orderId}")
     public OrderApiVO getOrderApiVO(@PathVariable Long orderId) {
         OrderApiVO orderApiVO = orderService.getOrderApiVO(orderId);
         UserLoginContext.sysClean();
@@ -34,7 +35,7 @@ public class OrderFeignClient {
     }
 
     @RequiresLogin
-    @GetMapping("/api/order")
+    @GetMapping("/order")
     PageUtil<OrderApiVO> listOrderApiVOSByPage(@RequestParam(required = false) Long orderNo,
                                                @RequestParam(required = false) Integer userId,
                                                @RequestParam(required = false) Integer status,
@@ -46,7 +47,7 @@ public class OrderFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/order/{orderNo}")
+    @PutMapping("/order/{orderNo}")
     Integer deliverGoods(@PathVariable Long orderNo) {
         int updateRow = orderService.updateOrder(orderNo);
         UserLoginContext.sysClean();

@@ -16,12 +16,13 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/feign")
 public class UserFeignClient {
 
     @Autowired
     private UserService userService;
 
-    @PostMapping("/api/userInfo")
+    @PostMapping("/userInfo")
     public UserApiVO getUserApiVO(@RequestBody UserApiDTO userApiDTO) {
         if (!StringUtils.isEmpty(userApiDTO.getWeChat())) {
             return userService.aliPayUserIdGetUserApiVO(userApiDTO);
@@ -34,12 +35,12 @@ public class UserFeignClient {
         }
     }
 
-    @GetMapping("/api/userInfo/{userId}")
+    @GetMapping("/userInfo/{userId}")
     public UserInfoApiVO getUserInfoApiVO(@PathVariable Integer userId) {
         return userService.getUserInfoApiVO(userId);
     }
 
-    @PostMapping("/api/userInfo/list")
+    @PostMapping("/userInfo/list")
     public List<UserInfoApiVO> listUserInfoApiVOS(@RequestBody Set<Integer> userIdSet) {
         return userService.listUserInfoApiVOS(userIdSet);
     }

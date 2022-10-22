@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "new-retail-product", path = "/product", fallback = SpuFeignFallback.class)
 public interface SpuFeignService {
 
-    @GetMapping("/api/spu/{spuId}")
+    @GetMapping("/feign/spu/{spuId}")
     SpuApiVO getSpuApiVO(@PathVariable Integer spuId);
 
-    @PostMapping("/api/spu")
+    @PostMapping("/feign/spu")
     Integer addSpu(@RequestBody SpuAddApiDTO spuAddApiDTO);
 
-    @PutMapping("/api/spu/{spuId}")
+    @PutMapping("/feign/spu/{spuId}")
     Integer updateSpu(@PathVariable Integer spuId, @RequestBody SpuUpdateApiDTO spuUpdateApiDTO);
 
-    @DeleteMapping("/api/spu/{spuId}")
+    @DeleteMapping("/feign/spu/{spuId}")
     Integer deleteSpu(@PathVariable Integer spuId);
 
 }

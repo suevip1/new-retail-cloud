@@ -18,19 +18,19 @@ public interface StockFeignService {
     /*
     * 获取库存信息
     * */
-    @PostMapping("/api/skuStock/list")
+    @PostMapping("/feign/skuStock/list")
     List<SkuStockApiVO> listSkuStockApiVOS(@RequestBody Set<Integer> skuIdSet);
 
     /*
     * 锁定商品库存
     * */
-    @PostMapping("/api/skuStock/lock")
+    @PostMapping("/feign/skuStock/lock")
     void stockLock(@RequestBody SkuStockLockApiDTO skuStockLockApiDTO);
 
     /*
     * 批量锁定商品库存
     * */
-    @PostMapping("/api/skuStock/batchLock")
+    @PostMapping("/feign/skuStock/batchLock")
     Integer batchStockLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList);
 
 }

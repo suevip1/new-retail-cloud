@@ -11,13 +11,14 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/feign")
 public class UserAddressFeignClient {
 
     @Autowired
     private UserAddressService userAddressService;
 
     @RequiresLogin
-    @GetMapping("/api/address/list")
+    @GetMapping("/address/list")
     public List<UserAddressApiVO> listUserAddressApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserAddressApiVO> userAddressApiVOList = userAddressService.listUserAddressApiVOS(userId);
@@ -25,12 +26,12 @@ public class UserAddressFeignClient {
         return userAddressApiVOList;
     }
 
-    @GetMapping("/api/address/{addressId}")
+    @GetMapping("/address/{addressId}")
     public UserAddressApiVO getUserAddressApiVO(@PathVariable Integer addressId) {
         return userAddressService.getUserAddressApiVO(addressId);
     }
 
-    @PostMapping("/api/address/list")
+    @PostMapping("/address/list")
     List<UserAddressApiVO> listUserAddressApiVOS(@RequestBody Set<Integer> userIdSet) {
         return userAddressService.listUserAddressApiVOS(userIdSet);
     }

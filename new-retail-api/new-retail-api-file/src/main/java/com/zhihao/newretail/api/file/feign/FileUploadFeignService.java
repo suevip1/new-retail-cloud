@@ -12,7 +12,7 @@ import java.io.IOException;
 @FeignClient(name = "new-retail-file", path = "/file")
 public interface FileUploadFeignService {
 
-    @PostMapping(value = "/api/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/feign/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     String getFileUrl(@RequestPart("file") MultipartFile file, @RequestParam("dir") String dir) throws IOException;
 
 }

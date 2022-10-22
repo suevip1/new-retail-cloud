@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/feign")
 public class SpecParamFeignClient {
 
     @Autowired
     private SpecParamService specParamService;
 
     @RequiresLogin
-    @GetMapping("/api/specParam/{categoryId}")
+    @GetMapping("/specParam/{categoryId}")
     public List<SpecParamApiVO> listSpecParamApiVOS(@PathVariable Integer categoryId) {
         List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOS(categoryId);
         UserLoginContext.sysClean();
@@ -26,7 +27,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @PostMapping("/api/specParam")
+    @PostMapping("/specParam")
     public Integer addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO) {
         int insertRow = specParamService.insertSpecParamKey(specParamAddApiDTO);
         UserLoginContext.sysClean();
@@ -34,7 +35,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/specParam/{specParamId}")
+    @PutMapping("/specParam/{specParamId}")
     public Integer updateSpecParam(@PathVariable Integer specParamId, @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO) {
         int updateRow = specParamService.updateSpecParamKey(specParamId, specParamUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -42,7 +43,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/specParam/{specParamId}")
+    @DeleteMapping("/specParam/{specParamId}")
     public Integer deleteSpecParam(@PathVariable Integer specParamId) {
         int deleteRow = specParamService.deleteSpecParamKey(specParamId);
         UserLoginContext.sysClean();

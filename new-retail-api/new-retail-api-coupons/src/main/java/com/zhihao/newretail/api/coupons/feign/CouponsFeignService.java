@@ -16,24 +16,24 @@ import java.util.Set;
 @FeignClient(name = "new-retail-coupons", path = "/coupons", fallback = CouponsFeignFallback.class)
 public interface CouponsFeignService {
 
-    @GetMapping("/api/coupons/{couponsId}")
+    @GetMapping("/feign/coupons/{couponsId}")
     CouponsApiVO getCouponsApiVO(@PathVariable Integer couponsId);
 
-    @GetMapping("/api/coupons/list")
+    @GetMapping("/feign/coupons/list")
     PageUtil<CouponsApiVO> listCouponsApiVOS(@RequestParam(required = false) Integer saleable,
                                              @RequestParam(defaultValue = "1") Integer pageNum,
                                              @RequestParam(defaultValue = "10") Integer pageSize);
 
-    @PostMapping("/api/coupons/list")
+    @PostMapping("/feign/coupons/list")
     List<CouponsApiVO> listCouponsApiVOS(@RequestBody Set<Integer> couponsIdSet);
 
-    @PostMapping("/api/coupons")
+    @PostMapping("/feign/coupons")
     Integer insertCoupons(@RequestBody CouponsAddApiDTO couponsAddApiDTO);
 
-    @PutMapping("/api/coupons/{couponsId}")
+    @PutMapping("/feign/coupons/{couponsId}")
     Integer updateCoupons(@PathVariable Integer couponsId, @RequestBody CouponsUpdateApiDTO couponsUpdateApiDTO);
 
-    @DeleteMapping("/api/coupons/{couponsId}")
+    @DeleteMapping("/feign/coupons/{couponsId}")
     Integer deleteCoupons(@PathVariable Integer couponsId);
 
 }

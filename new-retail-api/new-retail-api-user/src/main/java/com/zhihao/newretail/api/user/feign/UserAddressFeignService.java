@@ -16,13 +16,13 @@ import java.util.Set;
 @FeignClient(name = "new-retail-user", path = "/user", fallback = UserAddressFeignFallback.class)
 public interface UserAddressFeignService {
 
-    @GetMapping("/api/address/list")
+    @GetMapping("/feign/address/list")
     List<UserAddressApiVO> listUserAddressApiVOS();
 
-    @GetMapping("/api/address/{addressId}")
+    @GetMapping("/feign/address/{addressId}")
     UserAddressApiVO getUserAddressApiVO(@PathVariable Integer addressId);
 
-    @PostMapping("/api/address/list")
+    @PostMapping("/feign/address/list")
     List<UserAddressApiVO> listUserAddressApiVOS(@RequestBody Set<Integer> userIdSet);
 
 }

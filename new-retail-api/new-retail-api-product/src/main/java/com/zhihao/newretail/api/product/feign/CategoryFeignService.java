@@ -16,31 +16,31 @@ public interface CategoryFeignService {
     /*
     * 商品分类列表
     * */
-    @GetMapping("/api/category/list")
+    @GetMapping("/feign/category/list")
     PageUtil<CategoryApiVO> listCategoryApiVOS(@RequestParam(defaultValue = "1") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize);
 
     /*
     * 商品分类信息
     * */
-    @GetMapping("/api/category/{categoryId}")
+    @GetMapping("/feign/category/{categoryId}")
     CategoryApiVO getCategoryApiVO(@PathVariable Integer categoryId);
 
     /*
     * 新增商品分类
     * */
-    @PostMapping("/api/category")
+    @PostMapping("/feign/category")
     Integer addCategory(@RequestBody CategoryAddApiDTO categoryAddApiDTO);
 
     /*
     * 修改商品分类
     * */
-    @PutMapping("/api/category/{categoryId}")
+    @PutMapping("/feign/category/{categoryId}")
     Integer updateCategory(@PathVariable Integer categoryId, @RequestBody CategoryUpdateApiDTO categoryUpdateApiDTO);
 
     /*
     * 删除商品分类
     * */
-    @DeleteMapping("/api/category/{categoryId}")
+    @DeleteMapping("/feign/category/{categoryId}")
     Integer deleteCategory(@PathVariable Integer categoryId);
 
 }

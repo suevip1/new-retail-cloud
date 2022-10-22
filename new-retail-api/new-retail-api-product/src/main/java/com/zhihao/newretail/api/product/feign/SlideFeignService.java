@@ -16,7 +16,7 @@ public interface SlideFeignService {
     /*
     * 轮播图列表
     * */
-    @GetMapping("/api/slide/list")
+    @GetMapping("/feign/slide/list")
     PageUtil<SlideApiVO> listSlideApiVOS(@RequestParam(required = false) Integer slideId,
                                          @RequestParam(defaultValue = "1") Integer pageNum,
                                          @RequestParam(defaultValue = "10") Integer pageSize);
@@ -24,19 +24,19 @@ public interface SlideFeignService {
     /*
     * 新增首页轮播图
     * */
-    @PostMapping("/api/slide")
+    @PostMapping("/feign/slide")
     Integer addSlide(@RequestBody SlideAddApiDTO slideAddApiDTO);
 
     /*
     * 修改首页轮播图
     * */
-    @PutMapping("/api/slide/{slideId}")
+    @PutMapping("/feign/slide/{slideId}")
     Integer updateSlide(@PathVariable Integer slideId, @RequestBody SlideUpdateApiDTO slideUpdateApiDTO);
 
     /*
     * 删除首页轮播图
     * */
-    @DeleteMapping("/api/slide/{slideId}")
+    @DeleteMapping("/feign/slide/{slideId}")
     Integer deleteSlide(@PathVariable Integer slideId);
 
 }

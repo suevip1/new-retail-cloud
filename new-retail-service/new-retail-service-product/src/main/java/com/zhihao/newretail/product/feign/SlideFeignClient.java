@@ -11,13 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/feign")
 public class SlideFeignClient {
 
     @Autowired
     private SlideService slideService;
 
     @RequiresLogin
-    @GetMapping("/api/slide/list")
+    @GetMapping("/slide/list")
     PageUtil<SlideApiVO> listSlideApiVOS(@RequestParam(required = false) Integer slideId,
                                          @RequestParam(defaultValue = "1") Integer pageNum,
                                          @RequestParam(defaultValue = "10") Integer pageSize) {
@@ -27,7 +28,7 @@ public class SlideFeignClient {
     }
 
     @RequiresLogin
-    @PostMapping("/api/slide")
+    @PostMapping("/slide")
     Integer addSlide(@RequestBody SlideAddApiDTO slideAddApiDTO) {
         int insertRow = slideService.insertSlide(slideAddApiDTO);
         UserLoginContext.sysClean();
@@ -35,7 +36,7 @@ public class SlideFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/slide/{slideId}")
+    @PutMapping("/slide/{slideId}")
     Integer updateSlide(@PathVariable Integer slideId, @RequestBody SlideUpdateApiDTO slideUpdateApiDTO) {
         int updateRow = slideService.updateSlide(slideId, slideUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -43,7 +44,7 @@ public class SlideFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/slide/{slideId}")
+    @DeleteMapping("/slide/{slideId}")
     Integer deleteSlide(@PathVariable Integer slideId) {
         int deleteRow = slideService.deleteSlide(slideId);
         UserLoginContext.sysClean();

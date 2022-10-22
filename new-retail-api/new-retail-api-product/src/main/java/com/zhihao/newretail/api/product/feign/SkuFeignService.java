@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "new-retail-product", path = "/product", fallback = SkuFeignFallback.class)
 public interface SkuFeignService {
 
-    @PostMapping("/api/sku")
+    @PostMapping("/feign/sku")
     Integer addSku(@RequestBody SkuAddApiDTO skuAddApiDTO);
 
-    @PutMapping("/api/sku/{skuId}")
+    @PutMapping("/feign/sku/{skuId}")
     Integer updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO);
 
-    @DeleteMapping("/api/sku/{skuId}")
+    @DeleteMapping("/feign/sku/{skuId}")
     Integer deleteSku(@PathVariable Integer skuId);
 
 }

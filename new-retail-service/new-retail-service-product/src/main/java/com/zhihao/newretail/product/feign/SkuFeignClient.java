@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/feign")
 public class SkuFeignClient {
 
     @Autowired
     private SkuService skuService;
 
     @RequiresLogin
-    @PostMapping("/api/sku")
+    @PostMapping("/sku")
     public Integer addSku(@RequestBody SkuAddApiDTO skuAddApiDTO) {
         int insertRow = skuService.insertSku(skuAddApiDTO);
         UserLoginContext.sysClean();
@@ -23,7 +24,7 @@ public class SkuFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/api/sku/{skuId}")
+    @PutMapping("/sku/{skuId}")
     public Integer updateSku(@PathVariable Integer skuId, @RequestBody SkuUpdateApiDTO skuUpdateApiDTO) {
         int updateRow = skuService.updateSku(skuId, skuUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -31,7 +32,7 @@ public class SkuFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/api/sku/{skuId}")
+    @DeleteMapping("/sku/{skuId}")
     public Integer deleteSku(@PathVariable Integer skuId) {
         int deleteRow = skuService.deleteSku(skuId);
         UserLoginContext.sysClean();

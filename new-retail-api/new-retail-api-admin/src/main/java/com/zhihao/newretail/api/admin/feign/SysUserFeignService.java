@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "new-retail-admin", path = "/admin", fallback = SysUserFeignFallback.class)
 public interface SysUserFeignService {
 
-    @PostMapping("/api/sysUserInfo")
+    @PostMapping("/feign/sysUserInfo")
     SysUserApiVO getSysUserApiVO(@RequestBody SysUserApiDTO userApiDTO);
 
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "new-retail-pay", path = "/pay", fallback = PayInfoFeignFallback.class)
 public interface PayInfoFeignService {
 
-    @GetMapping("/payInfo/list")
+    @GetMapping("/feign/payInfo/list")
     PageUtil<PayInfoApiVO> listPayInfoApiVOS(@RequestParam(required = false) Long orderId,
                                              @RequestParam(required = false) Integer userId,
                                              @RequestParam(required = false) Integer payPlatform,

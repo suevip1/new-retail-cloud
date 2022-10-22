@@ -15,13 +15,13 @@ import java.util.Set;
 @FeignClient(name = "new-retail-product", path = "/product", fallback = ProductFeignFallback.class)
 public interface ProductFeignService {
 
-    @PostMapping("/api/goods/list")
+    @PostMapping("/feign/goods/list")
     List<GoodsApiVO> listGoodsApiVOS(@RequestBody Set<Integer> idSet);
 
-    @GetMapping("/api/goods/{skuId}")
+    @GetMapping("/feign/goods/{skuId}")
     GoodsApiVO getGoodsApiVO(@PathVariable Integer skuId);
 
-    @GetMapping("/api/product/list")
+    @GetMapping("/feign/product/list")
     PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
                                              @RequestParam(defaultValue = "1") Integer pageNum,
                                              @RequestParam(defaultValue = "10") Integer pageSize);

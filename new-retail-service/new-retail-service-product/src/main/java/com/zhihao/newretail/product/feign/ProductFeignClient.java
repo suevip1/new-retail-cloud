@@ -13,23 +13,24 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
+@RequestMapping("/feign")
 public class ProductFeignClient {
 
     @Autowired
     private ProductService productService;
 
-    @PostMapping("/api/goods/list")
+    @PostMapping("/goods/list")
     public List<GoodsApiVO> listGoodsApiVOS(@RequestBody Set<Integer> idSet) {
         return productService.listGoodsApiVOS(idSet);
     }
 
-    @GetMapping("/api/goods/{skuId}")
+    @GetMapping("/goods/{skuId}")
     public GoodsApiVO getGoodsApiVO(@PathVariable Integer skuId) {
         return productService.getGoodsApiVO(skuId);
     }
 
     @RequiresLogin
-    @GetMapping("/api/product/list")
+    @GetMapping("/product/list")
     public PageUtil<ProductApiVO> listProductApiVOS(@RequestParam(required = false) Integer categoryId,
                                                     @RequestParam(defaultValue = "1") Integer pageNum,
                                                     @RequestParam(defaultValue = "10") Integer pageSize) {

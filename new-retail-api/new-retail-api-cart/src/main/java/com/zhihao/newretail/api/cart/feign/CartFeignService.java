@@ -13,10 +13,10 @@ import java.util.List;
 @FeignClient(name = "new-retail-cart", path = "/cart", fallback = CartFeignFallback.class)
 public interface CartFeignService {
 
-    @GetMapping("/api/cart/list")
+    @GetMapping("/feign/cart/list")
     List<CartApiVO> listCartApiVOS();
 
-    @PutMapping("/api/cart")
+    @PutMapping("/feign/cart")
     void deleteCartBySelected();
 
 }

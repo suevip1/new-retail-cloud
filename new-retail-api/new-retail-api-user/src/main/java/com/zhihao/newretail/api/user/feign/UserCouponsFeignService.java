@@ -15,10 +15,10 @@ import java.util.List;
 @FeignClient(name = "new-retail-user", path = "/user", fallback = UserCouponsFeignFallback.class)
 public interface UserCouponsFeignService {
 
-    @GetMapping("/api/userCoupons/list")
+    @GetMapping("/feign/userCoupons/list")
     List<UserCouponsApiVO> listUserCouponsApiVOS();
 
-    @PutMapping("/api/userCoupons")
+    @PutMapping("/feign/userCoupons")
     int consumeCoupons(@RequestBody UserCouponsApiDTO userCouponsApiDTO);
 
 }

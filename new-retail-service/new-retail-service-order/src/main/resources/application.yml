@@ -1,4 +1,0 @@
-server:
-  port: 4400
-  servlet:
-    context-path: /order

@@ -1,4 +1,0 @@
-server:
-  port: 4600
-  servlet:
-    context-path: /coupons

@@ -1,4 +1,0 @@
-server:
-  port: 4300
-  servlet:
-    context-path: /cart

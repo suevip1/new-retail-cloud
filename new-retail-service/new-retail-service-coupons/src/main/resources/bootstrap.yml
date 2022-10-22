@@ -1,3 +1,7 @@
+server:
+  port: 4600
+  servlet:
+    context-path: /coupons
 spring:
   application:
     name: new-retail-coupons

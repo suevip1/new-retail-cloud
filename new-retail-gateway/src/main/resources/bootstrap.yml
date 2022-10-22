@@ -21,65 +21,47 @@ spring:
         - id: new-retail-auth
           uri: lb://new-retail-auth
           predicates:
-            - Path=/api/auth/**
-          filters:
-            - RewritePath=/api/auth/?(?<segment>.*), /auth/$\{segment}
+            - Path=/auth/**
 
         - id: new-retail-user
           uri: lb://new-retail-user
           predicates:
-            - Path=/api/user/**
-          filters:
-            - RewritePath=/api/user/?(?<segment>.*), /user/$\{segment}
+            - Path=/user/**
 
         - id: new-retail-product
           uri: lb://new-retail-product
           predicates:
-            - Path=/api/product/**
-          filters:
-            - RewritePath=/api/product/?(?<segment>.*), /product/$\{segment}
+            - Path=/product/**
 
         - id: new-retail-cart
           uri: lb://new-retail-cart
           predicates:
-            - Path=/api/cart/**
-          filters:
-            - RewritePath=/api/cart/?(?<segment>.*), /cart/$\{segment}
+            - Path=/cart/**
 
         - id: new-retail-order
           uri: lb://new-retail-order
           predicates:
-            - Path=/api/order/**
-          filters:
-            - RewritePath=/api/order/?(?<segment>.*), /order/$\{segment}
+            - Path=/order/**
 
         - id: new-retail-pay
           uri: lb://new-retail-pay
           predicates:
-            - Path=/api/pay/**
-          filters:
-            - RewritePath=/api/pay/?(?<segment>.*), /pay/$\{segment}
+            - Path=/pay/**
 
         - id: new-retail-coupons
           uri: lb://new-retail-coupons
           predicates:
-            - Path=/api/coupons/**
-          filters:
-            - RewritePath=/api/coupons/?(?<segment>.*), /coupons/$\{segment}
+            - Path=/coupons/**
 
         - id: new-retail-admin
           uri: lb://new-retail-admin
           predicates:
-            - Path=/api/admin/**
-          filters:
-            - RewritePath=/api/admin/?(?<segment>.*), /admin/$\{segment}
+            - Path=/admin/**
 
         - id: new-retail-file
           uri: lb://new-retail-file
           predicates:
-            - Path=/api/file/**
-          filters:
-            - RewritePath=/api/file/?(?<segment>.*), /file/$\{segment}
+            - Path=/file/**
   main:
     allow-bean-definition-overriding: true
 management:

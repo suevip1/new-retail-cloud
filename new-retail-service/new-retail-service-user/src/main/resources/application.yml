@@ -1,4 +1,0 @@
-server:
-  port: 4100
-  servlet:
-    context-path: /user

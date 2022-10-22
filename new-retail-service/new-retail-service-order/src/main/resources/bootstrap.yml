@@ -1,3 +1,7 @@
+server:
+  port: 4400
+  servlet:
+    context-path: /order
 spring:
   application:
     name: new-retail-order

@@ -21,7 +21,7 @@ public class OrderFeignClient {
     @Autowired
     private OrderService orderService;
 
-    @GetMapping("/orderPay/{orderId}")
+    @GetMapping("/order-pay/{orderId}")
     public OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId) {
         return orderService.getOrderPayInfoApiVO(orderId);
     }

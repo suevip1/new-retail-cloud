@@ -19,12 +19,13 @@ import java.util.Map;
  * @Email: cafebabe0508@163.com
  * */
 @Controller
+@RequestMapping("/alipay")
 public class PayController {
 
     @Autowired
     private PayService payService;
 
-    @GetMapping("/alipay/pc/{orderId}")
+    @GetMapping("/pc/{orderId}")
     public ModelAndView alipayPC(@PathVariable Long orderId) throws AlipayApiException {
         String body = payService.getBody(orderId);
         Map<String, Object> map = new HashMap<>();
@@ -32,7 +33,7 @@ public class PayController {
         return new ModelAndView("alipayPC", map);
     }
 
-    @PostMapping("/alipay/notify")
+    @PostMapping("/notify")
     public void asyncNotify(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, AlipayApiException {
         payService.asyncNotify(request, response);
     }

@@ -17,25 +17,25 @@ public interface SpecParamFeignService {
     /*
     * 分类通用参数列表
     * */
-    @GetMapping("/feign/specParam/{categoryId}")
+    @GetMapping("/feign/spec-param/{categoryId}")
     List<SpecParamApiVO> listSpecParamApiVOS(@PathVariable Integer categoryId);
 
     /*
     * 新增分类参数
     * */
-    @PostMapping("/feign/specParam")
+    @PostMapping("/feign/spec-param")
     Integer addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO);
 
     /*
     * 修改分类参数
     * */
-    @PutMapping("/feign/specParam/{specParamId}")
+    @PutMapping("/feign/spec-param/{specParamId}")
     Integer updateSpecParam(@PathVariable Integer specParamId, @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO);
 
     /*
     * 删除分类参数
     * */
-    @DeleteMapping("/feign/specParam/{specParamId}")
+    @DeleteMapping("/feign/spec-param/{specParamId}")
     Integer deleteSpecParam(@PathVariable Integer specParamId);
 
 }

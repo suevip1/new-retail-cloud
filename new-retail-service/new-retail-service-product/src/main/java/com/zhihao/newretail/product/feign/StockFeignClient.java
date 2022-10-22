@@ -19,17 +19,17 @@ public class StockFeignClient {
     @Autowired
     private StockService stockService;
 
-    @PostMapping("/skuStock/list")
+    @PostMapping("/sku-stock/list")
     public List<SkuStockApiVO> listSkuStockApiVOS(@RequestBody Set<Integer> skuIdSet) {
         return stockService.listSkuStockApiVOS(skuIdSet);
     }
 
-    @PostMapping("/skuStock/lock")
+    @PostMapping("/sku-stock/lock")
     public void stockLock(@RequestBody SkuStockLockApiDTO skuStockLockApiDTO) {
         stockService.stockLock(skuStockLockApiDTO);
     }
 
-    @PostMapping("/skuStock/batchLock")
+    @PostMapping("/sku-stock/batch-lock")
     public Integer batchStockLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
         return stockService.batchStockLock(skuStockLockApiDTOList);
     }

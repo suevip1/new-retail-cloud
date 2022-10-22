@@ -24,7 +24,7 @@ public class SysSpecParamController {
     private SysSpecParamService specParamService;
 
     @RequiresLogin
-    @GetMapping("/specParam/{categoryId}")
+    @GetMapping("/spec-param/{categoryId}")
     public R specParamList(@PathVariable Integer categoryId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
@@ -38,7 +38,7 @@ public class SysSpecParamController {
     }
 
     @RequiresLogin
-    @PostMapping("/specParam")
+    @PostMapping("/spec-param")
     public R specParam(@Valid @RequestBody SpecParamAddApiDTO specParamAddApiDTO) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
@@ -54,7 +54,7 @@ public class SysSpecParamController {
     }
 
     @RequiresLogin
-    @PutMapping("/specParam/{specParamId}")
+    @PutMapping("/spec-param/{specParamId}")
     public R specParam(@PathVariable Integer specParamId, @Valid @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
@@ -70,7 +70,7 @@ public class SysSpecParamController {
     }
 
     @RequiresLogin
-    @DeleteMapping("/specParam/{specParamId}")
+    @DeleteMapping("/spec-param/{specParamId}")
     public R specParam(@PathVariable Integer specParamId) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);

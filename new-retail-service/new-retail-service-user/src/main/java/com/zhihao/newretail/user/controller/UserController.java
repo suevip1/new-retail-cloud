@@ -33,7 +33,7 @@ public class UserController {
     }
 
     @RequiresLogin
-    @GetMapping("/userInfo")
+    @GetMapping("/user-info")
     public R userInfo() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @RequiresLogin
-    @PutMapping("/userInfo/photo")
+    @PutMapping("/user-info/photo")
     public R userInfo(@RequestPart MultipartFile file) throws IOException {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.updateUserInfo(userId, file);
@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @RequiresLogin
-    @PutMapping("/userInfo/nickName")
+    @PutMapping("/user-info/nickName")
     public R userInfo(@Valid @RequestBody UpdateNickNameForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.updateUserInfo(userId, form);

@@ -22,7 +22,7 @@ public class UserFeignClient {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/userInfo")
+    @PostMapping("/user-info")
     public UserApiVO getUserApiVO(@RequestBody UserApiDTO userApiDTO) {
         if (!StringUtils.isEmpty(userApiDTO.getWeChat())) {
             return userService.aliPayUserIdGetUserApiVO(userApiDTO);
@@ -35,12 +35,12 @@ public class UserFeignClient {
         }
     }
 
-    @GetMapping("/userInfo/{userId}")
+    @GetMapping("/user-info/{userId}")
     public UserInfoApiVO getUserInfoApiVO(@PathVariable Integer userId) {
         return userService.getUserInfoApiVO(userId);
     }
 
-    @PostMapping("/userInfo/list")
+    @PostMapping("/user-info/list")
     public List<UserInfoApiVO> listUserInfoApiVOS(@RequestBody Set<Integer> userIdSet) {
         return userService.listUserInfoApiVOS(userIdSet);
     }

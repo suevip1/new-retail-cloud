@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "new-retail-order", path = "/order", fallback = OrderFeignFallback.class)
 public interface OrderFeignService {
 
-    @GetMapping("/feign/orderPay/{orderId}")
+    @GetMapping("/feign/order-pay/{orderId}")
     OrderPayInfoApiVO getOrderPayInfoApiVO(@PathVariable Long orderId);
 
     @GetMapping("/feign/order/{orderId}")

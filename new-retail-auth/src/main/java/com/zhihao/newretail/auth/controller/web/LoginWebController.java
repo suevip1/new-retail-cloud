@@ -22,7 +22,7 @@ public class LoginWebController {
         return R.ok().put("token", token);
     }
 
-    @PostMapping("/login/alipay")
+    @PostMapping("/login/alipay-pc")
     public R aliPayPCLogin(@Valid @RequestBody UserAliPayPCLoginForm form) throws AlipayApiException {
         String token = loginService.aliPayPCLogin(form.getCode());
         return R.ok().put("token", token);

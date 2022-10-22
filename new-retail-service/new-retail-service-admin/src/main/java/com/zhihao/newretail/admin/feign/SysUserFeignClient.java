@@ -21,7 +21,7 @@ public class SysUserFeignClient {
     @Autowired
     private SysUserService sysUserService;
 
-    @PostMapping("/sysUserInfo")
+    @PostMapping("/sys/user-info")
     public SysUserApiVO getSysUserApiVO(@RequestBody SysUserApiDTO userApiDTO) {
         return sysUserService.getSysUserApiVO(userApiDTO.getUsername());
     }

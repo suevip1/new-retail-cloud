@@ -18,7 +18,7 @@ public class UserCouponsFeignClient {
     private UserCouponsService userCouponsService;
 
     @RequiresLogin
-    @GetMapping("/userCoupons/list")
+    @GetMapping("/user-coupons/list")
     public List<UserCouponsApiVO> listUserCouponsApiVOs() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserCouponsApiVO> userCouponsApiVOList = userCouponsService.listUserCouponsApiVOS(userId);
@@ -26,7 +26,7 @@ public class UserCouponsFeignClient {
         return userCouponsApiVOList;
     }
 
-    @PutMapping("/userCoupons")
+    @PutMapping("/user-coupons")
     public int consumeCoupons(@RequestBody UserCouponsApiDTO userCouponsApiDTO) {
         return userCouponsService.updateUserCoupons(userCouponsApiDTO);
     }

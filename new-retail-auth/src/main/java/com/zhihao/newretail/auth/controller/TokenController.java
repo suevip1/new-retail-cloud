@@ -17,7 +17,7 @@ public class TokenController {
     @Autowired
     private TokenService tokenService;
 
-    @PostMapping("/verifierToken")
+    @PostMapping("/verifier-token")
     public R verifierToken(@RequestHeader("token") String token,
                            @RequestParam(value = "tokenType", required = false) TokenTypeEnum tokenTypeEnum) {
         String newToken = tokenService.verifierToken(token, tokenTypeEnum);

@@ -19,7 +19,7 @@ public class SpecParamFeignClient {
     private SpecParamService specParamService;
 
     @RequiresLogin
-    @GetMapping("/specParam/{categoryId}")
+    @GetMapping("/spec-param/{categoryId}")
     public List<SpecParamApiVO> listSpecParamApiVOS(@PathVariable Integer categoryId) {
         List<SpecParamApiVO> specParamApiVOList = specParamService.listSpecParamApiVOS(categoryId);
         UserLoginContext.sysClean();
@@ -27,7 +27,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @PostMapping("/specParam")
+    @PostMapping("/spec-param")
     public Integer addSpecParam(@RequestBody SpecParamAddApiDTO specParamAddApiDTO) {
         int insertRow = specParamService.insertSpecParamKey(specParamAddApiDTO);
         UserLoginContext.sysClean();
@@ -35,7 +35,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @PutMapping("/specParam/{specParamId}")
+    @PutMapping("/spec-param/{specParamId}")
     public Integer updateSpecParam(@PathVariable Integer specParamId, @RequestBody SpecParamUpdateApiDTO specParamUpdateApiDTO) {
         int updateRow = specParamService.updateSpecParamKey(specParamId, specParamUpdateApiDTO);
         UserLoginContext.sysClean();
@@ -43,7 +43,7 @@ public class SpecParamFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/specParam/{specParamId}")
+    @DeleteMapping("/spec-param/{specParamId}")
     public Integer deleteSpecParam(@PathVariable Integer specParamId) {
         int deleteRow = specParamService.deleteSpecParamKey(specParamId);
         UserLoginContext.sysClean();

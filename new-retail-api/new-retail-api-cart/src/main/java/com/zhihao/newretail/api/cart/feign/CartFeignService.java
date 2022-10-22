@@ -4,8 +4,8 @@ import com.zhihao.newretail.api.cart.fallback.CartFeignFallback;
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.context.annotation.Primary;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import java.util.List;
 @FeignClient(name = "new-retail-cart", path = "/cart", fallback = CartFeignFallback.class)
 public interface CartFeignService {
 
-    @GetMapping("/feign/cart/list")
+    @GetMapping("/feign/my-cart")
     List<CartApiVO> listCartApiVOS();
 
-    @PutMapping("/feign/cart")
+    @DeleteMapping("/feign/my-cart")
     void deleteCartBySelected();
 
 }

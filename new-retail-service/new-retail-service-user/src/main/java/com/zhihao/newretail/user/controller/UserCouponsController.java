@@ -8,18 +8,20 @@ import com.zhihao.newretail.user.service.UserCouponsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/user-coupons")
 public class UserCouponsController {
 
     @Autowired
     private UserCouponsService userCouponsService;
 
     @RequiresLogin
-    @GetMapping("/userCoupons/list")
+    @GetMapping("/list")
     public R userCoupons() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CouponsApiVO> couponsApiVOList = userCouponsService.listUserCouponsVOs(userId);
@@ -28,7 +30,7 @@ public class UserCouponsController {
         return R.ok().put("data", couponsApiVOList);
     }
 
-    @GetMapping("/userCoupons/{couponsId}")
+    @GetMapping("/{couponsId}")
     public R userCouponsDetail(@PathVariable Integer couponsId) {
         CouponsApiVO userCouponsVO = userCouponsService.getUserCouponsVO(couponsId);
         return R.ok().put("data", userCouponsVO);

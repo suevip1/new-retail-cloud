@@ -19,7 +19,7 @@ public class PayInfoFeignClient {
     private PayInfoService payInfoService;
 
     @RequiresLogin
-    @GetMapping("/payInfo/list")
+    @GetMapping("/pay-info/list")
     PageUtil<PayInfoApiVO> listPayInfoApiVOS(@RequestParam(required = false) Long orderId,
                                              @RequestParam(required = false) Integer userId,
                                              @RequestParam(required = false) Integer payPlatform,

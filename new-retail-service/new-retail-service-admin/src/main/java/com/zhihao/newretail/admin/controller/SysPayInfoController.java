@@ -20,7 +20,7 @@ public class SysPayInfoController {
     private SysPayInfoService sysPayInfoService;
 
     @RequiresLogin
-    @GetMapping("/payInfo/list")
+    @GetMapping("/pay-info/list")
     public R payInfoList(@RequestParam(required = false) Long orderId,
                          @RequestParam(required = false) Integer userId,
                          @RequestParam(required = false) Integer payPlatform,

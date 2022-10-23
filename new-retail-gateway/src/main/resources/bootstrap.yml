@@ -21,47 +21,47 @@ spring:
         - id: new-retail-auth
           uri: lb://new-retail-auth
           predicates:
-            - Path=/auth/**
+            - Path=/new-retail-auth/**
 
         - id: new-retail-user
           uri: lb://new-retail-user
           predicates:
-            - Path=/user/**
+            - Path=/new-retail-user/**
 
         - id: new-retail-product
           uri: lb://new-retail-product
           predicates:
-            - Path=/product/**
+            - Path=/new-retail-product/**
 
         - id: new-retail-cart
           uri: lb://new-retail-cart
           predicates:
-            - Path=/cart/**
+            - Path=/new-retail-cart/**
 
         - id: new-retail-order
           uri: lb://new-retail-order
           predicates:
-            - Path=/order/**
+            - Path=/new-retail-order/**
 
         - id: new-retail-pay
           uri: lb://new-retail-pay
           predicates:
-            - Path=/pay/**
+            - Path=/new-retail-pay/**
 
         - id: new-retail-coupons
           uri: lb://new-retail-coupons
           predicates:
-            - Path=/coupons/**
+            - Path=/new-retail-coupons/**
 
         - id: new-retail-admin
           uri: lb://new-retail-admin
           predicates:
-            - Path=/admin/**
+            - Path=/new-retail-admin/**
 
         - id: new-retail-file
           uri: lb://new-retail-file
           predicates:
-            - Path=/file/**
+            - Path=/new-retail-file/**
   main:
     allow-bean-definition-overriding: true
 management:

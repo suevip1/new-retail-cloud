@@ -1,7 +1,7 @@
 server:
   port: 4200
   servlet:
-    context-path: /product
+    context-path: /new-retail-product
 spring:
   application:
     name: new-retail-product

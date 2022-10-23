@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Primary
-@FeignClient(name = "new-retail-product", path = "/product", fallback = StockFeignFallback.class)
+@FeignClient(name = "new-retail-product", path = "/new-retail-product", fallback = StockFeignFallback.class)
 public interface StockFeignService {
 
     /*

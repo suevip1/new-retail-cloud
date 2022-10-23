@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@FeignClient(name = "new-retail-file", path = "/file")
+@FeignClient(name = "new-retail-file", path = "/new-retail-file")
 public interface FileUploadFeignService {
 
     @PostMapping(value = "/feign/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

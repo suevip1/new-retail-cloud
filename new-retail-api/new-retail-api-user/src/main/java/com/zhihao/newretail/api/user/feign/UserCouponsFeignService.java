@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.List;
 
 @Primary
-@FeignClient(name = "new-retail-user", path = "/user", fallback = UserCouponsFeignFallback.class)
+@FeignClient(name = "new-retail-user", path = "/new-retail-user", fallback = UserCouponsFeignFallback.class)
 public interface UserCouponsFeignService {
 
     @GetMapping("/feign/user-coupons/list")

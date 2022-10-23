@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.List;
 
 @Primary
-@FeignClient(name = "new-retail-cart", path = "/cart", fallback = CartFeignFallback.class)
+@FeignClient(name = "new-retail-cart", path = "/new-retail-cart", fallback = CartFeignFallback.class)
 public interface CartFeignService {
 
-    @GetMapping("/feign/my-cart")
+    @GetMapping("/feign/cart")
     List<CartApiVO> listCartApiVOS();
 
-    @DeleteMapping("/feign/my-cart")
+    @DeleteMapping("/feign/cart")
     void deleteCartBySelected();
 
 }

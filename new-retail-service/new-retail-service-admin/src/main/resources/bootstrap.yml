@@ -1,7 +1,7 @@
 server:
   port: 4700
   servlet:
-    context-path: /admin
+    context-path: /new-retail-admin
 spring:
   application:
     name: new-retail-admin

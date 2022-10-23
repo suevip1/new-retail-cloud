@@ -17,7 +17,7 @@ public class CartFeignClient {
     private CartService cartService;
 
     @RequiresLogin
-    @GetMapping("/my-cart")
+    @GetMapping("/cart")
     public List<CartApiVO> listCartApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<CartApiVO> cartApiVOList = cartService.listCartApiVOs(userId);
@@ -26,7 +26,7 @@ public class CartFeignClient {
     }
 
     @RequiresLogin
-    @DeleteMapping("/my-cart")
+    @DeleteMapping("/cart")
     public void deleteCartBySelected() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         cartService.deleteCartBySelected(userId);

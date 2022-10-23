@@ -1,7 +1,7 @@
 server:
   port: 4800
   servlet:
-    context-path: /file
+    context-path: /new-retail-file
 spring:
   application:
     name: new-retail-file

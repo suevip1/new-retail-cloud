@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Primary
-@FeignClient(name = "new-retail-pay", path = "/pay", fallback = PayInfoFeignFallback.class)
+@FeignClient(name = "new-retail-pay", path = "/new-retail-pay", fallback = PayInfoFeignFallback.class)
 public interface PayInfoFeignService {
 
     @GetMapping("/feign/pay-info/list")

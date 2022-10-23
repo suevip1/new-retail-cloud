@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @Primary
-@FeignClient(name = "new-retail-coupons", path = "/coupons", fallback = CouponsFeignFallback.class)
+@FeignClient(name = "new-retail-coupons", path = "/new-retail-coupons", fallback = CouponsFeignFallback.class)
 public interface CouponsFeignService {
 
     @GetMapping("/feign/coupons/{couponsId}")

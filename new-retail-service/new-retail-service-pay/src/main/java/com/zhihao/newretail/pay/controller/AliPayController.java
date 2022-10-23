@@ -20,7 +20,7 @@ import java.util.Map;
  * */
 @Controller
 @RequestMapping("/alipay")
-public class PayController {
+public class AliPayController {
 
     @Autowired
     private PayService payService;

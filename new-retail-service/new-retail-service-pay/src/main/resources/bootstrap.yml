@@ -1,7 +1,7 @@
 server:
   port: 4500
   servlet:
-    context-path: /pay
+    context-path: /new-retail-pay
 spring:
   application:
     name: new-retail-pay

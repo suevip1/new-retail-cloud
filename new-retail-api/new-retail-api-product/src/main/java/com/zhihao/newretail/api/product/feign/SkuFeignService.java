@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.*;
 
 @Primary
-@FeignClient(name = "new-retail-product", path = "/product", fallback = SkuFeignFallback.class)
+@FeignClient(name = "new-retail-product", path = "/new-retail-product", fallback = SkuFeignFallback.class)
 public interface SkuFeignService {
 
     @PostMapping("/feign/sku")

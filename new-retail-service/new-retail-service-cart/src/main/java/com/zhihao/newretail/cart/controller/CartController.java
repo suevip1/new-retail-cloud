@@ -21,7 +21,7 @@ public class CartController {
     private CartService cartService;
 
     @RequiresLogin
-    @GetMapping("/my-cart")
+    @GetMapping("/cart")
     public R getCart() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.getCartVO(userId);
@@ -34,7 +34,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @PostMapping("/my-cart")
+    @PostMapping("/cart")
     public R addCart(@Valid @RequestBody CartAddForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.addCart(userId, form);
@@ -44,7 +44,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @PutMapping("/my-cart")
+    @PutMapping("/cart")
     public R updateCart(@Valid @RequestBody CartUpdateForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.updateCart(userId, form);
@@ -54,7 +54,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @DeleteMapping("/my-cart/{skuId}")
+    @DeleteMapping("/cart/{skuId}")
     public R deleteCart(@PathVariable Integer skuId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.deleteCart(userId, skuId);
@@ -64,7 +64,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @PutMapping("/my-cart/selectedAll")
+    @PutMapping("/cart/selectedAll")
     public R updateCartSelectedAll() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.updateCartSelectedAll(userId);
@@ -74,7 +74,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @PutMapping("/my-cart/unSelectedAll")
+    @PutMapping("/cart/unSelectedAll")
     public R updateCartUnSelectedAll() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         CartVO cartVO = cartService.updateCartNotSelectedAll(userId);
@@ -84,7 +84,7 @@ public class CartController {
     }
 
     @RequiresLogin
-    @GetMapping("/my-cart/quantity")
+    @GetMapping("/cart/quantity")
     public R cartQuantity() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         Integer quantity = cartService.getQuantity(userId);

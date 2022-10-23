@@ -24,7 +24,7 @@ public class OrderController {
     private OrderService orderService;
 
     @RequiresLogin
-    @GetMapping("/my-order/create")
+    @GetMapping("/order/create")
     public R orderCreate() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         OrderCreateVO orderCreateVO = orderService.getOrderCreateVO(userId);
@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     @RequiresLogin
-    @PostMapping("/my-order")
+    @PostMapping("/order")
     public R orderSubmit(@Valid @RequestBody OrderSubmitForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         String uuid = UserLoginContext.getUserLoginInfo().getUuid();
@@ -45,7 +45,7 @@ public class OrderController {
     }
 
     @RequiresLogin
-    @GetMapping("/my-order/{orderId}")
+    @GetMapping("/order/{orderId}")
     public R orderDetail(@PathVariable Long orderId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         OrderVO orderVO = orderService.getOrderVO(userId, orderId);
@@ -58,7 +58,7 @@ public class OrderController {
     }
 
     @RequiresLogin
-    @PutMapping("/my-order/{orderId}")
+    @PutMapping("/order/{orderId}")
     public R orderCancel(@PathVariable Long orderId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         orderService.updateOrder(userId, orderId);
@@ -68,7 +68,7 @@ public class OrderController {
     }
 
     @RequiresLogin
-    @PutMapping("/my-order/receipt/{orderId}")
+    @PutMapping("/order/receipt/{orderId}")
     public R orderConfirmReceipt(@PathVariable Long orderId) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         orderService.takeAnOrder(userId, orderId);
@@ -78,7 +78,7 @@ public class OrderController {
     }
 
     @RequiresLogin
-    @GetMapping("/my-order/list")
+    @GetMapping("/order/list")
     public R orderList(@RequestParam(required = false) Integer status,
                        @RequestParam(defaultValue = "1") Integer pageNum,
                        @RequestParam(defaultValue = "5") Integer pageSize) {

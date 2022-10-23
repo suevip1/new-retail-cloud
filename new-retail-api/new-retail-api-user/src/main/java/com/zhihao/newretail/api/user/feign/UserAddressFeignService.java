@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @Primary
-@FeignClient(name = "new-retail-user", path = "/user", fallback = UserAddressFeignFallback.class)
+@FeignClient(name = "new-retail-user", path = "/new-retail-user", fallback = UserAddressFeignFallback.class)
 public interface UserAddressFeignService {
 
     @GetMapping("/feign/address/list")

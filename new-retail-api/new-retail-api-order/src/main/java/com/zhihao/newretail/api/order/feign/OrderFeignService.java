@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @Email: cafebabe0508@163.com
  * */
 @Primary
-@FeignClient(name = "new-retail-order", path = "/order", fallback = OrderFeignFallback.class)
+@FeignClient(name = "new-retail-order", path = "/new-retail-order", fallback = OrderFeignFallback.class)
 public interface OrderFeignService {
 
     @GetMapping("/feign/order-pay/{orderId}")

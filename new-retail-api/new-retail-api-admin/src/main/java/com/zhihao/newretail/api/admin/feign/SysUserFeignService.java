@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @Email: cafebabe0508@163.com
  * */
 @Primary
-@FeignClient(name = "new-retail-admin", path = "/admin", fallback = SysUserFeignFallback.class)
+@FeignClient(name = "new-retail-admin", path = "/new-retail-admin", fallback = SysUserFeignFallback.class)
 public interface SysUserFeignService {
 
     @PostMapping("/feign/sys/user-info")

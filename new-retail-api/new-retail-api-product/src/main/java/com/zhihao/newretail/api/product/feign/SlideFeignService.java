@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.web.bind.annotation.*;
 
 @Primary
-@FeignClient(name = "new-retail-product", path = "/product", fallback = SlideFeignFallback.class)
+@FeignClient(name = "new-retail-product", path = "/new-retail-product", fallback = SlideFeignFallback.class)
 public interface SlideFeignService {
 
     /*

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 @Primary
-@FeignClient(name = "new-retail-product", path = "/product", fallback = ProductFeignFallback.class)
+@FeignClient(name = "new-retail-product", path = "/new-retail-product", fallback = ProductFeignFallback.class)
 public interface ProductFeignService {
 
     @PostMapping("/feign/goods/list")

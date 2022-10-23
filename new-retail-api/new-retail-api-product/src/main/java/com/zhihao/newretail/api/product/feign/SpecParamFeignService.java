@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Primary
-@FeignClient(name = "new-retail-product", path = "/product", fallback = SpecParamFeignFallback.class)
+@FeignClient(name = "new-retail-product", path = "/new-retail-product", fallback = SpecParamFeignFallback.class)
 public interface SpecParamFeignService {
 
     /*

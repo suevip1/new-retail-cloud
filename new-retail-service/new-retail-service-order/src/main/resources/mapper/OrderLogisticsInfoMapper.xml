@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zhihao.newretail.order.dao.OrderLogisticsInfoMapper">
+    <resultMap id="BaseResultMap" type="com.zhihao.newretail.order.pojo.OrderLogisticsInfo">
+        <id column="order_id" jdbcType="BIGINT" property="orderId" />
+        <id column="logistics_id" jdbcType="VARCHAR" property="logisticsId" />
+        <result column="logistics_company" jdbcType="VARCHAR" property="logisticsCompany" />
+        <result column="order_logistics_info_sharding" jdbcType="INTEGER" property="orderLogisticsInfoSharding" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        order_id, logistics_id, logistics_company, order_logistics_info_sharding
+    </sql>
+
+    <select id="deleteByOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_order_logistics_info
+        where order_id = #{orderId,jdbcType=BIGINT}
+    </select>
+
+    <delete id="selectByOrderId" parameterType="java.lang.Long">
+        delete from tb_order_logistics_info
+        where order_id = #{orderId,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insert" parameterType="com.zhihao.newretail.order.pojo.OrderLogisticsInfo">
+        insert into tb_order_logistics_info (order_id, logistics_id, logistics_company,
+                                             order_logistics_info_sharding)
+        values (#{orderId,jdbcType=BIGINT}, #{logisticsId,jdbcType=VARCHAR}, #{logisticsCompany,jdbcType=VARCHAR},
+                #{orderLogisticsInfoSharding,jdbcType=INTEGER})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.zhihao.newretail.order.pojo.OrderLogisticsInfo">
+        insert into tb_order_logistics_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                order_id,
+            </if>
+            <if test="logisticsId != null">
+                logistics_id,
+            </if>
+            <if test="logisticsCompany != null">
+                logistics_company,
+            </if>
+            <if test="orderLogisticsInfoSharding != null">
+                order_logistics_info_sharding,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                #{orderId,jdbcType=BIGINT},
+            </if>
+            <if test="logisticsId != null">
+                #{logisticsId,jdbcType=VARCHAR},
+            </if>
+            <if test="logisticsCompany != null">
+                #{logisticsCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="orderLogisticsInfoSharding != null">
+                #{orderLogisticsInfoSharding,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.zhihao.newretail.order.pojo.OrderLogisticsInfo">
+        update tb_order_logistics_info
+        <set>
+            <if test="logisticsId != null">
+                logistics_id = #{logisticsId,jdbcType=VARCHAR}
+            </if>
+            <if test="logisticsCompany != null">
+                logistics_company = #{logisticsCompany,jdbcType=VARCHAR},
+            </if>
+            <if test="orderLogisticsInfoSharding != null">
+                order_logistics_info_sharding = #{orderLogisticsInfoSharding,jdbcType=INTEGER},
+            </if>
+        </set>
+        where order_id = #{orderId,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByOrderId" parameterType="com.zhihao.newretail.order.pojo.OrderLogisticsInfo">
+        update tb_order_logistics_info
+        set logistics_id = #{logisticsId,jdbcType=VARCHAR},
+            logistics_company = #{logisticsCompany,jdbcType=VARCHAR},
+            order_logistics_info_sharding = #{orderLogisticsInfoSharding,jdbcType=INTEGER}
+        where order_id = #{orderId,jdbcType=BIGINT}
+    </update>
+</mapper>

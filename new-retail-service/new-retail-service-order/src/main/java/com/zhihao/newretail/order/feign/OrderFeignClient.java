@@ -1,5 +1,6 @@
 package com.zhihao.newretail.order.feign;
 
+import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -48,8 +49,8 @@ public class OrderFeignClient {
 
     @RequiresLogin
     @PutMapping("/order/{orderNo}")
-    Integer deliverGoods(@PathVariable Long orderNo) {
-        int updateRow = orderService.updateOrder(orderNo);
+    Integer deliverGoods(@PathVariable Long orderNo, @RequestBody OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO) {
+        int updateRow = orderService.updateOrder(orderNo, orderLogisticsInfoAddApiDTO);
         UserLoginContext.sysClean();
         return updateRow;
     }

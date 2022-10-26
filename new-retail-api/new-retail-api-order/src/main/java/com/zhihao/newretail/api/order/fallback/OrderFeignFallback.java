@@ -1,5 +1,6 @@
 package com.zhihao.newretail.api.order.fallback;
 
+import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
 import com.zhihao.newretail.api.order.feign.OrderFeignService;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
@@ -25,7 +26,7 @@ public class OrderFeignFallback implements OrderFeignService {
     }
 
     @Override
-    public Integer deliverGoods(Long orderNo) {
+    public Integer deliverGoods(Long orderNo, OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO) {
         return null;
     }
 

@@ -4,6 +4,7 @@ import com.zhihao.newretail.api.cart.feign.CartFeignService;
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
+import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
 import com.zhihao.newretail.api.order.vo.*;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
@@ -24,6 +25,7 @@ import com.zhihao.newretail.core.util.MyUUIDUtil;
 import com.zhihao.newretail.core.util.SnowflakeIdWorker;
 import com.zhihao.newretail.order.dao.OrderAddressMapper;
 import com.zhihao.newretail.order.dao.OrderItemMapper;
+import com.zhihao.newretail.order.dao.OrderLogisticsInfoMapper;
 import com.zhihao.newretail.order.dao.OrderMapper;
 import com.zhihao.newretail.order.enums.OrderStatusEnum;
 import com.zhihao.newretail.order.enums.ProductEnum;
@@ -31,6 +33,7 @@ import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.OrderAddress;
 import com.zhihao.newretail.order.pojo.OrderItem;
+import com.zhihao.newretail.order.pojo.OrderLogisticsInfo;
 import com.zhihao.newretail.order.pojo.vo.*;
 import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
@@ -91,6 +94,8 @@ public class OrderServiceImpl implements OrderService {
     private OrderItemMapper orderItemMapper;
     @Autowired
     private OrderAddressMapper orderAddressMapper;
+    @Autowired
+    private OrderLogisticsInfoMapper orderLogisticsInfoMapper;
 
     private static final String ORDER_TOKEN_REDIS_KEY = "order_token_user_id_%d";
 
@@ -531,12 +536,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public int updateOrder(Long orderNo) {
+    @Transactional
+    public int updateOrder(Long orderNo, OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO) {
         Order order = orderMapper.selectByPrimaryKey(orderNo);
         if (OrderStatusEnum.PAY_SUCCEED.getCode().equals(order.getStatus())) {
             order.setStatus(OrderStatusEnum.NOT_TAKE.getCode());
+            OrderLogisticsInfo orderLogisticsInfo = new OrderLogisticsInfo();
+            orderLogisticsInfo.setOrderId(orderNo);
+            orderLogisticsInfo.setLogisticsId(orderLogisticsInfoAddApiDTO.getLogisticsId());
+            orderLogisticsInfo.setLogisticsCompany(orderLogisticsInfoAddApiDTO.getLogisticsCompany());
             int updateRow = orderMapper.updateByPrimaryKeySelective(order);
-            if (updateRow <= 0) {
+            int insertRow = orderLogisticsInfoMapper.insertSelective(orderLogisticsInfo);
+            if (updateRow <= 0 || insertRow <= 0) {
                 throw new ServiceException("发货失败");
             }
             return updateRow;

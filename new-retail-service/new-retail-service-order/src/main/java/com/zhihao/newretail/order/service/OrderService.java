@@ -1,5 +1,6 @@
 package com.zhihao.newretail.order.service;
 
+import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.form.OrderSubmitForm;
@@ -58,7 +59,7 @@ public interface OrderService {
     /*
     * 更新订单(订单发货)
     * */
-    int updateOrder(Long orderNo);
+    int updateOrder(Long orderNo, OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO);
 
     /*
      * 获取订单

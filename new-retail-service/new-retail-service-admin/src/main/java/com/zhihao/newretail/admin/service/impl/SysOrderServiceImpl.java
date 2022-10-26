@@ -1,5 +1,7 @@
 package com.zhihao.newretail.admin.service.impl;
 
+import com.zhihao.newretail.admin.form.OrderShippedForm;
+import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
 import com.zhihao.newretail.api.order.feign.OrderFeignService;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -29,8 +31,15 @@ public class SysOrderServiceImpl implements SysOrderService {
 
     @Override
     @RequiresPermission(scope = AuthorizationConst.ADMIN)
-    public Integer deliverGoods(Long orderNo) {
-        return orderFeignService.deliverGoods(orderNo);
+    public Integer deliverGoods(OrderShippedForm form) {
+        return orderFeignService.deliverGoods(form.getOrderId(), form2OrderLogisticsInfoAddApiDTO(form));
+    }
+
+    private OrderLogisticsInfoAddApiDTO form2OrderLogisticsInfoAddApiDTO(OrderShippedForm form) {
+        OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO = new OrderLogisticsInfoAddApiDTO();
+        orderLogisticsInfoAddApiDTO.setLogisticsId(form.getLogisticsId());
+        orderLogisticsInfoAddApiDTO.setLogisticsCompany(form.getLogisticsCompany());
+        return orderLogisticsInfoAddApiDTO;
     }
 
 }

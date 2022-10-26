@@ -1,5 +1,6 @@
 package com.zhihao.newretail.admin.controller;
 
+import com.zhihao.newretail.admin.form.OrderShippedForm;
 import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.PageUtil;
@@ -10,6 +11,8 @@ import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 public class SysOrderController {
@@ -45,11 +48,11 @@ public class SysOrderController {
     }
 
     @RequiresLogin
-    @PutMapping("/order/{orderNo}")
-    public R deliverGoods(@PathVariable Long orderNo) {
+    @PutMapping("/order")
+    public R deliverGoods(@Valid @RequestBody OrderShippedForm form) {
         String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
         SysUserTokenContext.setUserToken(userToken);
-        Integer updateRow = sysOrderService.deliverGoods(orderNo);
+        Integer updateRow = sysOrderService.deliverGoods(form);
         UserLoginContext.sysClean();
         if (updateRow == null) {
             throw new ServiceException("订单服务繁忙");

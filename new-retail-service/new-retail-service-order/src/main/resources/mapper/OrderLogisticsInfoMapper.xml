@@ -12,14 +12,14 @@
         order_id, logistics_id, logistics_company, order_logistics_info_sharding
     </sql>
 
-    <select id="deleteByOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <select id="selectByOrderId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List" />
         from tb_order_logistics_info
         where order_id = #{orderId,jdbcType=BIGINT}
     </select>
 
-    <delete id="selectByOrderId" parameterType="java.lang.Long">
+    <delete id="deleteByOrderId" parameterType="java.lang.Long">
         delete from tb_order_logistics_info
         where order_id = #{orderId,jdbcType=BIGINT}
     </delete>

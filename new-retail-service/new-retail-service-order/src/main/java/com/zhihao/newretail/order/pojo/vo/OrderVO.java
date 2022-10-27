@@ -26,6 +26,8 @@ public class OrderVO {
 
     private Date updateTime;
 
+    private OrderLogisticsInfoVO orderLogisticsInfoVO;
+
     private OrderAddressVO orderAddressVO;
 
     private OrderCouponsVO orderCouponsVO;
@@ -112,6 +114,14 @@ public class OrderVO {
         this.updateTime = updateTime;
     }
 
+    public OrderLogisticsInfoVO getOrderLogisticsInfoVO() {
+        return orderLogisticsInfoVO;
+    }
+
+    public void setOrderLogisticsInfoVO(OrderLogisticsInfoVO orderLogisticsInfoVO) {
+        this.orderLogisticsInfoVO = orderLogisticsInfoVO;
+    }
+
     public OrderAddressVO getOrderAddressVO() {
         return orderAddressVO;
     }
@@ -149,6 +159,7 @@ public class OrderVO {
                 ", status=" + status +
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
+                ", orderLogisticsInfoVO=" + orderLogisticsInfoVO +
                 ", orderAddressVO=" + orderAddressVO +
                 ", orderCouponsVO=" + orderCouponsVO +
                 ", orderItemVOList=" + orderItemVOList +

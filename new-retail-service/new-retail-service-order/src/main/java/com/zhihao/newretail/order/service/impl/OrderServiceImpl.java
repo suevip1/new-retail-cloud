@@ -411,7 +411,9 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> orderAddressApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
             OrderAddress orderAddress = orderAddressMapper.selectByPrimaryKey(orderNo);
             OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
-            BeanUtils.copyProperties(orderAddress, orderAddressApiVO);
+            if (!ObjectUtils.isEmpty(orderAddress)) {
+                BeanUtils.copyProperties(orderAddress, orderAddressApiVO);
+            }
             res.setOrderAddressApiVO(orderAddressApiVO);
         }, executor);
 
@@ -426,12 +428,12 @@ public class OrderServiceImpl implements OrderService {
 
         CompletableFuture<Void> orderLogisticsInfoApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
             OrderLogisticsInfo orderLogisticsInfo = orderLogisticsInfoMapper.selectByOrderId(orderNo);
+            OrderLogisticsInfoApiVO orderLogisticsInfoApiVO = new OrderLogisticsInfoApiVO();
             if (!ObjectUtils.isEmpty(orderLogisticsInfo)) {
-                OrderLogisticsInfoApiVO orderLogisticsInfoApiVO = new OrderLogisticsInfoApiVO();
                 orderLogisticsInfoApiVO.setLogisticsId(orderLogisticsInfo.getLogisticsId());
                 orderLogisticsInfoApiVO.setLogisticsCompany(orderLogisticsInfo.getLogisticsCompany());
-                res.setOrderLogisticsInfoApiVO(orderLogisticsInfoApiVO);
             }
+            res.setOrderLogisticsInfoApiVO(orderLogisticsInfoApiVO);
         }, executor);
         CompletableFuture.allOf(orderApiVOFuture, orderUserApiVOFuture, orderAddressApiVOFuture, orderItemApiVOListFuture, orderLogisticsInfoApiVOFuture).join();
         return orderApiVO;

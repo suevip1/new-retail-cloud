@@ -36,6 +36,8 @@ public class OrderApiVO {
 
     private OrderUserApiVO orderUserApiVO;
 
+    private OrderLogisticsInfoApiVO orderLogisticsInfoApiVO;
+
     private OrderAddressApiVO orderAddressApiVO;
 
     private List<OrderItemApiVO> orderItemApiVOList;
@@ -160,6 +162,14 @@ public class OrderApiVO {
         this.orderUserApiVO = orderUserApiVO;
     }
 
+    public OrderLogisticsInfoApiVO getOrderLogisticsInfoApiVO() {
+        return orderLogisticsInfoApiVO;
+    }
+
+    public void setOrderLogisticsInfoApiVO(OrderLogisticsInfoApiVO orderLogisticsInfoApiVO) {
+        this.orderLogisticsInfoApiVO = orderLogisticsInfoApiVO;
+    }
+
     public OrderAddressApiVO getOrderAddressApiVO() {
         return orderAddressApiVO;
     }
@@ -194,6 +204,7 @@ public class OrderApiVO {
                 ", createTime=" + createTime +
                 ", updateTime=" + updateTime +
                 ", orderUserApiVO=" + orderUserApiVO +
+                ", orderLogisticsInfoApiVO=" + orderLogisticsInfoApiVO +
                 ", orderAddressApiVO=" + orderAddressApiVO +
                 ", orderItemApiVOList=" + orderItemApiVOList +
                 '}';

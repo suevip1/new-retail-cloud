@@ -86,4 +86,14 @@
             order_logistics_info_sharding = #{orderLogisticsInfoSharding,jdbcType=INTEGER}
         where order_id = #{orderId,jdbcType=BIGINT}
     </update>
+
+    <select id="selectListByOrderIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_order_logistics_info
+        where
+        <foreach collection="orderIdSet" item="item" separator="or">
+            order_id = #{item}
+        </foreach>
+    </select>
 </mapper>

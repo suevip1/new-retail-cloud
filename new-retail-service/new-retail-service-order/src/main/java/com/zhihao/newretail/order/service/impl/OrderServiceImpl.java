@@ -421,8 +421,17 @@ public class OrderServiceImpl implements OrderService {
                 res.setOrderItemApiVOList(orderItemApiVOList);
             }
         }, executor);
-        CompletableFuture.allOf(orderApiVOFuture, orderUserApiVOFuture, orderAddressApiVOFuture, orderItemApiVOListFuture).join();
 
+        CompletableFuture<Void> orderLogisticsInfoApiVOFuture = orderApiVOFuture.thenAcceptAsync((res) -> {
+            OrderLogisticsInfo orderLogisticsInfo = orderLogisticsInfoMapper.selectByOrderId(orderNo);
+            if (!ObjectUtils.isEmpty(orderLogisticsInfo)) {
+                OrderLogisticsInfoApiVO orderLogisticsInfoApiVO = new OrderLogisticsInfoApiVO();
+                orderLogisticsInfoApiVO.setLogisticsId(orderLogisticsInfo.getLogisticsId());
+                orderLogisticsInfoApiVO.setLogisticsCompany(orderLogisticsInfo.getLogisticsCompany());
+                res.setOrderLogisticsInfoApiVO(orderLogisticsInfoApiVO);
+            }
+        }, executor);
+        CompletableFuture.allOf(orderApiVOFuture, orderUserApiVOFuture, orderAddressApiVOFuture, orderItemApiVOListFuture, orderLogisticsInfoApiVOFuture).join();
         return orderApiVO;
     }
 
@@ -455,9 +464,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public PageUtil<OrderApiVO> listOrderApiVOS(Long orderNo, Integer userId, Integer status, Integer pageNum, Integer pageSize) {
         PageUtil<OrderApiVO> pageUtil = new PageUtil<>();
-        ThreadLocal<List<Order>> orderListThreadLocal = new ThreadLocal<>();
-        ThreadLocal<Set<Long>> orderNoSetThreadLocal = new ThreadLocal<>();
-        ThreadLocal<Set<Integer>> couponsIdSetThreadLocal = new ThreadLocal<>();
 
         CompletableFuture<Void> countTotalFuture = CompletableFuture.runAsync(() -> {
             int count = orderMapper.countByRecord(orderNo, userId, status);
@@ -465,48 +471,32 @@ public class OrderServiceImpl implements OrderService {
             pageUtil.setPageSize(pageSize);
             pageUtil.setTotal((long) count);
         }, executor);
+
         CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
             List<Order> orderList = orderMapper.selectOrderOrderAddressList(orderNo, userId, status, pageNum, pageSize);
-            if (!CollectionUtils.isEmpty(orderList)) {
-                orderListThreadLocal.set(orderList);
-                orderNoSetThreadLocal.set(orderList.stream().map(Order::getId).collect(Collectors.toSet()));
-                couponsIdSetThreadLocal.set(orderList.stream().map(Order::getCouponsId).collect(Collectors.toSet()));
-            }
-        }, executor).thenApply((res) -> {
-            if (!CollectionUtils.isEmpty(orderListThreadLocal.get())) {
-                List<OrderItem> orderItemList = orderItemMapper.selectListByOrderIdSet(orderNoSetThreadLocal.get());
-                List<GoodsApiVO> goodsApiVOList = listGoodsApiVOS(orderItemList);
-                return orderItemList2OrderItemApiVOList(orderItemList, goodsApiVOList);
-            }
-            return null;
-        }).thenAccept((res) -> {
-            if (!CollectionUtils.isEmpty(res)) {
-                List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSetThreadLocal.get());
-                List<OrderApiVO> orderApiVOList = orderListThreadLocal.get().stream().map(order -> {
-                    OrderApiVO orderApiVO = new OrderApiVO();
-                    BeanUtils.copyProperties(order, orderApiVO);
-                    if (!CollectionUtils.isEmpty(couponsApiVOList)) {
-                        couponsApiVOList.stream()
-                                .filter(couponsApiVO -> order.getCouponsId().equals(couponsApiVO.getId()))
-                                .forEach(couponsApiVO -> {
-                                    orderApiVO.setDeno(couponsApiVO.getDeno());
-                                    orderApiVO.setCondition(couponsApiVO.getCondition());
-                                });
-                    }
+            Set<Long> orderIdSet = orderList.stream().map(Order::getId).collect(Collectors.toSet());
+            if (!CollectionUtils.isEmpty(orderIdSet)) {
+                List<OrderLogisticsInfo> orderLogisticsInfoList = orderLogisticsInfoMapper.selectListByOrderIdSet(orderIdSet);
+                List<OrderApiVO> orderApiVOList = orderList.stream().map(order -> {
                     OrderAddressApiVO orderAddressApiVO = new OrderAddressApiVO();
                     BeanUtils.copyProperties(order.getOrderAddress(), orderAddressApiVO);
+                    OrderApiVO orderApiVO = new OrderApiVO();
+                    BeanUtils.copyProperties(order, orderApiVO);
                     orderApiVO.setOrderAddressApiVO(orderAddressApiVO);
-                    orderApiVO.setOrderItemApiVOList(res);
+                    if (!CollectionUtils.isEmpty(orderLogisticsInfoList)) {
+                        orderLogisticsInfoList.stream()
+                                .filter(orderLogisticsInfo -> order.getId().equals(orderLogisticsInfo.getOrderId()))
+                                .forEach(orderLogisticsInfo -> {
+                                    OrderLogisticsInfoApiVO orderLogisticsInfoApiVO = new OrderLogisticsInfoApiVO();
+                                    BeanUtils.copyProperties(orderLogisticsInfo, orderLogisticsInfoApiVO);
+                                    orderApiVO.setOrderLogisticsInfoApiVO(orderLogisticsInfoApiVO);
+                                });
+                    }
                     return orderApiVO;
                 }).collect(Collectors.toList());
                 pageUtil.setList(orderApiVOList);
             }
-        }).whenComplete((res, e) -> {
-            orderListThreadLocal.remove();
-            orderNoSetThreadLocal.remove();
-            couponsIdSetThreadLocal.remove();
-            log.info("'listOrderApiVOS()', ThreadLocal清理完毕.");
-        });
+        }, executor);
         CompletableFuture.allOf(countTotalFuture, listFuture).join();
         return pageUtil;
     }

@@ -373,18 +373,20 @@ public class OrderServiceImpl implements OrderService {
         CompletableFuture<Void> orderAddressVOFuture = CompletableFuture.runAsync(() -> {
             OrderAddress orderAddress = orderAddressMapper.selectByPrimaryKey(orderId);
             OrderAddressVO orderAddressVO = new OrderAddressVO();
-            BeanUtils.copyProperties(orderAddress, orderAddressVO);
+            if (!ObjectUtils.isEmpty(orderAddress)) {
+                BeanUtils.copyProperties(orderAddress, orderAddressVO);
+            }
             orderVO.setOrderAddressVO(orderAddressVO);
         }, executor);
         /* 订单快递信息 */
         CompletableFuture<Void> orderLogisticsInfoVOFuture = CompletableFuture.runAsync(() -> {
             OrderLogisticsInfo orderLogisticsInfo = orderLogisticsInfoMapper.selectByOrderId(orderId);
+            OrderLogisticsInfoVO orderLogisticsInfoVO = new OrderLogisticsInfoVO();
             if (!ObjectUtils.isEmpty(orderLogisticsInfo)) {
-                OrderLogisticsInfoVO orderLogisticsInfoVO = new OrderLogisticsInfoVO();
                 orderLogisticsInfoVO.setLogisticsId(orderLogisticsInfo.getLogisticsId());
                 orderLogisticsInfoVO.setLogisticsCompany(orderLogisticsInfo.getLogisticsCompany());
-                orderVO.setOrderLogisticsInfoVO(orderLogisticsInfoVO);
             }
+            orderVO.setOrderLogisticsInfoVO(orderLogisticsInfoVO);
         }, executor);
         CompletableFuture.allOf(orderVOFuture, orderItemVOListFuture, orderAddressVOFuture, orderLogisticsInfoVOFuture).join();
         return orderVO;

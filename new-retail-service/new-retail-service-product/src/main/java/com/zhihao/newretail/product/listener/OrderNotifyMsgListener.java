@@ -38,7 +38,7 @@ public class OrderNotifyMsgListener {
     * */
     @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_UNLOCK_QUEUE)
     public void stockUnLockQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("商品服务，接收解锁库存消息：{}", msgStr);
+        log.info("商品服务, 接收解锁库存消息:{}.", msgStr);
         StockUnLockMQDTO stockUnLockMQDTO = GsonUtil.json2Obj(msgStr, StockUnLockMQDTO.class);
         Long orderNo = stockUnLockMQDTO.getOrderNo();
         Integer version = stockUnLockMQDTO.getMqVersion();
@@ -48,7 +48,7 @@ public class OrderNotifyMsgListener {
         try {
             stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.UN_LOCK);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            log.info("当前时间:{},订单号:{},解锁库存", new Date(), orderNo);
+            log.info("当前时间:{}, 订单号:{}, 解锁库存.", new Date(), orderNo);
         } catch (Exception e) {
             channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
         }
@@ -59,7 +59,7 @@ public class OrderNotifyMsgListener {
     * */
     @RabbitListener(queues = RabbitMQConst.ORDER_STOCK_SUB_QUEUE)
     public void stockSubQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("商品服务，接收删减库存消息：{}", msgStr);
+        log.info("商品服务, 接收删减库存消息:{}.", msgStr);
         StockSubLockMQDTO stockSubLockMQDTO = GsonUtil.json2Obj(msgStr, StockSubLockMQDTO.class);
         Long orderNo = stockSubLockMQDTO.getOrderNo();
         Integer version = stockSubLockMQDTO.getMqVersion();
@@ -69,7 +69,7 @@ public class OrderNotifyMsgListener {
         try {
             stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.SUB);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            log.info("当前时间:{},订单号:{},删减库存", new Date(), orderNo);
+            log.info("当前时间:{}, 订单号:{}, 删减库存.", new Date(), orderNo);
         } catch (Exception e) {
             channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
         }

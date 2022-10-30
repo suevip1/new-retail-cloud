@@ -25,15 +25,15 @@ public class PayXxlJob {
 
     @XxlJob("payMessageSendErrorJobHandler")
     public void payMessageSendErrorJobHandler() {
-        log.info("XXL-JOB, 未发送状态消息处理.");
+        log.info("支付服务, XXL-JOB, 未发送状态消息处理.");
         List<PayInfoMQLog> payInfoMQLogList = payInfoMQLogService.listPayInfoMQLogS(MessageStatusEnum.NEW_MESSAGE.getCode());
         if (!CollectionUtils.isEmpty(payInfoMQLogList)) {
             for (PayInfoMQLog payInfoMQLog : payInfoMQLogList) {
                 rabbitTemplate.convertAndSend(payInfoMQLog.getExchange(), payInfoMQLog.getRoutingKey(), payInfoMQLog.getContent(), new CorrelationData(String.valueOf(payInfoMQLog.getMessageId())));
             }
-            log.info("XXL-JOB, 未发送状态消息处理完成.");
+            log.info("支付服务, XXL-JOB, 未发送状态消息处理完成.");
         } else {
-            log.info("XXL-JOB, 未发送状态消息为空, 无需处理.");
+            log.info("支付服务, XXL-JOB, 未发送状态消息为空, 无需处理.");
         }
     }
 

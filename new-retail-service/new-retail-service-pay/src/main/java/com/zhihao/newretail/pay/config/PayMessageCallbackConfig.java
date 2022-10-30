@@ -48,14 +48,14 @@ public class PayMessageCallbackConfig {
                         if (ack) {
                             payInfoMqLog.setStatus(MessageStatusEnum.SEND_SUCCESS.getCode());
                             payInfoMqLogService.updateMessage(payInfoMqLog);
-                            log.info("支付服务，消息发送成功，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                            log.info("支付服务, 消息发送成功, messageId:{}, messageContent:{}.", messageId, payInfoMqLog.getContent());
                         } else {
                             /* 发送失败，重新发送 */
                             payInfoMqLog.setStatus(MessageStatusEnum.SEND_ERROR.getCode());
                             int updateMessageRow = payInfoMqLogService.updateMessage(payInfoMqLog);
                             if (updateMessageRow > 0) {
                                 rabbitTemplate.convertAndSend(payInfoMqLog.getExchange(), payInfoMqLog.getRoutingKey(), payInfoMqLog.getContent());
-                                log.info("支付服务，消息发送失败，尝试重新发送，messageId：{}，messageContent：{}", messageId, payInfoMqLog.getContent());
+                                log.info("支付服务, 消息发送失败, 尝试重新发送, messageId:{}, messageContent:{}.", messageId, payInfoMqLog.getContent());
                             }
                         }
                     }
@@ -74,8 +74,8 @@ public class PayMessageCallbackConfig {
                 String replyText = returnedMessage.getReplyText();
                 String exchange = returnedMessage.getExchange();
                 String routingKey = returnedMessage.getRoutingKey();
-                log.info("支付服务，消息回退");
-                log.info("time:{},message:{},replyText:{},exchange:{},routingKey:{}", new Date(), message, replyText, exchange, routingKey);
+                log.info("支付服务, 消息回退.");
+                log.info("time:{}, message:{}, replyText:{}, exchange:{}, routingKey:{}.", new Date(), message, replyText, exchange, routingKey);
             } finally {
                 lock.unlock();
             }

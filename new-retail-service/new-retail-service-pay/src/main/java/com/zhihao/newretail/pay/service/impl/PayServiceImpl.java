@@ -158,7 +158,7 @@ public class PayServiceImpl implements PayService {
         int insetMessageRow = payInfoMqLogService.insetMessage(messageId, content, PAY_NOTIFY_EXCHANGE, PAY_SUCCESS_ROUTING_KEY);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(PAY_NOTIFY_EXCHANGE, PAY_SUCCESS_ROUTING_KEY, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("支付服务，发送支付成功通知消息：{}", content);
+            log.info("支付服务, 发送支付成功通知消息:{}.", content);
         }
     }
 

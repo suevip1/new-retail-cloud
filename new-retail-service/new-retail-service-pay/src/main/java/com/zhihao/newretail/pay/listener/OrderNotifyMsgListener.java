@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /*
@@ -33,14 +34,13 @@ public class OrderNotifyMsgListener {
     @RabbitListener(queues = RabbitMQConst.ORDER_CLOSE_PAY_QUEUE)
     public void orderClosePayQueue(Message message, Channel channel) throws IOException {
         String msgStr = new String(message.getBody());
-        log.info("支付服务，接收关闭支付消息：{}", msgStr);
+        log.info("支付服务, 接收关闭支付消息:{}.", msgStr);
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
         Integer version = payNotifyMQDTO.getMqVersion();
         PayInfo payInfo = payInfoService.getPayInfo(payNotifyMQDTO.getOrderNo());
 
-        if (!ObjectUtils.isEmpty(payInfo)
-                && DeleteEnum.NOT_DELETE.getCode().equals(payInfo.getIsDelete())
-                && OrderStatusEnum.NOT_PAY.getCode().equals(payInfo.getStatus())) {
+        if (!ObjectUtils.isEmpty(payInfo) && DeleteEnum.NOT_DELETE.getCode().equals(payInfo.getIsDelete()) &&
+                OrderStatusEnum.NOT_PAY.getCode().equals(payInfo.getStatus())) {
             AtomicInteger payVersion = new AtomicInteger(payInfo.getMqVersion());
 
             if (payVersion.compareAndSet(version, payVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
@@ -49,10 +49,13 @@ public class OrderNotifyMsgListener {
                 try {
                     payInfoService.updatePayInfo(payInfo);
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                    log.info("当前时间:{}, 订单号:{}, 关闭支付.", new Date(), payInfo.getOrderId());
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 }
             }
+        } else {
+            log.info("订单号:{}, 无需处理.", payNotifyMQDTO.getOrderNo());
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }

@@ -44,15 +44,14 @@ public class PayNotifyMsgListener {
 
     @RabbitListener(queues = PAY_SUCCESS_QUEUE)
     public void payNotifyQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("订单服务，接收支付成功通知消息：{}", msgStr);
+        log.info("订单服务, 接收支付成功通知消息:{}.", msgStr);
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
         Integer version = payNotifyMQDTO.getMqVersion();
-
         Order order = orderService.getOrder(payNotifyMQDTO.getOrderNo());
-        if (!ObjectUtils.isEmpty(order)
-                && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())
-                && payNotifyMQDTO.getUserId().equals(order.getUserId())
-                && payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
+
+        if (!ObjectUtils.isEmpty(order) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete()) &&
+                payNotifyMQDTO.getUserId().equals(order.getUserId()) &&
+                payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
             AtomicInteger orderVersion = new AtomicInteger(order.getMqVersion());
             if (orderVersion.compareAndSet(version, orderVersion.get() + CONSUME_VERSION)
                     || StringUtils.isEmpty(order.getOrderCode())) {
@@ -65,7 +64,7 @@ public class PayNotifyMsgListener {
                     orderService.updateOrder(order);
                     String content = stockSubLockMessageContent(order.getId());
                     sendStockSubLockNotifyMessage(content);     // 通知删减库存
-                    log.info("当前时间:{},订单号:{},付款成功", new Date(), order.getId());
+                    log.info("当前时间:{}, 订单号:{}, 付款成功.", new Date(), order.getId());
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
@@ -80,7 +79,7 @@ public class PayNotifyMsgListener {
         int insetMessageRow = orderMqLogService.insetMessage(messageId, content, ORDER_NOTIFY_EXCHANGE, ORDER_STOCK_SUB_ROUTING_KEY);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(ORDER_NOTIFY_EXCHANGE, ORDER_STOCK_SUB_ROUTING_KEY, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送删减库存消息：{}", content);
+            log.info("订单服务, 发送删减库存消息:{}.", content);
         }
     }
 

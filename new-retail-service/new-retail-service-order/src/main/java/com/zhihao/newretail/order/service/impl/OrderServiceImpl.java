@@ -794,7 +794,7 @@ public class OrderServiceImpl implements OrderService {
         int insetMessageRow = orderMqLogService.insetMessage(messageId, content, ORDER_NOTIFY_EXCHANGE, routingKey);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(ORDER_NOTIFY_EXCHANGE, routingKey, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送普通消息");
+            log.info("订单服务, 发送普通消息.");
         }
     }
 
@@ -806,7 +806,7 @@ public class OrderServiceImpl implements OrderService {
                 message.getMessageProperties().setDelay(delay);
                 return message;
             }, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送延迟消息");
+            log.info("订单服务, 发送延迟消息.");
         }
     }
 

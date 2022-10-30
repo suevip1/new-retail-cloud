@@ -31,7 +31,7 @@ public class CanalMsgListener {
 
     @RabbitListener(queues = RabbitMQConst.CANAL_USER_QUEUE)
     public void canalMsgQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("用户服务，接收canal消息: {}", msgStr);
+        log.info("用户服务, 接收canal消息:{}.", msgStr);
         JsonObject json = gson.fromJson(msgStr, JsonObject.class);
         CompletableFuture<Void> syncCurrentDataFuture = CompletableFuture.runAsync(() -> {
             JsonElement data = json.get("data");
@@ -40,10 +40,10 @@ public class CanalMsgListener {
                 for (JsonElement jsonElement : currentDataList) {
                     JsonObject currentData = jsonElement.getAsJsonObject();
                     redisUtil.deleteObject(String.format(USER_INFO, currentData.get("user_id").getAsInt()));
-                    log.info("用户服务，当前数据处理完成");
+                    log.info("用户服务, 当前数据处理完成.");
                 }
             } else {
-                log.info("用户服务，当前数据为空，无需处理");
+                log.info("用户服务, 当前数据为空, 无需处理.");
             }
         }, executor);
         CompletableFuture<Void> syncOldDataFuture = CompletableFuture.runAsync(() -> {
@@ -54,13 +54,13 @@ public class CanalMsgListener {
                     JsonObject oldData = jsonElement.getAsJsonObject();
                     if (!ObjectUtils.isEmpty(oldData.get("user_id"))) {
                         redisUtil.deleteObject(String.format(USER_INFO, oldData.get("user_id").getAsInt()));
-                        log.info("用户服务，旧数据删除成功");
+                        log.info("用户服务, 旧数据删除成功.");
                     } else {
-                        log.info("用户服务，旧数据为空，无需处理");
+                        log.info("用户服务, 旧数据为空, 无需处理.");
                     }
                 }
             } else {
-                log.info("用户服务，旧数据为空，无需处理");
+                log.info("用户服务, 旧数据为空, 无需处理.");
             }
         }, executor);
         CompletableFuture.allOf(syncCurrentDataFuture, syncOldDataFuture).join();

@@ -25,15 +25,15 @@ public class OrderXxlJob {
 
     @XxlJob("orderMessageSendErrorJobHandler")
     public void orderMessageSendErrorJobHandler() {
-        log.info("XXL-JOB, 未发送状态消息处理.");
+        log.info("订单服务, XXL-JOB, 未发送状态消息处理.");
         List<OrderMQLog> orderMQLogList = orderMQLogService.listOrderMQLogS(MessageStatusEnum.NEW_MESSAGE.getCode());
         if (!CollectionUtils.isEmpty(orderMQLogList)) {
             for (OrderMQLog orderMQLog : orderMQLogList) {
                 rabbitTemplate.convertAndSend(orderMQLog.getExchange(), orderMQLog.getRoutingKey(), orderMQLog.getContent(), new CorrelationData(String.valueOf(orderMQLog.getMessageId())));
             }
-            log.info("XXL-JOB, 未发送状态消息处理完成.");
+            log.info("订单服务, XXL-JOB, 未发送状态消息处理完成.");
         } else {
-            log.info("XXL-JOB, 未发送状态消息为空, 无需处理.");
+            log.info("订单服务, XXL-JOB, 未发送状态消息为空, 无需处理.");
         }
     }
 

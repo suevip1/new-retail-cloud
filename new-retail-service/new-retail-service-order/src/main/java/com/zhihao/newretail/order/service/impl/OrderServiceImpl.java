@@ -326,8 +326,8 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         /* 发送定时消息，未支付订单定时关闭 */
-        // int delay = 900000;     // 15分钟
-        int delay = 60000;
+        int delay = 900000;     // 15分钟
+        // int delay = 60000;
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
         sendMessage(orderCloseMessageContent, delay);
         cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品

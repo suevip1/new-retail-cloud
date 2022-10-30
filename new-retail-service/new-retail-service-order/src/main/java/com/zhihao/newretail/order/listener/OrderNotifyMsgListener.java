@@ -46,16 +46,15 @@ public class OrderNotifyMsgListener {
 
     @RabbitListener(queues = ORDER_CLOSE_QUEUE)
     public void orderCloseQueue(String msgStr, Message message, Channel channel) throws IOException {
-        log.info("订单服务，接收关闭订单消息：{}", msgStr);
+        log.info("订单服务, 接收关闭订单消息:{}.", msgStr);
         OrderCloseMQDTO orderCloseMQDTO = GsonUtil.json2Obj(msgStr, OrderCloseMQDTO.class);
         Integer version = orderCloseMQDTO.getMqVersion();
         Order order = orderService.getOrder(orderCloseMQDTO.getOrderNo());
         /*
         * 关闭未支付的订单
         * */
-        if (!ObjectUtils.isEmpty(order)
-                && OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())
-                && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+        if (!ObjectUtils.isEmpty(order) && OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus()) &&
+                DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
             AtomicInteger orderVersion = new AtomicInteger(order.getMqVersion());   // 消费消息版本号
             if (orderVersion.compareAndSet(version, orderVersion.get() + CONSUME_VERSION)) {
                 order.setIsDelete(DeleteEnum.DELETE.getCode());
@@ -68,11 +67,13 @@ public class OrderNotifyMsgListener {
                         sendCouponsUnSubNotifyMessage(order.getCouponsId());    // 发送消息回滚优惠券
                     }
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-                    log.info("当前时间:{},订单号:{},关闭订单", new Date(), order.getId());
+                    log.info("当前时间:{}, 订单号:{}, 关闭订单.", new Date(), order.getId());
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 }
             }
+        } else {
+            log.info("订单号:{}, 无需处理.", orderCloseMQDTO.getOrderNo());
         }
         channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
@@ -88,7 +89,7 @@ public class OrderNotifyMsgListener {
         int insetMessageRow = orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送解锁库存消息：{}", content);
+            log.info("订单服务, 发送解锁库存消息:{}.", content);
         }
     }
 
@@ -103,7 +104,7 @@ public class OrderNotifyMsgListener {
         int insetMessageRow = orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送优惠券回退消息：{}", content);
+            log.info("订单服务, 发送优惠券回退消息:{}.", content);
         }
     }
 
@@ -118,7 +119,7 @@ public class OrderNotifyMsgListener {
         int insetMessageRow = orderMqLogService.insetMessage(messageId, content, exchange, routingKey);
         if (insetMessageRow > 0) {
             rabbitTemplate.convertAndSend(exchange, routingKey, content, new CorrelationData(String.valueOf(messageId)));
-            log.info("订单服务，发送关闭支付消息：{}", content);
+            log.info("订单服务, 发送关闭支付消息:{}.", content);
         }
     }
 

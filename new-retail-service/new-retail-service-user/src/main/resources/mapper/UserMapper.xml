@@ -192,13 +192,14 @@
     select
     count(*)
     from tb_user
-    where is_delete = 0
+    where
     <if test="username != null">
-      and username = #{username,jdbcType=VARCHAR}
+      username = #{username,jdbcType=VARCHAR} and
     </if>
     <if test="weChat != null">
-      and we_chat = #{weChat,jdbcType=VARCHAR}
+      we_chat = #{weChat,jdbcType=VARCHAR} and
     </if>
+    is_delete = 0
   </select>
 
   <select id="selectByScope" parameterType="com.zhihao.newretail.user.pojo.User" resultMap="UserAndUserInfo">

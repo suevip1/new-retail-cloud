@@ -23,30 +23,30 @@ public interface UserAddressService {
     /*
     * 新增收货地址
     * */
-    void insertUserAddress(Integer userId, UserAddressAddForm form);
+    int insertUserAddress(Integer userId, UserAddressAddForm form);
 
     /*
     * 更新收货地址信息
     * */
-    void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form);
+    int updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form);
 
     /*
     * 删除收货地址
     * */
-    void deleteUserAddress(Integer userId, Integer addressId);
+    int deleteUserAddress(Integer userId, Integer addressId);
 
     /*
-    * 获取收货地址列表
+    * 获取收货地址列表(Feign)
     * */
     List<UserAddressApiVO> listUserAddressApiVOS(Integer userId);
 
     /*
-    * 批量获取收货地址
+    * 批量获取收货地址(Feign)
     * */
     List<UserAddressApiVO> listUserAddressApiVOS(Set<Integer> userIdSet);
 
     /*
-    * 获取收货地址信息
+    * 获取收货地址信息(Feign)
     * */
     UserAddressApiVO getUserAddressApiVO(Integer addressId);
 

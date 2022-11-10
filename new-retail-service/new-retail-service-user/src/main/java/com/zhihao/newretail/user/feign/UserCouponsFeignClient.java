@@ -19,7 +19,7 @@ public class UserCouponsFeignClient {
 
     @RequiresLogin
     @GetMapping("/user-coupons/list")
-    public List<UserCouponsApiVO> listUserCouponsApiVOs() {
+    public List<UserCouponsApiVO> listUserCouponsApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserCouponsApiVO> userCouponsApiVOList = userCouponsService.listUserCouponsApiVOS(userId);
         UserLoginContext.clean();

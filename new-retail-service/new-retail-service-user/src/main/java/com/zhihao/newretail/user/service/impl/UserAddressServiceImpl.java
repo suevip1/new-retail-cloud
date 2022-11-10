@@ -2,14 +2,12 @@ package com.zhihao.newretail.user.service.impl;
 
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
-import com.zhihao.newretail.core.util.BeanCopyUtil;
 import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.UserAddress;
 import com.zhihao.newretail.user.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,57 +25,42 @@ public class UserAddressServiceImpl implements UserAddressService {
 
     @Override
     public List<UserAddressVO> listUserAddressVOS(Integer userId) {
-        return userAddressMapper.selectListByUserId(userId).stream()
-                .map(userAddress -> BeanCopyUtil.source2Target(userAddress, UserAddressVO.class))
-                .collect(Collectors.toList());
+        return userAddressMapper.selectListByUserId(userId).stream().map(this::userAddress2UserAddressVO).collect(Collectors.toList());
     }
 
     @Override
     public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-
         if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+            throw new ServiceException("收货地址不存在");
         }
-        return BeanCopyUtil.source2Target(userAddress, UserAddressVO.class);
+        return userAddress2UserAddressVO(userAddress);
     }
 
     @Override
-    public void insertUserAddress(Integer userId, UserAddressAddForm form) {
+    public int insertUserAddress(Integer userId, UserAddressAddForm form) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(form, userAddress);
         userAddress.setUserId(userId);
-        int insertUserAddressRow = userAddressMapper.insertSelective(userAddress);
-
-        if (insertUserAddressRow <= 0) {
-            throw new ServiceException("新增收货地址失败");
-        }
+        return userAddressMapper.insertSelective(userAddress);
     }
 
     @Override
-    public void updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form) {
+    public int updateUserAddress(Integer userId, Integer addressId, UserAddressUpdateForm form) {
         UserAddress userAddress = new UserAddress();
         BeanUtils.copyProperties(form, userAddress);
         userAddress.setId(addressId);
         userAddress.setUserId(userId);
-        int updateUserAddressRow = userAddressMapper.updateByPrimaryKeySelective(userAddress);
-
-        if (updateUserAddressRow <= 0) {
-            throw new ServiceException("更新收货地址失败");
-        }
+        return userAddressMapper.updateByPrimaryKeySelective(userAddress);
     }
 
     @Override
-    public void deleteUserAddress(Integer userId, Integer addressId) {
+    public int deleteUserAddress(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-
         if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "收货地址不存在");
+            throw new ServiceException("收货地址不存在");
         }
-        int deleteRow = userAddressMapper.deleteByPrimaryKey(addressId);
-        if (deleteRow <= 0) {
-            throw new ServiceException("删除收货地址失败");
-        }
+        return userAddressMapper.deleteByPrimaryKey(addressId);
     }
 
     @Override
@@ -93,9 +76,13 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public UserAddressApiVO getUserAddressApiVO(Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-        UserAddressApiVO userAddressApiVO = new UserAddressApiVO();
-        BeanUtils.copyProperties(userAddress, userAddressApiVO);
-        return userAddressApiVO;
+        return userAddress2UserAddressApiVO(userAddress);
+    }
+
+    private UserAddressVO userAddress2UserAddressVO(UserAddress userAddress) {
+        UserAddressVO userAddressVO = new UserAddressVO();
+        BeanUtils.copyProperties(userAddress, userAddressVO);
+        return userAddressVO;
     }
 
     private UserAddressApiVO userAddress2UserAddressApiVO(UserAddress userAddress) {

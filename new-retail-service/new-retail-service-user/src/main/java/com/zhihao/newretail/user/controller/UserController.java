@@ -9,7 +9,6 @@ import com.zhihao.newretail.user.form.UpdateNickNameForm;
 import com.zhihao.newretail.user.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,8 +23,8 @@ public class UserController {
 
     @PostMapping("/register")
     public R register(@Valid @RequestBody UserRegisterForm form) {
-        Integer insertRow = userService.insertUser(form);
-        if (insertRow <= 0 || ObjectUtils.isEmpty(insertRow)) {
+        int insertUserRow = userService.insertUser(form);
+        if (insertUserRow <= 0) {
             throw new ServiceException("注册失败");
         } else {
             return R.ok("注册成功");

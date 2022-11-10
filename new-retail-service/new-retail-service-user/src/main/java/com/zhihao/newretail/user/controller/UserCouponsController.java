@@ -22,17 +22,16 @@ public class UserCouponsController {
 
     @RequiresLogin
     @GetMapping("/list")
-    public R userCoupons() {
+    public R getUserCouponsList() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        List<CouponsApiVO> couponsApiVOList = userCouponsService.listUserCouponsVOs(userId);
+        List<CouponsApiVO> couponsApiVOList = userCouponsService.listCouponsApiVOS(userId);
         UserLoginContext.clean();
-
         return R.ok().put("data", couponsApiVOList);
     }
 
     @GetMapping("/{couponsId}")
-    public R userCouponsDetail(@PathVariable Integer couponsId) {
-        CouponsApiVO userCouponsVO = userCouponsService.getUserCouponsVO(couponsId);
+    public R getUserCouponsDetail(@PathVariable Integer couponsId) {
+        CouponsApiVO userCouponsVO = userCouponsService.getCouponsApiVO(couponsId);
         return R.ok().put("data", userCouponsVO);
     }
 

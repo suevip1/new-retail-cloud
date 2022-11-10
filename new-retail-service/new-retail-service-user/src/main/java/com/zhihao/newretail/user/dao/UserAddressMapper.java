@@ -20,9 +20,10 @@ public interface UserAddressMapper {
 
     int updateByPrimaryKey(UserAddress record);
 
-    /* 用户id查询 */
+    /* 用户 ID 获取收货地址列表 */
     List<UserAddress> selectListByUserId(Integer userId);
 
+    /* 用户 ID 批量获取收货地址列表 */
     List<UserAddress> selectListByUserIdSet(@Param("userIdSet") Set<Integer> userIdSet);
 
 }

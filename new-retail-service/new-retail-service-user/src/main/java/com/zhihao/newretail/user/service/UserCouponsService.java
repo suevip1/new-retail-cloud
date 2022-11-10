@@ -10,33 +10,33 @@ import java.util.List;
 public interface UserCouponsService {
 
     /*
-    * 获取优惠券列表
-    * */
-    List<CouponsApiVO> listUserCouponsVOs(Integer userId);
+     * 获取用户优惠券信息
+     * */
+    CouponsApiVO getCouponsApiVO(Integer couponsId);
 
     /*
-    * 获取优惠券信息
-    * */
-    CouponsApiVO getUserCouponsVO(Integer couponsId);
+     * 获取用户优惠券列表
+     * */
+    List<CouponsApiVO> listCouponsApiVOS(Integer userId);
 
     /*
-    * 获取优惠券列表
-    * */
-    List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId);
+     * 获取优惠券信息
+     * */
+    UserCoupons getUserCoupons(Integer couponsId);
 
     /*
-    * 更新优惠券数量
-    * */
+     * 更新优惠券数量
+     * */
     int updateUserCoupons(UserCouponsApiDTO userCouponsApiDTO);
 
     /*
-    * 优惠券信息
-    * */
-    UserCoupons getUserCouponsByCouponsId(Integer couponsId);
+     * 更新优惠券信息
+     * */
+    void updateUserCoupons(UserCoupons userCoupons);
 
     /*
-    * 更新优惠券信息
+    * 获取优惠券列表(Feign)
     * */
-    void updateUserCoupons(UserCoupons userCoupons);
+    List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId);
 
 }

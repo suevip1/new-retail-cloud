@@ -26,26 +26,20 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     private CouponsFeignService couponsFeignService;
 
     @Override
-    public List<CouponsApiVO> listUserCouponsVOs(Integer userId) {
+    public CouponsApiVO getCouponsApiVO(Integer couponsId) {
+        return couponsFeignService.getCouponsApiVO(couponsId);
+    }
+
+    @Override
+    public List<CouponsApiVO> listCouponsApiVOS(Integer userId) {
         List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
         Set<Integer> couponsIdSet = userCouponsList.stream().map(UserCoupons::getCouponsId).collect(Collectors.toSet());
         return couponsFeignService.listCouponsApiVOS(couponsIdSet);
     }
 
     @Override
-    public CouponsApiVO getUserCouponsVO(Integer couponsId) {
-        return couponsFeignService.getCouponsApiVO(couponsId);
-    }
-
-    @Override
-    public List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId) {
-        List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
-        return userCouponsList.stream()
-                .map(userCoupons -> {
-                    UserCouponsApiVO userCouponsApiVO = new UserCouponsApiVO();
-                    BeanUtils.copyProperties(userCoupons, userCouponsApiVO);
-                    return userCouponsApiVO;
-                }).collect(Collectors.toList());
+    public UserCoupons getUserCoupons(Integer couponsId) {
+        return userCouponsMapper.selectByCouponsId(couponsId);
     }
 
     @Override
@@ -58,13 +52,19 @@ public class UserCouponsServiceImpl implements UserCouponsService {
     }
 
     @Override
-    public UserCoupons getUserCouponsByCouponsId(Integer couponsId) {
-        return userCouponsMapper.selectByCouponsId(couponsId);
+    public void updateUserCoupons(UserCoupons userCoupons) {
+        userCouponsMapper.updateByPrimaryKeySelective(userCoupons);
     }
 
     @Override
-    public void updateUserCoupons(UserCoupons userCoupons) {
-        userCouponsMapper.updateByPrimaryKeySelective(userCoupons);
+    public List<UserCouponsApiVO> listUserCouponsApiVOS(Integer userId) {
+        List<UserCoupons> userCouponsList = userCouponsMapper.selectListByUserId(userId);
+        return userCouponsList.stream()
+                .map(userCoupons -> {
+                    UserCouponsApiVO userCouponsApiVO = new UserCouponsApiVO();
+                    BeanUtils.copyProperties(userCoupons, userCouponsApiVO);
+                    return userCouponsApiVO;
+                }).collect(Collectors.toList());
     }
 
 }

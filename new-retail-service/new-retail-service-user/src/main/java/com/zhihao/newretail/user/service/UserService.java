@@ -16,23 +16,12 @@ import java.util.Set;
 public interface UserService {
 
     /*
-    * 新增用户
-    * 基于用户名、密码注册
+    * 新增用户(基于用户名、密码注册注册)
     * */
-    Integer insertUser(UserRegisterForm form);
+    int insertUser(UserRegisterForm form);
 
     /*
-    * 获取用户基本信息
-    * */
-    UserApiVO getUserApiVO(User scope);
-
-    /*
-    * 支付宝用户id获取用户信息
-    * */
-    UserApiVO aliPayUserIdGetUserApiVO(UserApiDTO userApiDTO);
-
-    /*
-    * 用户基本信息
+    * 获取用户信息
     * */
     UserInfoVO getUserInfoVO(Integer userId);
 
@@ -47,12 +36,22 @@ public interface UserService {
     UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form);
 
     /*
+     * 获取用户基本信息(Feign)
+     * */
+    UserApiVO getUserApiVO(User scope);
+
+    /*
+     * 支付宝用户id获取用户信息(Feign)
+     * */
+    UserApiVO getUserApiVOByAliPayUserId(UserApiDTO userApiDTO);
+
+    /*
     * 获取用户信息(Feign)
     * */
     UserInfoApiVO getUserInfoApiVO(Integer userId);
 
     /*
-    * 批量获取用户信息
+    * 批量获取用户信息(Feign)
     * */
     List<UserInfoApiVO> listUserInfoApiVOS(Set<Integer> userIdSet);
 

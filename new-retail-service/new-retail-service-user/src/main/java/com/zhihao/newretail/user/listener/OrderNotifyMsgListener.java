@@ -34,7 +34,7 @@ public class OrderNotifyMsgListener {
         log.info("用户服务, 接收优惠券回退消息:{}.", msgStr);
         CouponsUnSubMQDTO couponsUnSubMQDTO = GsonUtil.json2Obj(msgStr, CouponsUnSubMQDTO.class);
         Integer version = couponsUnSubMQDTO.getMqVersion();
-        UserCoupons userCoupons = userCouponsService.getUserCouponsByCouponsId(couponsUnSubMQDTO.getCouponsId());
+        UserCoupons userCoupons = userCouponsService.getUserCoupons(couponsUnSubMQDTO.getCouponsId());
 
         if (!ObjectUtils.isEmpty(userCoupons)) {
             AtomicInteger userCouponsVersion = new AtomicInteger(userCoupons.getMqVersion());

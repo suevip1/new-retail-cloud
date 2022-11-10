@@ -20,7 +20,6 @@ import com.zhihao.newretail.user.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -56,16 +55,11 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private FileUploadFeignService fileUploadFeignService;
 
-    /* 用户信息缓存15天 */
-    private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 15;
+    private final static long CACHE_EXPIRE_TIMEOUT = 3600 * 24 * 15;    // 用户信息缓存15天
 
-    /*
-     * 新增用户
-     * 基于用户名、密码注册
-     * */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer insertUser(UserRegisterForm form) {
+    public int insertUser(UserRegisterForm form) {
         String username = form.getUsername();
         String password = form.getPassword();
         String uuid = getUserUUID();    // 获取分布式唯一id
@@ -76,20 +70,16 @@ public class UserServiceImpl implements UserService {
         user.setUsername(username);
         user.setPassword(secretPassword);
         int countByScope = userMapper.countByScope(user);
-
         if (countByScope == 0) {
             int insertUserRow = userMapper.insertSelective(user);
-
             if (insertUserRow <= 0) {
                 throw new ServiceException("保存用户失败");
             } else {
-                Integer userId = user.getId();          // 获取返回主键值
                 UserInfo userInfo = new UserInfo();
-                userInfo.setUserId(userId);
+                userInfo.setUserId(user.getId());
                 userInfo.setNickName("用户" + uuid);     // 用户昵称
                 userInfo.setPhoto("https://zh-product.oss-cn-shenzhen.aliyuncs.com/user-photo/photo.png");  // 用户默认头像
                 int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
-
                 if (insertUserInfoRow <= 0) {
                     throw new ServiceException("保存用户信息失败");
                 }
@@ -97,70 +87,6 @@ public class UserServiceImpl implements UserService {
             }
         }
         throw new ServiceException("用户已存在");
-    }
-
-    /*
-     * 获取用户基本信息
-     * */
-    @Override
-    public UserApiVO getUserApiVO(User scope) {
-        UserApiVO userApiVO = new UserApiVO();
-        UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
-        User user = userMapper.selectByScope(scope);
-
-        if (!ObjectUtils.isEmpty(user)) {
-            UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
-
-            if (ObjectUtils.isEmpty(userInfo)) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-            }
-            BeanUtils.copyProperties(user, userApiVO);
-            BeanUtils.copyProperties(userInfo, userInfoApiVO);
-            userApiVO.setUserInfoApiVO(userInfoApiVO);
-            return userApiVO;
-        }
-        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public UserApiVO aliPayUserIdGetUserApiVO(UserApiDTO userApiDTO) {
-        User scope = userApiDTO2User(userApiDTO);
-        User user = userMapper.selectByScope(scope);
-        if (ObjectUtils.isEmpty(user)) {
-            insertUser(userApiDTO);
-            user = userMapper.selectByScope(scope);
-            return user2UserApiVO(user);
-        } else {
-            return user2UserApiVO(user);
-        }
-    }
-
-    private void insertUser(UserApiDTO userApiDTO) {
-        String uuid = getUserUUID();
-        String weChat = userApiDTO.getWeChat();
-        String nickName = userApiDTO.getNickName();
-        String photo = userApiDTO.getPhoto();
-        User user = new User();
-        user.setUuid(uuid);
-        user.setWeChat(weChat);
-        int insertUserRow = userMapper.insertSelective(user);
-        if (insertUserRow > 0) {
-            UserInfo userInfo = new UserInfo();
-            userInfo.setUserId(user.getId());
-            if (StringUtils.isEmpty(nickName)) {
-                userInfo.setNickName("用户" + uuid);
-            } else {
-                userInfo.setNickName(nickName);
-            }
-            userInfo.setPhoto(photo);
-            int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
-            if (insertUserInfoRow <= 0) {
-                throw new ServiceException("保存用户信息失败");
-            }
-        } else {
-            throw new ServiceException("保存用户失败");
-        }
     }
 
     @Override
@@ -174,17 +100,16 @@ public class UserServiceImpl implements UserService {
                 UserInfo userInfo = userInfoMapper.selectByUserId(userId);
                 if (ObjectUtils.isEmpty(userInfo)) {
                     redisUtil.setObject(redisKey, PRESENT, 43200L);
-                    throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户信息不存在");
+                    throw new ServiceException("用户信息不存在");
                 } else {
-                    UserInfoVO userInfoVO = new UserInfoVO();
-                    BeanUtils.copyProperties(userInfo, userInfoVO);
+                    UserInfoVO userInfoVO = userInfo2UserInfoVO(userInfo);
                     redisUtil.setObject(redisKey, GsonUtil.obj2Json(userInfoVO), CACHE_EXPIRE_TIMEOUT);
                     return userInfoVO;
                 }
             }
             UserInfoVO userInfoVO = GsonUtil.json2Obj(str, UserInfoVO.class);
             if (ObjectUtils.isEmpty(userInfoVO)) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户信息不存在");
+                throw new ServiceException("用户信息不存在");
             }
             return userInfoVO;
         } finally {
@@ -213,6 +138,33 @@ public class UserServiceImpl implements UserService {
             throw new ServiceException("修改昵称失败");
         }
         return userInfo2UserInfoVO(userInfo);
+    }
+
+    @Override
+    public UserApiVO getUserApiVO(User scope) {
+        User user = userMapper.selectByScope(scope);
+        if (!ObjectUtils.isEmpty(user)) {
+            UserInfo userInfo = userInfoMapper.selectByUserId(user.getId());
+            if (!ObjectUtils.isEmpty(userInfo)) {
+                return user2UserApiVO(user, userInfo);
+            }
+            throw new ServiceException("用户不存在");
+        }
+        throw new ServiceException("用户不存在");
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserApiVO getUserApiVOByAliPayUserId(UserApiDTO userApiDTO) {
+        User scope = userApiDTO2User(userApiDTO);
+        User user = userMapper.selectByScope(scope);
+        if (!ObjectUtils.isEmpty(user)) {
+            return user2UserApiVO(user, user.getUserInfo());
+        } else {
+            insertUserByUserApiDTO(userApiDTO);
+            user = userMapper.selectByScope(scope);
+            return user2UserApiVO(user, user.getUserInfo());
+        }
     }
 
     @Override
@@ -247,11 +199,11 @@ public class UserServiceImpl implements UserService {
         return userInfoVO;
     }
 
-    private UserApiVO user2UserApiVO(User user) {
+    private UserApiVO user2UserApiVO(User user, UserInfo userInfo) {
         UserApiVO userApiVO = new UserApiVO();
         UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
         BeanUtils.copyProperties(user, userApiVO);
-        BeanUtils.copyProperties(user.getUserInfo(), userInfoApiVO);
+        BeanUtils.copyProperties(userInfo, userInfoApiVO);
         userApiVO.setUserInfoApiVO(userInfoApiVO);
         return userApiVO;
     }
@@ -260,6 +212,28 @@ public class UserServiceImpl implements UserService {
         UserInfoApiVO userInfoApiVO = new UserInfoApiVO();
         BeanUtils.copyProperties(userInfo, userInfoApiVO);
         return userInfoApiVO;
+    }
+
+    private void insertUserByUserApiDTO(UserApiDTO userApiDTO) {
+        String uuid = getUserUUID();
+        String weChat = userApiDTO.getWeChat();
+        String photo = userApiDTO.getPhoto();
+        User user = new User();
+        user.setUuid(uuid);
+        user.setWeChat(weChat);
+        int insertUserRow = userMapper.insertSelective(user);
+        if (insertUserRow > 0) {
+            UserInfo userInfo = new UserInfo();
+            userInfo.setUserId(user.getId());
+            userInfo.setNickName("用户" + uuid);
+            userInfo.setPhoto(photo);
+            int insertUserInfoRow = userInfoMapper.insertSelective(userInfo);
+            if (insertUserInfoRow <= 0) {
+                throw new ServiceException("保存用户信息失败");
+            }
+        } else {
+            throw new ServiceException("保存用户失败");
+        }
     }
 
 }

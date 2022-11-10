@@ -6,7 +6,7 @@ import com.zhihao.newretail.api.user.vo.UserInfoApiVO;
 import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.form.UpdateNickNameForm;
-import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
+import com.zhihao.newretail.user.vo.UserInfoVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

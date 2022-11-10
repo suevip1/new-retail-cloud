@@ -7,7 +7,7 @@ import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.dao.CategoryMapper;
 import com.zhihao.newretail.product.enums.CategoryEnum;
 import com.zhihao.newretail.product.pojo.Category;
-import com.zhihao.newretail.product.pojo.vo.CategoryVO;
+import com.zhihao.newretail.product.vo.CategoryVO;
 import com.zhihao.newretail.product.service.CategoryService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

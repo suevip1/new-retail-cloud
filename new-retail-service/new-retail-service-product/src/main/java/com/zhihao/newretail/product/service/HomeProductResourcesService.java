@@ -1,6 +1,6 @@
 package com.zhihao.newretail.product.service;
 
-import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
+import com.zhihao.newretail.product.vo.HomeProductVO;
 
 import java.util.List;
 

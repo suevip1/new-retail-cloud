@@ -3,7 +3,7 @@ package com.zhihao.newretail.cart.service;
 import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.form.CartUpdateForm;
-import com.zhihao.newretail.cart.pojo.vo.CartVO;
+import com.zhihao.newretail.cart.vo.CartVO;
 
 import java.util.List;
 

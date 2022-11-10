@@ -3,8 +3,8 @@ package com.zhihao.newretail.product.service;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
-import com.zhihao.newretail.product.pojo.vo.ProductVO;
-import com.zhihao.newretail.product.pojo.vo.ProductDetailVO;
+import com.zhihao.newretail.product.vo.ProductVO;
+import com.zhihao.newretail.product.vo.ProductDetailVO;
 
 import java.util.List;
 import java.util.Set;

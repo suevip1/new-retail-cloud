@@ -5,7 +5,7 @@ import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.admin.dao.SysRoleMapper;
 import com.zhihao.newretail.admin.pojo.SysRole;
 import com.zhihao.newretail.admin.form.SysRoleForm;
-import com.zhihao.newretail.admin.pojo.vo.SysRoleVO;
+import com.zhihao.newretail.admin.vo.SysRoleVO;
 import com.zhihao.newretail.admin.service.SysRoleService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;

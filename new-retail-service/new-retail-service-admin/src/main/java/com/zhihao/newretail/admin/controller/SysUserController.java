@@ -2,7 +2,7 @@ package com.zhihao.newretail.admin.controller;
 
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.admin.form.SysUserForm;
-import com.zhihao.newretail.admin.pojo.vo.SysUserVO;
+import com.zhihao.newretail.admin.vo.SysUserVO;
 import com.zhihao.newretail.admin.service.SysUserService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;

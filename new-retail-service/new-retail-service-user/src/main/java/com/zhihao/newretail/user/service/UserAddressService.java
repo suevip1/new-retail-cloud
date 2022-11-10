@@ -3,7 +3,7 @@ package com.zhihao.newretail.user.service;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
-import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
+import com.zhihao.newretail.user.vo.UserAddressVO;
 
 import java.util.List;
 import java.util.Set;

@@ -6,7 +6,7 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.form.UpdateNickNameForm;
-import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
+import com.zhihao.newretail.user.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;

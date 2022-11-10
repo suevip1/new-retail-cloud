@@ -5,7 +5,7 @@ import com.zhihao.newretail.api.product.dto.CategoryUpdateApiDTO;
 import com.zhihao.newretail.api.product.vo.CategoryApiVO;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.pojo.Category;
-import com.zhihao.newretail.product.pojo.vo.CategoryVO;
+import com.zhihao.newretail.product.vo.CategoryVO;
 
 import java.util.List;
 

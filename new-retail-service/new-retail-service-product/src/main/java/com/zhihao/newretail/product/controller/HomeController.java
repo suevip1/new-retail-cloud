@@ -1,8 +1,8 @@
 package com.zhihao.newretail.product.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
-import com.zhihao.newretail.product.pojo.vo.SlideVO;
+import com.zhihao.newretail.product.vo.HomeProductVO;
+import com.zhihao.newretail.product.vo.SlideVO;
 import com.zhihao.newretail.product.service.HomeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -7,7 +7,7 @@ import com.zhihao.newretail.user.dao.UserAddressMapper;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.pojo.UserAddress;
-import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
+import com.zhihao.newretail.user.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;

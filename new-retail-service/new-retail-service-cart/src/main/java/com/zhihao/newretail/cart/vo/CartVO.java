@@ -1,4 +1,4 @@
-package com.zhihao.newretail.cart.pojo.vo;
+package com.zhihao.newretail.cart.vo;
 
 import java.math.BigDecimal;
 import java.util.List;

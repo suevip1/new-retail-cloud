@@ -1,7 +1,7 @@
 package com.zhihao.newretail.product.controller;
 
 import com.zhihao.newretail.core.util.R;
-import com.zhihao.newretail.product.pojo.vo.CategoryVO;
+import com.zhihao.newretail.product.vo.CategoryVO;
 import com.zhihao.newretail.product.service.CategoryService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;

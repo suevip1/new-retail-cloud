@@ -1,4 +1,4 @@
-package com.zhihao.newretail.admin.pojo.vo;
+package com.zhihao.newretail.admin.vo;
 
 /*
  * @Project: NewRetail-Cloud

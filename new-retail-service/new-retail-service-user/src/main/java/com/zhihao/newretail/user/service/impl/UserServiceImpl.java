@@ -16,7 +16,7 @@ import com.zhihao.newretail.user.form.UserRegisterForm;
 import com.zhihao.newretail.user.pojo.User;
 import com.zhihao.newretail.user.pojo.UserInfo;
 import com.zhihao.newretail.user.form.UpdateNickNameForm;
-import com.zhihao.newretail.user.pojo.vo.UserInfoVO;
+import com.zhihao.newretail.user.vo.UserInfoVO;
 import com.zhihao.newretail.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

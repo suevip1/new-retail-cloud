@@ -5,8 +5,8 @@ import com.zhihao.newretail.api.order.vo.OrderApiVO;
 import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
 import com.zhihao.newretail.order.form.OrderSubmitForm;
 import com.zhihao.newretail.order.pojo.Order;
-import com.zhihao.newretail.order.pojo.vo.OrderCreateVO;
-import com.zhihao.newretail.order.pojo.vo.OrderVO;
+import com.zhihao.newretail.order.vo.OrderCreateVO;
+import com.zhihao.newretail.order.vo.OrderVO;
 import com.zhihao.newretail.core.util.PageUtil;
 
 public interface OrderService {

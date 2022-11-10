@@ -1,4 +1,4 @@
-package com.zhihao.newretail.order.pojo.vo;
+package com.zhihao.newretail.order.vo;
 
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.user.vo.UserAddressApiVO;

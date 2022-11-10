@@ -3,7 +3,7 @@ package com.zhihao.newretail.admin.service;
 import com.zhihao.newretail.api.admin.vo.SysUserApiVO;
 import com.zhihao.newretail.admin.pojo.SysUser;
 import com.zhihao.newretail.admin.form.SysUserForm;
-import com.zhihao.newretail.admin.pojo.vo.SysUserVO;
+import com.zhihao.newretail.admin.vo.SysUserVO;
 
 import java.util.List;
 

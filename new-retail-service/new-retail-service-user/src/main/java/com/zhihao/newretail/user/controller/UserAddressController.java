@@ -5,7 +5,7 @@ import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
-import com.zhihao.newretail.user.pojo.vo.UserAddressVO;
+import com.zhihao.newretail.user.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;

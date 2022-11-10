@@ -1,4 +1,4 @@
-package com.zhihao.newretail.user.pojo.vo;
+package com.zhihao.newretail.user.vo;
 
 public class UserAddressVO {
 

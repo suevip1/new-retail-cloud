@@ -2,7 +2,7 @@ package com.zhihao.newretail.cart.controller;
 
 import com.zhihao.newretail.cart.form.CartAddForm;
 import com.zhihao.newretail.cart.form.CartUpdateForm;
-import com.zhihao.newretail.cart.pojo.vo.CartVO;
+import com.zhihao.newretail.cart.vo.CartVO;
 import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;

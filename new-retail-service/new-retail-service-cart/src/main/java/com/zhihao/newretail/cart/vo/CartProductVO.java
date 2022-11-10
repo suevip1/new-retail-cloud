@@ -1,8 +1,8 @@
-package com.zhihao.newretail.order.pojo.vo;
+package com.zhihao.newretail.cart.vo;
 
 import java.math.BigDecimal;
 
-public class OrderItemCreateVO {
+public class CartProductVO {
 
     private Integer spuId;
 
@@ -19,6 +19,10 @@ public class OrderItemCreateVO {
     private Integer quantity;
 
     private BigDecimal totalPrice;
+
+    private Integer isSaleable;
+
+    private Boolean selected;
 
     public Integer getSpuId() {
         return spuId;
@@ -84,9 +88,50 @@ public class OrderItemCreateVO {
         this.totalPrice = totalPrice;
     }
 
+    public Integer getIsSaleable() {
+        return isSaleable;
+    }
+
+    public void setIsSaleable(Integer isSaleable) {
+        this.isSaleable = isSaleable;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
+
+    public CartProductVO() {
+    }
+
+    public CartProductVO(Integer spuId,
+                         Integer skuId,
+                         String title,
+                         String skuImage,
+                         String param,
+                         BigDecimal price,
+                         Integer quantity,
+                         BigDecimal totalPrice,
+                         Integer isSaleable,
+                         Boolean selected) {
+        this.spuId = spuId;
+        this.skuId = skuId;
+        this.title = title;
+        this.skuImage = skuImage;
+        this.param = param;
+        this.price = price;
+        this.quantity = quantity;
+        this.totalPrice = totalPrice;
+        this.isSaleable = isSaleable;
+        this.selected = selected;
+    }
+
     @Override
     public String toString() {
-        return "OrderItemCreateVO{" +
+        return "CartProductVO{" +
                 "spuId=" + spuId +
                 ", skuId=" + skuId +
                 ", title='" + title + '\'' +
@@ -95,6 +140,8 @@ public class OrderItemCreateVO {
                 ", price=" + price +
                 ", quantity=" + quantity +
                 ", totalPrice=" + totalPrice +
+                ", isSaleable=" + isSaleable +
+                ", selected=" + selected +
                 '}';
     }
 

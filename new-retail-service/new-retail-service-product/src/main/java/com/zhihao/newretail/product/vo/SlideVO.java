@@ -1,4 +1,4 @@
-package com.zhihao.newretail.product.pojo.vo;
+package com.zhihao.newretail.product.vo;
 
 public class SlideVO {
 

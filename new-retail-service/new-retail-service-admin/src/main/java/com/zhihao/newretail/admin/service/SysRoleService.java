@@ -1,7 +1,7 @@
 package com.zhihao.newretail.admin.service;
 
 import com.zhihao.newretail.admin.form.SysRoleForm;
-import com.zhihao.newretail.admin.pojo.vo.SysRoleVO;
+import com.zhihao.newretail.admin.vo.SysRoleVO;
 
 import java.util.List;
 

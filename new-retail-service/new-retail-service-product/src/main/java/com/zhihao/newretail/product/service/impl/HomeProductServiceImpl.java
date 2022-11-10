@@ -2,7 +2,7 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.product.consts.ProductCacheKeyConst;
 import com.zhihao.newretail.product.factory.HomeProductResourcesFactory;
-import com.zhihao.newretail.product.pojo.vo.HomeProductVO;
+import com.zhihao.newretail.product.vo.HomeProductVO;
 import com.zhihao.newretail.product.service.CategoryService;
 import com.zhihao.newretail.product.service.HomeProductResourcesService;
 import com.zhihao.newretail.product.service.SpuService;

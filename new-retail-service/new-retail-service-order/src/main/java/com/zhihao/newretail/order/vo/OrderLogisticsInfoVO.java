@@ -1,4 +1,4 @@
-package com.zhihao.newretail.order.pojo.vo;
+package com.zhihao.newretail.order.vo;
 
 public class OrderLogisticsInfoVO {
 

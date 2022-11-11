@@ -10,22 +10,22 @@ import java.util.Set;
 public interface SkuService {
 
     /*
-    * 新增sku
+    * 新增商品规格
     * */
     int insertSku(SkuAddApiDTO skuAddApiDTO);
 
     /*
-    * 修改sku
+    * 修改商品规格
     * */
     int updateSku(Integer skuId, SkuUpdateApiDTO skuUpdateApiDTO);
 
     /*
-    * 删除sku
+    * 删除商品规格
     * */
     int deleteSku(Integer skuId);
 
     /*
-    * 获取sku
+    * 获取商品规格
     * */
     Sku getSku(Integer skuId);
 

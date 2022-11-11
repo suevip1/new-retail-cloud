@@ -31,40 +31,6 @@ public class StockServiceImpl implements StockService {
     private SkuStockLockMapper skuStockLockMapper;
 
     @Override
-    public int insertStock(Integer skuId, Integer stockNum) {
-        SkuStock skuStock = new SkuStock();
-        skuStock.setSkuId(skuId);
-        skuStock.setActualStock(stockNum);
-        skuStock.setStock(stockNum);
-        int insertStockRow = skuStockMapper.insertSelective(skuStock);
-        if (insertStockRow <= 0) {
-            throw new ServiceException("库存写入失败");
-        }
-        return insertStockRow;
-    }
-
-    @Override
-    public int updateStock(Integer skuId, Integer stockNum) {
-        SkuStock skuStock = skuStockMapper.selectBySkuId(skuId);
-        skuStock.setActualStock(stockNum);
-        skuStock.setStock(stockNum - skuStock.getLockStock());
-        int updateRow = skuStockMapper.updateByPrimaryKeySelective(skuStock);
-        if (updateRow <= 0) {
-            throw new ServiceException("修改库存失败");
-        }
-        return updateRow;
-    }
-
-    @Override
-    public int deleteStock(Integer skuId) {
-        int deleteRow = skuStockMapper.deleteBySkuId(skuId);
-        if (deleteRow <= 0) {
-            throw new ServiceException("删除库存失败");
-        }
-        return deleteRow;
-    }
-
-    @Override
     public List<SkuStockApiVO> listSkuStockApiVOS(Set<Integer> skuIdSet) {
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         return skuStockList.stream().map(this::skuStock2SkuStockApiVO).collect(Collectors.toList());

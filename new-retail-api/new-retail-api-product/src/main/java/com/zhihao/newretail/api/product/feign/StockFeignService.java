@@ -31,6 +31,6 @@ public interface StockFeignService {
     * 批量锁定商品库存
     * */
     @PostMapping("/feign/sku-stock/batch-lock")
-    Integer batchStockLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList);
+    Integer stockBatchLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList);
 
 }

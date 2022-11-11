@@ -41,16 +41,19 @@ public class OrderNotifyMsgListener {
         log.info("商品服务, 接收解锁库存消息:{}.", msgStr);
         StockUnLockMQDTO stockUnLockMQDTO = GsonUtil.json2Obj(msgStr, StockUnLockMQDTO.class);
         Long orderNo = stockUnLockMQDTO.getOrderNo();
-        Integer version = stockUnLockMQDTO.getMqVersion();
-
-        List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
-        List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
-        try {
-            stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.UN_LOCK);
+        List<SkuStockLock> skuStockLockList = buildSkuStockLockList(stockService.listSkuStockLockS(orderNo), stockUnLockMQDTO.getMqVersion());
+        if (!CollectionUtils.isEmpty(skuStockLockList)) {
+            try {
+                stockService.updateStockByType(orderNo, skuStockLockList, SkuStockTypeEnum.UN_LOCK);
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                log.info("当前时间:{}, 订单号:{}, 解锁库存.", new Date(), orderNo);
+            } catch (Exception e) {
+                channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                log.info("当前时间:{}, 订单号:{}, 解锁库存失败, 消息回退.", new Date(), orderNo);
+            }
+        } else {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            log.info("当前时间:{}, 订单号:{}, 解锁库存.", new Date(), orderNo);
-        } catch (Exception e) {
-            channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+            log.info("当前时间:{}, 订单号:{}, 解锁库存信息为空.", new Date(), orderNo);
         }
     }
 
@@ -62,16 +65,19 @@ public class OrderNotifyMsgListener {
         log.info("商品服务, 接收删减库存消息:{}.", msgStr);
         StockSubLockMQDTO stockSubLockMQDTO = GsonUtil.json2Obj(msgStr, StockSubLockMQDTO.class);
         Long orderNo = stockSubLockMQDTO.getOrderNo();
-        Integer version = stockSubLockMQDTO.getMqVersion();
-
-        List<SkuStockLock> skuStockLockList = stockService.listSkuStockLocks(orderNo);
-        List<SkuStockLock> skuStockLocks = buildSkuStockLockList(skuStockLockList, version);
-        try {
-            stockService.updateStockByType(orderNo, skuStockLocks, SkuStockTypeEnum.SUB);
+        List<SkuStockLock> skuStockLockList = buildSkuStockLockList(stockService.listSkuStockLockS(orderNo), stockSubLockMQDTO.getMqVersion());
+        if (!CollectionUtils.isEmpty(skuStockLockList)) {
+            try {
+                stockService.updateStockByType(orderNo, skuStockLockList, SkuStockTypeEnum.SUB);
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+                log.info("当前时间:{}, 订单号:{}, 删减库存.", new Date(), orderNo);
+            } catch (Exception e) {
+                channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                log.info("当前时间:{}, 订单号:{}, 删减库存失败, 消息回退.", new Date(), orderNo);
+            }
+        } else {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-            log.info("当前时间:{}, 订单号:{}, 删减库存.", new Date(), orderNo);
-        } catch (Exception e) {
-            channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+            log.info("当前时间:{}, 订单号:{}, 删减库存信息为空.", new Date(), orderNo);
         }
     }
 

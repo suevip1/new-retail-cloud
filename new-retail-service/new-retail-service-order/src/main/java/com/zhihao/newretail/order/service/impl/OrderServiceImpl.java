@@ -5,7 +5,12 @@ import com.zhihao.newretail.api.cart.vo.CartApiVO;
 import com.zhihao.newretail.api.coupons.feign.CouponsFeignService;
 import com.zhihao.newretail.api.coupons.vo.CouponsApiVO;
 import com.zhihao.newretail.api.order.dto.OrderLogisticsInfoAddApiDTO;
-import com.zhihao.newretail.api.order.vo.*;
+import com.zhihao.newretail.api.order.vo.OrderAddressApiVO;
+import com.zhihao.newretail.api.order.vo.OrderApiVO;
+import com.zhihao.newretail.api.order.vo.OrderItemApiVO;
+import com.zhihao.newretail.api.order.vo.OrderLogisticsInfoApiVO;
+import com.zhihao.newretail.api.order.vo.OrderPayInfoApiVO;
+import com.zhihao.newretail.api.order.vo.OrderUserApiVO;
 import com.zhihao.newretail.api.product.dto.SkuStockLockApiDTO;
 import com.zhihao.newretail.api.product.feign.ProductFeignService;
 import com.zhihao.newretail.api.product.feign.StockFeignService;
@@ -34,11 +39,16 @@ import com.zhihao.newretail.order.pojo.Order;
 import com.zhihao.newretail.order.pojo.OrderAddress;
 import com.zhihao.newretail.order.pojo.OrderItem;
 import com.zhihao.newretail.order.pojo.OrderLogisticsInfo;
-import com.zhihao.newretail.order.pojo.vo.*;
 import com.zhihao.newretail.order.service.OrderMQLogService;
 import com.zhihao.newretail.order.service.OrderService;
 import com.zhihao.newretail.core.util.PageUtil;
-import com.zhihao.newretail.order.vo.*;
+import com.zhihao.newretail.order.vo.OrderAddressVO;
+import com.zhihao.newretail.order.vo.OrderCouponsVO;
+import com.zhihao.newretail.order.vo.OrderCreateVO;
+import com.zhihao.newretail.order.vo.OrderItemCreateVO;
+import com.zhihao.newretail.order.vo.OrderItemVO;
+import com.zhihao.newretail.order.vo.OrderLogisticsInfoVO;
+import com.zhihao.newretail.order.vo.OrderVO;
 import com.zhihao.newretail.rabbitmq.dto.coupons.CouponsUnSubMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.order.OrderCloseMQDTO;
 import com.zhihao.newretail.rabbitmq.dto.stock.StockUnLockMQDTO;
@@ -57,8 +67,13 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static com.zhihao.newretail.rabbitmq.consts.RabbitMQConst.*;
@@ -297,8 +312,8 @@ public class OrderServiceImpl implements OrderService {
         }
         /* 锁定商品库存 */
         try {
-            int batchStockLockRow = stockFeignService.batchStockLock(skuStockLockApiDTOList);
-            if (batchStockLockRow <= 0) {
+            int stockBatchLockRow = stockFeignService.stockBatchLock(skuStockLockApiDTOList);
+            if (stockBatchLockRow <= 0) {
                 throw new ServiceException("库存锁定失败");
             }
         } catch (Exception e) {

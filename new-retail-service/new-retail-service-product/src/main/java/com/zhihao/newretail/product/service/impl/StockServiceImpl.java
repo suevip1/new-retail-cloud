@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,6 @@ public class StockServiceImpl implements StockService {
         BeanUtils.copyProperties(skuStockLockApiDTO, skuStockLock);
         skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
         int insertSkuStockLockRow = skuStockLockMapper.insertSelective(skuStockLock);
-
         if (insertSkuStockLockRow <= 0) {
             throw new ServiceException("库存锁定失败");
         }
@@ -50,36 +50,29 @@ public class StockServiceImpl implements StockService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+    public int stockBatchLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
         /* 获取商品规格id集合 */
         Set<Integer> skuIdSet = skuStockLockApiDTOList.stream().map(SkuStockLockApiDTO::getSkuId).collect(Collectors.toSet());
-        Map<Integer, SkuStockLockApiDTO> skuStockLockApiDTOMap = skuStockLockApiDTOList2Map(skuStockLockApiDTOList);
-
-        /* id集合获取库存信息列表 */
-        List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
-        List<SkuStock> skuStocks = new ArrayList<>();
-        for (SkuStock skuStock : skuStockList) {
-            SkuStockLockApiDTO skuStockLockApiDTO = skuStockLockApiDTOMap.get(skuStock.getSkuId());
-            buildSkuStock(skuStock, skuStockLockApiDTO);
-            skuStocks.add(skuStock);
+        if (!CollectionUtils.isEmpty(skuIdSet)) {
+            Map<Integer, SkuStockLockApiDTO> skuStockLockApiDTOMap = skuStockLockApiDTOList2Map(skuStockLockApiDTOList);
+            List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);    // id集合获取库存信息列表
+            List<SkuStock> skuStocks = new ArrayList<>();
+            for (SkuStock skuStock : skuStockList) {
+                SkuStockLockApiDTO skuStockLockApiDTO = skuStockLockApiDTOMap.get(skuStock.getSkuId());
+                handleSkuStock(skuStock, skuStockLockApiDTO);
+                skuStocks.add(skuStock);
+            }
+            int updateBatchRow = skuStockMapper.updateBatch(skuStocks);
+            if (updateBatchRow >= 1) {
+                skuStockBatchLock(skuStockLockApiDTOList);
+                return updateBatchRow;
+            }
         }
-        int updateBatchRow = skuStockMapper.updateBatch(skuStocks);
-
-        /* 集合锁定库存 */
-        List<SkuStockLock> skuStockLockList = skuStockLockApiDTOList.stream()
-                .map(skuStockLockApiDTO -> {
-                    SkuStockLock skuStockLock = new SkuStockLock();
-                    BeanUtils.copyProperties(skuStockLockApiDTO, skuStockLock);
-                    skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
-                    return skuStockLock;
-                }).collect(Collectors.toList());
-        skuStockLockMapper.insertBatch(skuStockLockList);
-
-        return updateBatchRow;
+        throw new ServiceException("库存锁定信息为空");
     }
 
     @Override
-    public List<SkuStockLock> listSkuStockLocks(Long orderId) {
+    public List<SkuStockLock> listSkuStockLockS(Long orderId) {
         return skuStockLockMapper.selectListByOrderId(orderId);
     }
 
@@ -88,10 +81,8 @@ public class StockServiceImpl implements StockService {
     public void updateStockByType(Long orderId, List<SkuStockLock> skuStockLockList, SkuStockTypeEnum skuStockTypeEnum) {
         Set<Integer> skuIdSet = skuStockLockListGetSkuIdSet(skuStockLockList);
         Map<Integer, SkuStockLock> skuStockLockMap = skuStockLockList2Map(skuStockLockList);
-
         List<SkuStock> skuStockList = skuStockMapper.selectListBySkuIdSet(skuIdSet);
         List<SkuStock> skuStocks = new ArrayList<>();
-
         if (SkuStockTypeEnum.UN_LOCK.getCode().equals(skuStockTypeEnum.getCode())) {
             /* 解锁库存 */
             for (SkuStock skuStock : skuStockList) {
@@ -109,8 +100,14 @@ public class StockServiceImpl implements StockService {
                 skuStocks.add(skuStock);
             }
         }
-        skuStockMapper.updateBatch(skuStocks);
-        skuStockLockMapper.deleteByOrderId(orderId);
+        int updateBatchRow = skuStockMapper.updateBatch(skuStocks);
+        if (updateBatchRow >= 1) {
+            int deleteSkuStockLockRow = skuStockLockMapper.deleteByOrderId(orderId);
+            if (deleteSkuStockLockRow <= 0) {
+                throw new ServiceException("解锁或删减库存失败");
+            }
+        }
+        throw new ServiceException("解锁或删减库存失败");
     }
 
     private SkuStockApiVO skuStock2SkuStockApiVO(SkuStock skuStock) {
@@ -124,7 +121,15 @@ public class StockServiceImpl implements StockService {
                 .collect(Collectors.toMap(SkuStockLockApiDTO::getSkuId, skuStockLockApiDTO -> skuStockLockApiDTO));
     }
 
-    private void buildSkuStock(SkuStock skuStock, SkuStockLockApiDTO skuStockLockApiDTO) {
+    private Set<Integer> skuStockLockListGetSkuIdSet(List<SkuStockLock> skuStockLockList) {
+        return skuStockLockList.stream().map(SkuStockLock::getSkuId).collect(Collectors.toSet());
+    }
+
+    private Map<Integer, SkuStockLock> skuStockLockList2Map(List<SkuStockLock> skuStockLockList) {
+        return skuStockLockList.stream().collect(Collectors.toMap(SkuStockLock::getSkuId, skuStockLock -> skuStockLock));
+    }
+
+    private void handleSkuStock(SkuStock skuStock, SkuStockLockApiDTO skuStockLockApiDTO) {
         if (skuStock.getLockStock() == 0) {
             skuStock.setStock(skuStock.getActualStock() - skuStockLockApiDTO.getCount());
         } else {
@@ -133,12 +138,21 @@ public class StockServiceImpl implements StockService {
         skuStock.setLockStock(skuStock.getLockStock() + skuStockLockApiDTO.getCount());
     }
 
-    private Set<Integer> skuStockLockListGetSkuIdSet(List<SkuStockLock> skuStockLockList) {
-        return skuStockLockList.stream().map(SkuStockLock::getSkuId).collect(Collectors.toSet());
-    }
-
-    private Map<Integer, SkuStockLock> skuStockLockList2Map(List<SkuStockLock> skuStockLockList) {
-        return skuStockLockList.stream().collect(Collectors.toMap(SkuStockLock::getSkuId, skuStockLock -> skuStockLock));
+    /*
+    * 批量锁定库存
+    * */
+    private void skuStockBatchLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+        List<SkuStockLock> skuStockLockList = skuStockLockApiDTOList.stream()
+                .map(skuStockLockApiDTO -> {
+                    SkuStockLock skuStockLock = new SkuStockLock();
+                    BeanUtils.copyProperties(skuStockLockApiDTO, skuStockLock);
+                    skuStockLock.setStatus(SkuStockLockEnum.LOCK.getCode());
+                    return skuStockLock;
+                }).collect(Collectors.toList());
+        int insertBatchRow = skuStockLockMapper.insertBatch(skuStockLockList);
+        if (insertBatchRow <= 0) {
+            throw new ServiceException("库存锁定失败");
+        }
     }
 
 }

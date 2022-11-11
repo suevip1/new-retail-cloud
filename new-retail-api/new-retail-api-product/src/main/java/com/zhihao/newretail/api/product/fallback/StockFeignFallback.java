@@ -22,7 +22,7 @@ public class StockFeignFallback implements StockFeignService {
     }
 
     @Override
-    public Integer batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+    public Integer stockBatchLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
         return null;
     }
 

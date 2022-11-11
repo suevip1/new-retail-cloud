@@ -30,8 +30,8 @@ public class StockFeignClient {
     }
 
     @PostMapping("/sku-stock/batch-lock")
-    public Integer batchStockLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
-        return stockService.batchStockLock(skuStockLockApiDTOList);
+    public Integer stockBatchLock(@RequestBody List<SkuStockLockApiDTO> skuStockLockApiDTOList) {
+        return stockService.stockBatchLock(skuStockLockApiDTOList);
     }
 
 }

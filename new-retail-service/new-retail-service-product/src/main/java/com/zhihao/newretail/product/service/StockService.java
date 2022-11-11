@@ -23,12 +23,12 @@ public interface StockService {
     /*
     * 批量锁定商品库存
     * */
-    int batchStockLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList);
+    int stockBatchLock(List<SkuStockLockApiDTO> skuStockLockApiDTOList);
 
     /*
-    * 获取库存锁定信息
+    * 获取库存锁定信息列表
     * */
-    List<SkuStockLock> listSkuStockLocks(Long orderId);
+    List<SkuStockLock> listSkuStockLockS(Long orderId);
 
     /*
     * 解锁库存 删减库存

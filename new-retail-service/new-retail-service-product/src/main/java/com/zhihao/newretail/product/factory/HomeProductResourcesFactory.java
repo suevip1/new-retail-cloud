@@ -13,8 +13,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -50,15 +55,15 @@ public class HomeProductResourcesFactory {
                 .filter(spu -> category.getId().equals(spu.getCategoryId()))
                 .map(spu -> {
                     ProductVO productVO = BeanCopyUtil.source2Target(spu, ProductVO.class);
-                    assert productVO != null;
-                    productVO.setShowImage(spu.getSpuInfo().getShowImage());
-                    List<Sku> skuList = spu.getSkuList().stream().sorted(Comparator.comparing(Sku::getPrice)).collect(Collectors.toList());
-                    if (!CollectionUtils.isEmpty(skuList)) {
-                        productVO.setPrice(skuList.get(0).getPrice());
+                    if (!ObjectUtils.isEmpty(productVO)) {
+                        productVO.setShowImage(spu.getSpuInfo().getShowImage());
+                        List<Sku> skuList = spu.getSkuList().stream().sorted(Comparator.comparing(Sku::getPrice)).collect(Collectors.toList());
+                        if (!CollectionUtils.isEmpty(skuList)) {
+                            productVO.setPrice(skuList.get(0).getPrice());
+                        }
                     }
                     return productVO;
-                })
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
     }
 
 }

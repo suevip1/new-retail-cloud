@@ -1,6 +1,9 @@
 package com.zhihao.newretail.product.listener;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.rabbitmq.client.Channel;
 import com.zhihao.newretail.product.consts.TableNameConst;
 import com.zhihao.newretail.product.factory.ProductCacheSyncFactory;

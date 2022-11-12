@@ -129,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
             Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
             return productFeignService.listGoodsApiVOS(skuIdSet);       // 获取购物车商品信息
         }).thenApply((res) -> {
+            BigDecimal totalPrice = BigDecimal.ZERO;
             if (!CollectionUtils.isEmpty(res)) {
                 List<CartApiVO> cartApiVOList = cartListThreadLocal.get();
                 List<OrderItemCreateVO> orderItemCreateVOList = new ArrayList<>();
@@ -138,26 +139,20 @@ public class OrderServiceImpl implements OrderService {
                     orderItemCreateVOList.add(orderItemCreateVO);
                 });
                 /* 计算商品总价格 */
-                BigDecimal totalPrice = orderItemCreateVOList.stream()
-                        .map(OrderItemCreateVO::getTotalPrice)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+                totalPrice = orderItemCreateVOList.stream().map(OrderItemCreateVO::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
                 orderCreateVO.setOrderItemCreateVOList(orderItemCreateVOList);
                 orderCreateVO.setTotalPrice(totalPrice);
-                return totalPrice;
             }
-            return BigDecimal.ZERO;
+            return totalPrice;
         }).thenAccept((res) -> {
             List<UserCouponsApiVO> userCouponsApiVOList = userCouponsFeignService.listUserCouponsApiVOS();
             if (!CollectionUtils.isEmpty(userCouponsApiVOList)) {
-                Set<Integer> couponsIdSet = userCouponsApiVOList.stream()
-                        .map(UserCouponsApiVO::getCouponsId)
-                        .collect(Collectors.toSet());
+                Set<Integer> couponsIdSet = userCouponsApiVOList.stream().map(UserCouponsApiVO::getCouponsId).collect(Collectors.toSet());
                 List<CouponsApiVO> couponsApiVOList = couponsFeignService.listCouponsApiVOS(couponsIdSet);
                 if (!CollectionUtils.isEmpty(couponsApiVOList)) {
                     /* 筛选可用优惠券(满减) */
                     List<CouponsApiVO> couponsApiVOS = couponsApiVOList.stream()
-                            .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1)
-                            .collect(Collectors.toList());
+                            .filter(couponsApiVO -> res.compareTo(couponsApiVO.getCondition()) > -1).collect(Collectors.toList());
                     orderCreateVO.setCouponsApiVOList(couponsApiVOS);
                 }
             }
@@ -209,11 +204,11 @@ public class OrderServiceImpl implements OrderService {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             try {
                 UserAddressApiVO userAddressApiVO = userAddressFeignService.getUserAddressApiVO(form.getAddressId());
-                if (ObjectUtils.isEmpty(userAddressApiVO.getId())) {
-                    throw new CompletionException("收货地址不存在", new RuntimeException());
+                if (!ObjectUtils.isEmpty(userAddressApiVO.getId())) {
+                    BeanUtils.copyProperties(userAddressApiVO, orderAddress);
+                    orderAddress.setOrderId(orderNo);
                 }
-                BeanUtils.copyProperties(userAddressApiVO, orderAddress);
-                orderAddress.setOrderId(orderNo);
+                throw new CompletionException("收货地址不存在", new RuntimeException());
             } catch (NullPointerException e) {
                 throw new CompletionException("用户收货地址服务繁忙", new RuntimeException());
             }
@@ -224,10 +219,10 @@ public class OrderServiceImpl implements OrderService {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             if (!ObjectUtils.isEmpty(couponsId)) {
                 CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(couponsId);
-                if (ObjectUtils.isEmpty(couponsApiVO)) {
-                    throw new CompletionException("优惠券服务繁忙", new RuntimeException());
+                if (!ObjectUtils.isEmpty(couponsApiVO)) {
+                    BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
                 }
-                BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+                throw new CompletionException("优惠券服务繁忙", new RuntimeException());
             }
         }, executor);
 
@@ -278,7 +273,6 @@ public class OrderServiceImpl implements OrderService {
                 SkuStockLockApiDTO skuStockLockApiDTO = buildSkuStockLock(orderNo, cartApiVO.getQuantity(), goodsApiVO);
                 skuStockLockApiDTOList.add(skuStockLockApiDTO);
             }
-
         }).whenComplete((res, e) -> {
             cartListThreadLocal.remove();
             skuIdSetThreadLocal.remove();
@@ -296,15 +290,15 @@ public class OrderServiceImpl implements OrderService {
         try {
             int insertOrderRow = orderMapper.insertSelective(order);
             if (insertOrderRow <= 0) {
-                throw new ServiceException("订单确认失败");
+                throw new ServiceException("订单信息保存失败");
             }
             int insertBatchOrderItemRow = orderItemMapper.insertBatch(orderItemList);
             if (insertBatchOrderItemRow <= 0) {
-                throw new ServiceException("订单项列表确认失败");
+                throw new ServiceException("订单项列表保存失败");
             }
             int insertOrderAddressRow = orderAddressMapper.insertSelective(orderAddress);
             if (insertOrderAddressRow <= 0) {
-                throw new ServiceException("订单收货地址确认失败");
+                throw new ServiceException("订单收货地址保存失败");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -343,7 +337,6 @@ public class OrderServiceImpl implements OrderService {
         }
         /* 发送定时消息，未支付订单定时关闭 */
         int delay = 900000;     // 15分钟
-        // int delay = 60000;
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
         sendMessage(orderCloseMessageContent, delay);
         cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
@@ -357,13 +350,13 @@ public class OrderServiceImpl implements OrderService {
         /* 订单信息 */
         CompletableFuture<Void> orderVOFuture = CompletableFuture.supplyAsync(() -> {
             Order order = orderMapper.selectByPrimaryKey(orderId);
-            if (ObjectUtils.isEmpty(order)
-                    || !userId.equals(order.getUserId())
-                    || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
-                throw new CompletionException("订单不存在", new RuntimeException());
+            if (!ObjectUtils.isEmpty(order) &&
+                    userId.equals(order.getUserId()) &&
+                    DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+                BeanUtils.copyProperties(order, orderVO);
+                return orderVO;
             }
-            BeanUtils.copyProperties(order, orderVO);
-            return orderVO;
+            throw new CompletionException("订单不存在", new RuntimeException());
         }, executor).thenAccept((res) -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
             if (!ObjectUtils.isEmpty(res.getCouponsId())) {
@@ -524,15 +517,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        if (ObjectUtils.isEmpty(order)
-                || !userId.equals(order.getUserId())
-                || !OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())
-                || DeleteEnum.DELETE.getCode().equals(order.getIsDelete())) {
-            throw new ServiceException("订单不存在");
+        if (!ObjectUtils.isEmpty(order) && userId.equals(order.getUserId()) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+            if (OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())) {
+                String orderCloseMessageContent = buildOrderCloseMessageContent(order);
+                sendMessage(ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);     // 取消订单，发送消息直接关闭订单
+            } else {
+                throw new ServiceException("订单未满足取消条件");
+            }
         }
-        /* 取消订单，发送消息直接关闭订单 */
-        String orderCloseMessageContent = buildOrderCloseMessageContent(order);
-        sendMessage(ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);
+        throw new ServiceException("订单不存在");
     }
 
     @Override
@@ -543,34 +536,35 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void takeAnOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        if (ObjectUtils.isEmpty(order) || !userId.equals(order.getUserId())) {
-            throw new ServiceException("订单不存在");
-        } else if (OrderStatusEnum.NOT_TAKE.getCode().equals(order.getStatus())) {
-            order.setStatus(OrderStatusEnum.TAKE_SUCCEED.getCode());
-            orderMapper.updateByPrimaryKeySelective(order);
-        } else {
-            throw new ServiceException("订单未满足收货条件");
+        if (!ObjectUtils.isEmpty(order) && userId.equals(order.getUserId()) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+            if (OrderStatusEnum.NOT_TAKE.getCode().equals(order.getStatus())) {
+                order.setStatus(OrderStatusEnum.TAKE_SUCCEED.getCode());
+                orderMapper.updateByPrimaryKeySelective(order);
+            } else {
+                throw new ServiceException("订单未满足收货条件");
+            }
         }
+        throw new ServiceException("订单不存在");
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int updateOrder(Long orderNo, OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO) {
         Order order = orderMapper.selectByPrimaryKey(orderNo);
-        if (OrderStatusEnum.PAY_SUCCEED.getCode().equals(order.getStatus())) {
-            order.setStatus(OrderStatusEnum.NOT_TAKE.getCode());
-            OrderLogisticsInfo orderLogisticsInfo = new OrderLogisticsInfo();
-            orderLogisticsInfo.setOrderId(orderNo);
-            orderLogisticsInfo.setLogisticsId(orderLogisticsInfoAddApiDTO.getLogisticsId());
-            orderLogisticsInfo.setLogisticsCompany(orderLogisticsInfoAddApiDTO.getLogisticsCompany());
-            int updateRow = orderMapper.updateByPrimaryKeySelective(order);
-            int insertRow = orderLogisticsInfoMapper.insertSelective(orderLogisticsInfo);
-            if (updateRow <= 0 || insertRow <= 0) {
+        if (!ObjectUtils.isEmpty(order) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+            if (OrderStatusEnum.PAY_SUCCEED.getCode().equals(order.getStatus())) {
+                order.setStatus(OrderStatusEnum.NOT_TAKE.getCode());
+                int updateOrderRow = orderMapper.updateByPrimaryKeySelective(order);
+                if (updateOrderRow >= 1) {
+                    insertOrderLogisticsInfo(orderNo, orderLogisticsInfoAddApiDTO);
+                    return updateOrderRow;
+                }
                 throw new ServiceException("发货失败");
+            } else {
+                throw new ServiceException("当前订单状态不符合发货要求");
             }
-            return updateRow;
         }
-        throw new ServiceException("当前订单状态不符合发货要求");
+        throw new ServiceException("订单不存在");
     }
 
     @Override
@@ -799,6 +793,20 @@ public class OrderServiceImpl implements OrderService {
         couponsUnSubMQDTO.setQuantity(1);
         couponsUnSubMQDTO.setMqVersion(CONSUME_VERSION);
         return GsonUtil.obj2Json(couponsUnSubMQDTO);
+    }
+
+    /*
+    * 保存订单快递信息
+    * */
+    private void insertOrderLogisticsInfo(Long orderNo, OrderLogisticsInfoAddApiDTO orderLogisticsInfoAddApiDTO) {
+        OrderLogisticsInfo orderLogisticsInfo = new OrderLogisticsInfo();
+        orderLogisticsInfo.setOrderId(orderNo);
+        orderLogisticsInfo.setLogisticsId(orderLogisticsInfoAddApiDTO.getLogisticsId());
+        orderLogisticsInfo.setLogisticsCompany(orderLogisticsInfoAddApiDTO.getLogisticsCompany());
+        int insertOrderLogisticsInfoRow = orderLogisticsInfoMapper.insertSelective(orderLogisticsInfo);
+        if (insertOrderLogisticsInfoRow <= 0) {
+            throw new ServiceException("订单快递信息保存失败");
+        }
     }
 
     /*

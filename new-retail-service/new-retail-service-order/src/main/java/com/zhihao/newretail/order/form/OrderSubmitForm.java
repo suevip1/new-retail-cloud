@@ -1,8 +1,11 @@
 package com.zhihao.newretail.order.form;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
+@Data
 public class OrderSubmitForm {
 
     @NotBlank(message = "订单凭证不能为空")
@@ -12,38 +15,5 @@ public class OrderSubmitForm {
     private Integer addressId;
 
     private Integer couponsId;
-
-    public String getOrderToken() {
-        return orderToken;
-    }
-
-    public void setOrderToken(String orderToken) {
-        this.orderToken = orderToken;
-    }
-
-    public Integer getAddressId() {
-        return addressId;
-    }
-
-    public void setAddressId(Integer addressId) {
-        this.addressId = addressId;
-    }
-
-    public Integer getCouponsId() {
-        return couponsId;
-    }
-
-    public void setCouponsId(Integer couponsId) {
-        this.couponsId = couponsId;
-    }
-
-    @Override
-    public String toString() {
-        return "OrderSubmitForm{" +
-                "orderToken='" + orderToken + '\'' +
-                ", addressId=" + addressId +
-                ", couponsId=" + couponsId +
-                '}';
-    }
 
 }

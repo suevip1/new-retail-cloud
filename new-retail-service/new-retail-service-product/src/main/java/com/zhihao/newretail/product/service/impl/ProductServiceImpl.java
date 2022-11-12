@@ -86,10 +86,10 @@ public class ProductServiceImpl implements ProductService {
                 return productDetailVO;
             }
             ProductDetailVO productDetailVO = GsonUtil.json2Obj(str, ProductDetailVO.class);
-            if (ObjectUtils.isEmpty(productDetailVO)) {
-                throw new ServiceException(HttpStatus.SC_NOT_FOUND, "商品不存在");
+            if (!ObjectUtils.isEmpty(productDetailVO)) {
+                return productDetailVO;
             }
-            return productDetailVO;
+            throw new ServiceException("商品不存在");
         } finally {
             lock.unlock();
         }
@@ -103,10 +103,9 @@ public class ProductServiceImpl implements ProductService {
         return skuList.stream().map(sku -> {
             GoodsApiVO goodsApiVO = new GoodsApiVO();
             BeanUtils.copyProperties(sku, goodsApiVO);
-            spuList.stream().filter(spu -> sku.getSpuId().equals(spu.getId()))
-                    .forEach(spu -> {
-                        goodsApiVO.setTitle(spu.getTitle());
-                    });
+            spuList.stream().filter(spu -> sku.getSpuId().equals(spu.getId())).forEach(spu -> {
+                goodsApiVO.setTitle(spu.getTitle());
+            });
             return goodsApiVO;
         }).collect(Collectors.toList());
     }
@@ -134,13 +133,12 @@ public class ProductServiceImpl implements ProductService {
         }, executor);
         CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
             List<Spu> spuList = spuService.listSpuS(categoryId, pageNum, pageSize);
-            List<ProductVO> productVOList = spuList.stream()
-                    .map(spu -> {
-                        ProductVO productVO = new ProductVO();
-                        BeanUtils.copyProperties(spu, productVO);
-                        productVO.setShowImage(spu.getSpuInfo().getShowImage());
-                        return productVO;
-                    }).collect(Collectors.toList());
+            List<ProductVO> productVOList = spuList.stream().map(spu -> {
+                ProductVO productVO = new ProductVO();
+                BeanUtils.copyProperties(spu, productVO);
+                productVO.setShowImage(spu.getSpuInfo().getShowImage());
+                return productVO;
+            }).collect(Collectors.toList());
             pageUtil.setList(productVOList);
         }, executor);
         CompletableFuture.allOf(countTotalFuture, listFuture).join();
@@ -158,8 +156,7 @@ public class ProductServiceImpl implements ProductService {
         }, executor);
         CompletableFuture<Void> listFuture = CompletableFuture.runAsync(() -> {
             List<ProductApiVO> productApiVOList = spuService.listSpuS(categoryId, pageNum, pageSize).stream()
-                    .map(this::spu2ProductApiVO)
-                    .collect(Collectors.toList());
+                    .map(this::spu2ProductApiVO).collect(Collectors.toList());
             pageUtil.setList(productApiVOList);
         }, executor);
         CompletableFuture.allOf(totalFuture, listFuture).join();

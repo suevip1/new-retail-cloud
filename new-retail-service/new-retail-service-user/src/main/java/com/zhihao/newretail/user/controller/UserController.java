@@ -29,11 +29,10 @@ public class UserController {
     @PostMapping("/register")
     public R register(@Valid @RequestBody UserRegisterForm form) {
         int insertUserRow = userService.insertUser(form);
-        if (insertUserRow <= 0) {
-            throw new ServiceException("注册失败");
-        } else {
+        if (insertUserRow >= 1) {
             return R.ok("注册成功");
         }
+        throw new ServiceException("注册失败");
     }
 
     @RequiresLogin
@@ -42,7 +41,6 @@ public class UserController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.getUserInfoVO(userId);
         UserLoginContext.clean();
-
         return R.ok().put("data", userInfoVO);
     }
 
@@ -52,7 +50,6 @@ public class UserController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.updateUserInfo(userId, file);
         UserLoginContext.clean();
-
         return R.ok().put("data", userInfoVO);
     }
 
@@ -62,7 +59,6 @@ public class UserController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         UserInfoVO userInfoVO = userService.updateUserInfo(userId, form);
         UserLoginContext.clean();
-
         return R.ok().put("data", userInfoVO);
     }
 

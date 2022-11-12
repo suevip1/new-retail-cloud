@@ -59,10 +59,10 @@ public class UserAddressController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         int insertUserAddressRow = userAddressService.insertUserAddress(userId, form);
         UserLoginContext.clean();
-        if (insertUserAddressRow <= 0) {
-            throw new ServiceException("新增收货地址失败");
+        if (insertUserAddressRow >= 1) {
+            return R.ok("新增收货地址成功");
         }
-        return R.ok("新增收货地址成功");
+        throw new ServiceException("新增收货地址失败");
     }
 
     /*
@@ -74,10 +74,10 @@ public class UserAddressController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         int updateUserAddressRow = userAddressService.updateUserAddress(userId, addressId, form);
         UserLoginContext.clean();
-        if (updateUserAddressRow <= 0) {
-            throw new ServiceException("修改收货地址失败");
+        if (updateUserAddressRow >= 1) {
+            return R.ok("修改收货地址成功");
         }
-        return R.ok("修改收货地址成功");
+        throw new ServiceException("修改收货地址失败");
     }
 
     /*
@@ -89,10 +89,10 @@ public class UserAddressController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         int deleteUserAddressRow = userAddressService.deleteUserAddress(userId, addressId);
         UserLoginContext.clean();
-        if (deleteUserAddressRow <= 0) {
-            throw new ServiceException("删除收货地址失败");
+        if (deleteUserAddressRow >= 1) {
+            return R.ok("删除收货地址成功");
         }
-        return R.ok("删除收货地址成功");
+        throw new ServiceException("删除收货地址失败");
     }
 
 }

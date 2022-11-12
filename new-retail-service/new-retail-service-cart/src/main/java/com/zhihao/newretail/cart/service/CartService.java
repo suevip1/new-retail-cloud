@@ -47,7 +47,7 @@ public interface CartService {
     /*
     * Api购物车列表
     * */
-    List<CartApiVO> listCartApiVOs(Integer userId);
+    List<CartApiVO> listCartApiVOS(Integer userId);
 
     /*
     * 删除用户购物车选中的商品

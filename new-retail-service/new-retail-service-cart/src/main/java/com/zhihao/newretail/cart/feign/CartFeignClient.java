@@ -5,7 +5,10 @@ import com.zhihao.newretail.cart.service.CartService;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -20,7 +23,7 @@ public class CartFeignClient {
     @GetMapping("/cart")
     public List<CartApiVO> listCartApiVOS() {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        List<CartApiVO> cartApiVOList = cartService.listCartApiVOs(userId);
+        List<CartApiVO> cartApiVOList = cartService.listCartApiVOS(userId);
         UserLoginContext.clean();
         return cartApiVOList;
     }

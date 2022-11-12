@@ -15,8 +15,6 @@ public class CartFeignFallback implements CartFeignService {
     }
 
     @Override
-    public void deleteCartBySelected() {
-
-    }
+    public void deleteCartBySelected() {}
 
 }

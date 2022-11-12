@@ -63,23 +63,24 @@ public class PayServiceImpl implements PayService {
     @Override
     public String getBody(Long orderId) throws AlipayApiException {
         OrderPayInfoApiVO orderPayInfoApiVO = orderFeignService.getOrderPayInfoApiVO(orderId);
-        if (ObjectUtils.isEmpty(orderPayInfoApiVO.getId()) || DeleteEnum.DELETE.getCode().equals(orderPayInfoApiVO.getIsDelete())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
-        }
-        if (!OrderStatusEnum.NOT_PAY.getCode().equals(orderPayInfoApiVO.getStatus())) {
-            throw new ServiceException("订单已关闭支付");
-        }
-        AlipayTradePagePayResponse response = pagePay(orderPayInfoApiVO.getId(), orderPayInfoApiVO.getActualAmount());
-        if (response.isSuccess()) {
-            PayInfo payInfo = payInfoService.getPayInfo(orderId);
-            if (ObjectUtils.isEmpty(payInfo)) {
-                payInfo = buildPayInfo(orderPayInfoApiVO);
-                payInfoService.insertPayInfo(payInfo);
+        if (!ObjectUtils.isEmpty(orderPayInfoApiVO.getId()) && DeleteEnum.NOT_DELETE.getCode().equals(orderPayInfoApiVO.getIsDelete())) {
+            if (OrderStatusEnum.NOT_PAY.getCode().equals(orderPayInfoApiVO.getStatus())) {
+                AlipayTradePagePayResponse response = pagePay(orderPayInfoApiVO.getId(), orderPayInfoApiVO.getActualAmount());
+                if (response.isSuccess()) {
+                    PayInfo payInfo = payInfoService.getPayInfo(orderId);
+                    if (ObjectUtils.isEmpty(payInfo)) {
+                        payInfo = buildPayInfo(orderPayInfoApiVO);
+                        payInfoService.insertPayInfo(payInfo);
+                    }
+                    return response.getBody();
+                } else {
+                    throw new ServiceException("支付模块异常");
+                }
+            } else {
+                throw new ServiceException("订单已关闭支付");
             }
-            return response.getBody();
-        } else {
-            throw new ServiceException("支付模块异常");
         }
+        throw new ServiceException(HttpStatus.SC_NOT_FOUND, "订单不存在");
     }
 
     @Override

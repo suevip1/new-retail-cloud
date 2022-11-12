@@ -36,14 +36,11 @@ public class OrderNotifyMsgListener {
         String msgStr = new String(message.getBody());
         log.info("支付服务, 接收关闭支付消息:{}.", msgStr);
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
-        Integer version = payNotifyMQDTO.getMqVersion();
         PayInfo payInfo = payInfoService.getPayInfo(payNotifyMQDTO.getOrderNo());
-
         if (!ObjectUtils.isEmpty(payInfo) && DeleteEnum.NOT_DELETE.getCode().equals(payInfo.getIsDelete()) &&
                 OrderStatusEnum.NOT_PAY.getCode().equals(payInfo.getStatus())) {
             AtomicInteger payVersion = new AtomicInteger(payInfo.getMqVersion());
-
-            if (payVersion.compareAndSet(version, payVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
+            if (payVersion.compareAndSet(payNotifyMQDTO.getMqVersion(), payVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
                 payInfo.setIsDelete(DeleteEnum.DELETE.getCode());
                 payInfo.setMqVersion(payVersion.get());
                 try {
@@ -52,12 +49,13 @@ public class OrderNotifyMsgListener {
                     log.info("当前时间:{}, 订单号:{}, 关闭支付.", new Date(), payInfo.getOrderId());
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                    log.info("当前时间:{}, 订单号:{}, 关闭支付失败, 消息回退.", new Date(), payInfo.getOrderId());
                 }
             }
         } else {
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
             log.info("订单号:{}, 无需处理.", payNotifyMQDTO.getOrderNo());
         }
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
 }

@@ -11,7 +11,7 @@ import java.util.Set;
 public interface SpuService {
 
     /*
-    * 商品信息
+    * 获取商品信息(Feign)
     * */
     SpuApiVO getSpuApiVO(Integer spuId);
 

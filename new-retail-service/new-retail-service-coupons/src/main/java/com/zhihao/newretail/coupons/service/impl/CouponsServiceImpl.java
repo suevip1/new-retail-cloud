@@ -10,7 +10,6 @@ import com.zhihao.newretail.coupons.service.CouponsService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 import java.util.Set;
@@ -25,10 +24,7 @@ public class CouponsServiceImpl implements CouponsService {
     @Override
     public CouponsApiVO getCouponsApiVO(Integer couponsId) {
         Coupons coupons = couponsMapper.selectByPrimaryKey(couponsId);
-        if (!ObjectUtils.isEmpty(coupons)) {
-            return coupons2CouponsApiVO(coupons);
-        }
-        return null;
+        return coupons2CouponsApiVO(coupons);
     }
 
     @Override
@@ -38,7 +34,8 @@ public class CouponsServiceImpl implements CouponsService {
         pageUtil.setPageNum(pageNum);
         pageUtil.setPageSize(pageSize);
         pageUtil.setTotal((long) count);
-        List<CouponsApiVO> couponsApiVOList = couponsMapper.selectListBySaleable(saleable, pageNum, pageSize).stream().map(this::coupons2CouponsApiVO).collect(Collectors.toList());
+        List<CouponsApiVO> couponsApiVOList = couponsMapper.selectListBySaleable(saleable, pageNum, pageSize).stream()
+                .map(this::coupons2CouponsApiVO).collect(Collectors.toList());
         pageUtil.setList(couponsApiVOList);
         return pageUtil;
     }

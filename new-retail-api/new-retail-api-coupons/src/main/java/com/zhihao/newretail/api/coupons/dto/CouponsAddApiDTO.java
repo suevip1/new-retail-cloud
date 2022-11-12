@@ -1,8 +1,11 @@
 package com.zhihao.newretail.api.coupons.dto;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
+@Data
 public class CouponsAddApiDTO {
 
     private BigDecimal deno;
@@ -14,45 +17,5 @@ public class CouponsAddApiDTO {
     private Date endDate;
 
     private Integer maxNum;
-
-    public BigDecimal getDeno() {
-        return deno;
-    }
-
-    public void setDeno(BigDecimal deno) {
-        this.deno = deno;
-    }
-
-    public BigDecimal getCondition() {
-        return condition;
-    }
-
-    public void setCondition(BigDecimal condition) {
-        this.condition = condition;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(Date endDate) {
-        this.endDate = endDate;
-    }
-
-    public Integer getMaxNum() {
-        return maxNum;
-    }
-
-    public void setMaxNum(Integer maxNum) {
-        this.maxNum = maxNum;
-    }
 
 }

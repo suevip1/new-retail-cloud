@@ -1,6 +1,10 @@
 package com.zhihao.newretail.user.listener;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.rabbitmq.client.Channel;
 import com.zhihao.newretail.rabbitmq.consts.RabbitMQConst;
 import com.zhihao.newretail.redis.util.MyRedisUtil;

@@ -33,22 +33,26 @@ public class OrderNotifyMsgListener {
     public void couponsUnSubQueue(String msgStr, Message message, Channel channel) throws IOException {
         log.info("用户服务, 接收优惠券回退消息:{}.", msgStr);
         CouponsUnSubMQDTO couponsUnSubMQDTO = GsonUtil.json2Obj(msgStr, CouponsUnSubMQDTO.class);
-        Integer version = couponsUnSubMQDTO.getMqVersion();
-        UserCoupons userCoupons = userCouponsService.getUserCoupons(couponsUnSubMQDTO.getCouponsId());
-
+        Integer couponsId = couponsUnSubMQDTO.getCouponsId();
+        UserCoupons userCoupons = userCouponsService.getUserCoupons(couponsId);
         if (!ObjectUtils.isEmpty(userCoupons)) {
             AtomicInteger userCouponsVersion = new AtomicInteger(userCoupons.getMqVersion());
-            if (userCouponsVersion.compareAndSet(version, userCouponsVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
+            if (userCouponsVersion.compareAndSet(couponsUnSubMQDTO.getMqVersion(),
+                    userCouponsVersion.get() + RabbitMQConst.CONSUME_VERSION)) {
                 userCoupons.setQuantity(userCoupons.getQuantity() + couponsUnSubMQDTO.getQuantity());
                 userCoupons.setMqVersion(userCouponsVersion.get());
                 try {
                     userCouponsService.updateUserCoupons(userCoupons);
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
-                    log.info("当前时间:{}, 优惠券id:{}, 回退优惠券.", new Date(), couponsUnSubMQDTO.getCouponsId());
+                    log.info("当前时间:{}, 优惠券id:{}, 回退优惠券.", new Date(), couponsId);
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                    log.info("当前时间:{}, 优惠券id:{}, 回退优惠券失败, 消息回退.", new Date(), couponsId);
                 }
             }
+        } else {
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
+            log.info("当前时间:{}, 优惠券id:{}, 回退优惠券信息为空.", new Date(), couponsId);
         }
     }
 }

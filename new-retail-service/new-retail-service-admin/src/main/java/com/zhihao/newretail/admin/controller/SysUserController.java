@@ -7,7 +7,13 @@ import com.zhihao.newretail.admin.service.SysUserService;
 import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -26,37 +32,37 @@ public class SysUserController {
     @GetMapping("/user/list")
     public R userList() {
         List<SysUserVO> sysUserVOList = sysUserService.listSysUserVOS();
-        if (CollectionUtils.isEmpty(sysUserVOList)) {
-            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", sysUserVOList);
+        if (!CollectionUtils.isEmpty(sysUserVOList)) {
+            return R.ok().put("data", sysUserVOList);
         }
-        return R.ok().put("data", sysUserVOList);
+        return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", sysUserVOList);
     }
 
     @PostMapping("/user")
     public R userCreate(@Valid @RequestBody SysUserForm form) {
         int insertRow = sysUserService.insertSysUser(form);
-        if (insertRow <= 0) {
-            return R.error("创建失败");
+        if (insertRow >= 1) {
+            return R.ok("创建成功");
         }
-        return R.ok("创建成功");
+        return R.error("创建失败");
     }
 
     @PutMapping("/user/{userId}")
     public R userUpdate(@PathVariable Integer userId, @Valid @RequestBody SysUserForm form) {
         int updateRow = sysUserService.updateSysUser(userId, form);
-        if (updateRow <= 0) {
-            return R.error("修改失败");
+        if (updateRow >= 1) {
+            return R.ok("修改成功");
         }
-        return R.ok("修改成功");
+        return R.error("修改失败");
     }
 
     @DeleteMapping("/user/{userId}")
     public R userDelete(@PathVariable Integer userId) {
         int deleteRow = sysUserService.deleteSysUser(userId);
-        if (deleteRow <= 0) {
-            return R.error("删除失败");
+        if (deleteRow >= 1) {
+            return R.ok("删除成功");
         }
-        return R.ok("删除成功");
+        return R.error("删除失败");
     }
 
 }

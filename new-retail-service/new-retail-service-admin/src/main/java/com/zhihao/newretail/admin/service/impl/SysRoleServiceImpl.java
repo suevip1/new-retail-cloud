@@ -7,7 +7,6 @@ import com.zhihao.newretail.admin.pojo.SysRole;
 import com.zhihao.newretail.admin.form.SysRoleForm;
 import com.zhihao.newretail.admin.vo.SysRoleVO;
 import com.zhihao.newretail.admin.service.SysRoleService;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,10 +38,10 @@ public class SysRoleServiceImpl implements SysRoleService {
     @Override
     public SysRoleVO getSysRoleVO(Integer roleId) {
         SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
-        if (ObjectUtils.isEmpty(sysRole)) {
-            throw new ServiceException(HttpStatus.SC_NO_CONTENT, "角色不存在");
+        if (!ObjectUtils.isEmpty(sysRole)) {
+            return sysRole2SysRoleVO(sysRole);
         }
-        return sysRole2SysRoleVO(sysRole);
+        throw new ServiceException("角色不存在");
     }
 
     @Override
@@ -52,43 +51,32 @@ public class SysRoleServiceImpl implements SysRoleService {
         sysRole.setKey(form.getKey());
         sysRole.setScope(form.getScope());
         int insertRow = sysRoleMapper.insertSelective(sysRole);
-
-        if (insertRow <= 0) {
-            throw new ServiceException("新增角色失败");
+        if (insertRow >= 1) {
+            return insertRow;
         }
-        return insertRow;
+        throw new ServiceException("新增角色失败");
     }
 
     @Override
     public int updateRole(Integer roleId, SysRoleForm form) {
         SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
-        if (ObjectUtils.isEmpty(sysRole) || DeleteEnum.DELETE.getCode().equals(sysRole.getIsDelete())) {
-            throw new ServiceException("角色不存在");
+        if (!ObjectUtils.isEmpty(sysRole) && DeleteEnum.NOT_DELETE.getCode().equals(sysRole.getIsDelete())) {
+            sysRole.setName(form.getName());
+            sysRole.setKey(form.getKey());
+            sysRole.setScope(form.getScope());
+            return sysRoleMapper.updateByPrimaryKeySelective(sysRole);
         }
-        sysRole.setName(form.getName());
-        sysRole.setKey(form.getKey());
-        sysRole.setScope(form.getScope());
-        int updateRow = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
-
-        if (updateRow <= 0) {
-            throw new ServiceException("更新角色失败");
-        }
-        return updateRow;
+        throw new ServiceException("角色不存在");
     }
 
     @Override
     public int deleteRole(Integer roleId) {
         SysRole sysRole = sysRoleMapper.selectByPrimaryKey(roleId);
-        if (ObjectUtils.isEmpty(sysRole) || DeleteEnum.DELETE.getCode().equals(sysRole.getIsDelete())) {
-            throw new ServiceException("角色不存在");
+        if (!ObjectUtils.isEmpty(sysRole) && DeleteEnum.NOT_DELETE.getCode().equals(sysRole.getIsDelete())) {
+            sysRole.setIsDelete(DeleteEnum.DELETE.getCode());   // 使用逻辑删除
+            return sysRoleMapper.updateByPrimaryKeySelective(sysRole);
         }
-        sysRole.setIsDelete(DeleteEnum.DELETE.getCode());   // 使用逻辑删除
-        int updateRow = sysRoleMapper.updateByPrimaryKeySelective(sysRole);
-
-        if (updateRow <= 0) {
-            throw new ServiceException("删除角色失败");
-        }
-        return updateRow;
+        throw new ServiceException("角色不存在");
     }
 
     private SysRoleVO sysRole2SysRoleVO(SysRole sysRole) {

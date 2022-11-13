@@ -1,5 +1,7 @@
 package com.zhihao.newretail.admin.form;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -8,6 +10,7 @@ import javax.validation.constraints.NotNull;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
+@Data
 public class SysRoleForm {
 
     @NotBlank(message = "角色名不能为空")
@@ -18,29 +21,5 @@ public class SysRoleForm {
 
     @NotNull(message = "权限范围不能为空")
     private Integer scope;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public Integer getScope() {
-        return scope;
-    }
-
-    public void setScope(Integer scope) {
-        this.scope = scope;
-    }
 
 }

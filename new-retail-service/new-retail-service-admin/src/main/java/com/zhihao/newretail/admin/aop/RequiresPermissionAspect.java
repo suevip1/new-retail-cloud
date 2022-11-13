@@ -1,4 +1,4 @@
-package com.zhihao.newretail.admin.aspect;
+package com.zhihao.newretail.admin.aop;
 
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.admin.annotation.RequiresPermission;

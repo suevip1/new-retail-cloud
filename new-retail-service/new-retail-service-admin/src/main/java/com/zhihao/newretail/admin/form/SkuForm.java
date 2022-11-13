@@ -1,9 +1,12 @@
 package com.zhihao.newretail.admin.form;
 
+import lombok.Data;
+
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Data
 public class SkuForm {
 
     @NotNull(message = "请选择所属商品")
@@ -18,45 +21,5 @@ public class SkuForm {
     private Integer stock;
 
     private List<SkuParamForm> skuParamFormList;
-
-    public Integer getSpuId() {
-        return spuId;
-    }
-
-    public void setSpuId(Integer spuId) {
-        this.spuId = spuId;
-    }
-
-    public String getSkuImage() {
-        return skuImage;
-    }
-
-    public void setSkuImage(String skuImage) {
-        this.skuImage = skuImage;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getStock() {
-        return stock;
-    }
-
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
-    public List<SkuParamForm> getSkuParamFormList() {
-        return skuParamFormList;
-    }
-
-    public void setSkuParamFormList(List<SkuParamForm> skuParamFormList) {
-        this.skuParamFormList = skuParamFormList;
-    }
 
 }

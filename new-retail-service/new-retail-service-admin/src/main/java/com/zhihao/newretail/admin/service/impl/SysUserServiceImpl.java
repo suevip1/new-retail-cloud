@@ -13,7 +13,6 @@ import com.zhihao.newretail.admin.form.SysUserForm;
 import com.zhihao.newretail.admin.vo.SysRoleVO;
 import com.zhihao.newretail.admin.vo.SysUserVO;
 import com.zhihao.newretail.admin.service.SysUserService;
-import org.apache.http.HttpStatus;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,12 +65,11 @@ public class SysUserServiceImpl implements SysUserService {
         sysUser.setUsername(username);
         sysUser.setPassword(secretPassword);
         int insertRow = sysUserMapper.insertSelective(sysUser);
-        insertUserRole(sysUser.getId(), roleId);
-
-        if (insertRow <= 0) {
-            throw new ServiceException("创建用户失败");
+        if (insertRow >= 1) {
+            insertUserRole(sysUser.getId(), roleId);
+            return insertRow;
         }
-        return insertRow;
+        throw new ServiceException("创建用户失败");
     }
 
     @Override
@@ -82,33 +80,28 @@ public class SysUserServiceImpl implements SysUserService {
         Integer roleId = form.getRoleId();
 
         SysUser sysUser = sysUserMapper.selectByPrimaryKey(userId);
-        if (ObjectUtils.isEmpty(sysUser) || DeleteEnum.DELETE.getCode().equals(sysUser.getIsDelete())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
-        }
-        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
-        sysUser.setUsername(username);
-        sysUser.setPassword(secretPassword);
-        int updateRow = sysUserMapper.updateByPrimaryKeySelective(sysUser);
-        updateUserRole(userId, roleId);
-
-        if (updateRow <= 0) {
+        if (!ObjectUtils.isEmpty(sysUser) && DeleteEnum.NOT_DELETE.getCode().equals(sysUser.getIsDelete())) {
+            String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
+            sysUser.setUsername(username);
+            sysUser.setPassword(secretPassword);
+            int updateRow = sysUserMapper.updateByPrimaryKeySelective(sysUser);
+            if (updateRow >= 1) {
+                updateUserRole(userId, roleId);
+                return updateRow;
+            }
             throw new ServiceException("修改用户失败");
         }
-        return updateRow;
+        throw new ServiceException("用户不存在");
     }
 
     @Override
     public int deleteSysUser(Integer userId) {
         SysUser sysUser = sysUserMapper.selectByPrimaryKey(userId);
-        if (ObjectUtils.isEmpty(sysUser) || DeleteEnum.DELETE.getCode().equals(sysUser.getIsDelete())) {
-            throw new ServiceException(HttpStatus.SC_NOT_FOUND, "用户不存在");
+        if (!ObjectUtils.isEmpty(sysUser) && DeleteEnum.NOT_DELETE.getCode().equals(sysUser.getIsDelete())) {
+            sysUser.setIsDelete(DeleteEnum.DELETE.getCode());   // 逻辑删除
+            return sysUserMapper.updateByPrimaryKeySelective(sysUser);
         }
-        sysUser.setIsDelete(DeleteEnum.DELETE.getCode());   // 逻辑删除
-        int updateRow = sysUserMapper.updateByPrimaryKeySelective(sysUser);
-        if (updateRow <= 0) {
-            throw new ServiceException("删除用户失败");
-        }
-        return updateRow;
+        throw new ServiceException("用户不存在");
     }
 
     @Override
@@ -136,14 +129,20 @@ public class SysUserServiceImpl implements SysUserService {
         SysUserRoleKey userRole = new SysUserRoleKey();
         userRole.setUserId(userId);
         userRole.setRoleId(roleId);
-        sysUserRoleMapper.insertSelective(userRole);
+        int insertRow = sysUserRoleMapper.insertSelective(userRole);
+        if (insertRow <= 0) {
+            throw new ServiceException("用户角色关联失败");
+        }
     }
 
     /*
     * 更新用户角色关联
     * */
     private void updateUserRole(Integer userId, Integer roleId) {
-        sysUserRoleMapper.updateRoleIdByUserId(userId, roleId);
+        int updateRow = sysUserRoleMapper.updateRoleIdByUserId(userId, roleId);
+        if (updateRow <= 0) {
+            throw new ServiceException("用户角色修改失败");
+        }
     }
 
     /*

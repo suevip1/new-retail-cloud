@@ -108,36 +108,36 @@ public class UserServiceImpl implements UserService {
                 }
             }
             UserInfoVO userInfoVO = GsonUtil.json2Obj(str, UserInfoVO.class);
-            if (ObjectUtils.isEmpty(userInfoVO)) {
-                throw new ServiceException("用户信息不存在");
+            if (!ObjectUtils.isEmpty(userInfoVO)) {
+                return userInfoVO;
             }
-            return userInfoVO;
+            throw new ServiceException("用户信息不存在");
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public UserInfoVO updateUserInfo(Integer userId, MultipartFile file) throws IOException {
+    public int updateUserPhoto(Integer userId, MultipartFile file) throws IOException {
         UserInfo userInfo = userInfoMapper.selectByUserId(userId);
         String url = fileUploadFeignService.getFileUrl(file, FileUploadDirConst.USER_PHOTO);
         userInfo.setPhoto(url);
         int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
-        if (updateRow <= 0) {
-            throw new ServiceException("修改头像失败");
+        if (updateRow >= 1) {
+            return updateRow;
         }
-        return userInfo2UserInfoVO(userInfo);
+        throw new ServiceException("修改头像失败");
     }
 
     @Override
-    public UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form) {
+    public int updateUserNickName(Integer userId, UpdateNickNameForm form) {
         UserInfo userInfo = userInfoMapper.selectByUserId(userId);
         userInfo.setNickName(form.getNickName());
         int updateRow = userInfoMapper.updateByPrimaryKeySelective(userInfo);
-        if (updateRow <= 0) {
-            throw new ServiceException("修改昵称失败");
+        if (updateRow >= 1) {
+            return updateRow;
         }
-        return userInfo2UserInfoVO(userInfo);
+        throw new ServiceException("修改昵称失败");
     }
 
     @Override

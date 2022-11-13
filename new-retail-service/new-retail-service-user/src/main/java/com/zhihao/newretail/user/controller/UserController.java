@@ -1,6 +1,5 @@
 package com.zhihao.newretail.user.controller;
 
-import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -32,7 +31,7 @@ public class UserController {
         if (insertUserRow >= 1) {
             return R.ok("注册成功");
         }
-        throw new ServiceException("注册失败");
+        return R.error("注册失败");
     }
 
     @RequiresLogin
@@ -46,20 +45,26 @@ public class UserController {
 
     @RequiresLogin
     @PutMapping("/info/photo")
-    public R userInfo(@RequestPart MultipartFile file) throws IOException {
+    public R updatePhoto(@RequestPart MultipartFile file) throws IOException {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        UserInfoVO userInfoVO = userService.updateUserInfo(userId, file);
+        int updateRow = userService.updateUserPhoto(userId, file);
         UserLoginContext.clean();
-        return R.ok().put("data", userInfoVO);
+        if (updateRow >= 1) {
+            return R.ok("修改成功");
+        }
+        return R.error("修改失败");
     }
 
     @RequiresLogin
     @PutMapping("/info/nickName")
-    public R userInfo(@Valid @RequestBody UpdateNickNameForm form) {
+    public R updateNickName(@Valid @RequestBody UpdateNickNameForm form) {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
-        UserInfoVO userInfoVO = userService.updateUserInfo(userId, form);
+        int updateRow = userService.updateUserNickName(userId, form);
         UserLoginContext.clean();
-        return R.ok().put("data", userInfoVO);
+        if (updateRow >= 1) {
+            return R.ok("修改成功");
+        }
+        return R.error("修改失败");
     }
 
 }

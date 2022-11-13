@@ -1,6 +1,5 @@
 package com.zhihao.newretail.user.controller;
 
-import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.R;
 import com.zhihao.newretail.security.context.UserLoginContext;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
@@ -8,7 +7,9 @@ import com.zhihao.newretail.user.form.UserAddressAddForm;
 import com.zhihao.newretail.user.form.UserAddressUpdateForm;
 import com.zhihao.newretail.user.vo.UserAddressVO;
 import com.zhihao.newretail.user.service.UserAddressService;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +36,10 @@ public class UserAddressController {
         Integer userId = UserLoginContext.getUserLoginInfo().getUserId();
         List<UserAddressVO> userAddressVOList = userAddressService.listUserAddressVOS(userId);
         UserLoginContext.clean();
-        return R.ok().put("data", userAddressVOList);
+        if (!CollectionUtils.isEmpty(userAddressVOList)) {
+            return R.ok().put("data", userAddressVOList);
+        }
+        return R.error(HttpStatus.SC_NO_CONTENT, "暂无收货地址").put("data", userAddressVOList);
     }
 
     /*
@@ -62,7 +66,7 @@ public class UserAddressController {
         if (insertUserAddressRow >= 1) {
             return R.ok("新增收货地址成功");
         }
-        throw new ServiceException("新增收货地址失败");
+        return R.error("新增收货地址失败");
     }
 
     /*
@@ -77,7 +81,7 @@ public class UserAddressController {
         if (updateUserAddressRow >= 1) {
             return R.ok("修改收货地址成功");
         }
-        throw new ServiceException("修改收货地址失败");
+        return R.error("修改收货地址失败");
     }
 
     /*
@@ -92,7 +96,7 @@ public class UserAddressController {
         if (deleteUserAddressRow >= 1) {
             return R.ok("删除收货地址成功");
         }
-        throw new ServiceException("删除收货地址失败");
+        return R.error("删除收货地址失败");
     }
 
 }

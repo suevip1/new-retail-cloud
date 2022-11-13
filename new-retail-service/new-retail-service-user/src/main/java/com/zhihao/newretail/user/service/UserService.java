@@ -28,12 +28,12 @@ public interface UserService {
     /*
     * 用户修改头像
     * */
-    UserInfoVO updateUserInfo(Integer userId, MultipartFile file) throws IOException;
+    int updateUserPhoto(Integer userId, MultipartFile file) throws IOException;
 
     /*
     * 用户修改昵称
     * */
-    UserInfoVO updateUserInfo(Integer userId, UpdateNickNameForm form);
+    int updateUserNickName(Integer userId, UpdateNickNameForm form);
 
     /*
      * 获取用户基本信息(Feign)

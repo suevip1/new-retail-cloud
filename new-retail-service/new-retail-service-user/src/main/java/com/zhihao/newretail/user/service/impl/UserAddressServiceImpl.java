@@ -31,10 +31,10 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public UserAddressVO getUserAddressVO(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
-            throw new ServiceException("收货地址不存在");
+        if (!ObjectUtils.isEmpty(userAddress) && userId.equals(userAddress.getUserId())) {
+            return userAddress2UserAddressVO(userAddress);
         }
-        return userAddress2UserAddressVO(userAddress);
+        throw new ServiceException("收货地址不存在");
     }
 
     @Override
@@ -57,10 +57,10 @@ public class UserAddressServiceImpl implements UserAddressService {
     @Override
     public int deleteUserAddress(Integer userId, Integer addressId) {
         UserAddress userAddress = userAddressMapper.selectByPrimaryKey(addressId);
-        if (ObjectUtils.isEmpty(userAddress) || !userId.equals(userAddress.getUserId())) {
-            throw new ServiceException("收货地址不存在");
+        if (!ObjectUtils.isEmpty(userAddress) && userId.equals(userAddress.getUserId())) {
+            return userAddressMapper.deleteByPrimaryKey(addressId);
         }
-        return userAddressMapper.deleteByPrimaryKey(addressId);
+        throw new ServiceException("收货地址不存在");
     }
 
     @Override

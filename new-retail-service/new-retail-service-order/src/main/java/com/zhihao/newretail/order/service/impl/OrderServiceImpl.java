@@ -207,8 +207,9 @@ public class OrderServiceImpl implements OrderService {
                 if (!ObjectUtils.isEmpty(userAddressApiVO.getId())) {
                     BeanUtils.copyProperties(userAddressApiVO, orderAddress);
                     orderAddress.setOrderId(orderNo);
+                } else {
+                    throw new CompletionException("收货地址不存在", new RuntimeException());
                 }
-                throw new CompletionException("收货地址不存在", new RuntimeException());
             } catch (NullPointerException e) {
                 throw new CompletionException("用户收货地址服务繁忙", new RuntimeException());
             }
@@ -221,8 +222,9 @@ public class OrderServiceImpl implements OrderService {
                 CouponsApiVO couponsApiVO = couponsFeignService.getCouponsApiVO(couponsId);
                 if (!ObjectUtils.isEmpty(couponsApiVO)) {
                     BeanUtils.copyProperties(couponsApiVO, orderCouponsVO);
+                } else {
+                    throw new CompletionException("优惠券服务繁忙", new RuntimeException());
                 }
-                throw new CompletionException("优惠券服务繁忙", new RuntimeException());
             }
         }, executor);
 
@@ -517,15 +519,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        if (!ObjectUtils.isEmpty(order) && userId.equals(order.getUserId()) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+        if (!ObjectUtils.isEmpty(order) &&
+                userId.equals(order.getUserId()) &&
+                DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
             if (OrderStatusEnum.NOT_PAY.getCode().equals(order.getStatus())) {
                 String orderCloseMessageContent = buildOrderCloseMessageContent(order);
                 sendMessage(ORDER_CLOSE_ROUTING_KEY, orderCloseMessageContent);     // 取消订单，发送消息直接关闭订单
             } else {
                 throw new ServiceException("订单未满足取消条件");
             }
+        } else {
+            throw new ServiceException("订单不存在");
         }
-        throw new ServiceException("订单不存在");
     }
 
     @Override
@@ -536,15 +541,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void takeAnOrder(Integer userId, Long orderId) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
-        if (!ObjectUtils.isEmpty(order) && userId.equals(order.getUserId()) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
+        if (!ObjectUtils.isEmpty(order) &&
+                userId.equals(order.getUserId()) &&
+                DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete())) {
             if (OrderStatusEnum.NOT_TAKE.getCode().equals(order.getStatus())) {
                 order.setStatus(OrderStatusEnum.TAKE_SUCCEED.getCode());
                 orderMapper.updateByPrimaryKeySelective(order);
             } else {
                 throw new ServiceException("订单未满足收货条件");
             }
+        } else {
+            throw new ServiceException("订单不存在");
         }
-        throw new ServiceException("订单不存在");
     }
 
     @Override

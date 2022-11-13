@@ -46,15 +46,16 @@ public class PayNotifyMsgListener {
     public void payNotifyQueue(String msgStr, Message message, Channel channel) throws IOException {
         log.info("订单服务, 接收支付成功通知消息:{}.", msgStr);
         PayNotifyMQDTO payNotifyMQDTO = GsonUtil.json2Obj(msgStr, PayNotifyMQDTO.class);
-        Integer version = payNotifyMQDTO.getMqVersion();
         Order order = orderService.getOrder(payNotifyMQDTO.getOrderNo());
 
-        if (!ObjectUtils.isEmpty(order) && DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete()) &&
+        if (!ObjectUtils.isEmpty(order) &&
+                DeleteEnum.NOT_DELETE.getCode().equals(order.getIsDelete()) &&
                 payNotifyMQDTO.getUserId().equals(order.getUserId()) &&
                 payNotifyMQDTO.getPayAmount().equals(order.getActualAmount())) {
             AtomicInteger orderVersion = new AtomicInteger(order.getMqVersion());
-            if (orderVersion.compareAndSet(version, orderVersion.get() + CONSUME_VERSION)
-                    || StringUtils.isEmpty(order.getOrderCode())) {
+            if (orderVersion.compareAndSet(payNotifyMQDTO.getMqVersion(),
+                    orderVersion.get() + CONSUME_VERSION) ||
+                    StringUtils.isEmpty(order.getOrderCode())) {
                 /* 更新订单状态 */
                 order.setOrderCode(payNotifyMQDTO.getPlatformNumber());
                 order.setPaymentType(payNotifyMQDTO.getPayPlatform());
@@ -67,11 +68,16 @@ public class PayNotifyMsgListener {
                     log.info("当前时间:{}, 订单号:{}, 付款成功.", new Date(), order.getId());
                     channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
                 } catch (Exception e) {
+                    log.info("当前时间:{}, 订单号:{}, 付款通知消费失败, 消息回退.", new Date(), order.getId());
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
+                    throw e;
                 }
             }
+        } else {
+            // TODO 订单不存在、订单支付金额不对待处理
+            log.info("当前时间:{}, 订单号:{}, 付款通知消息异常, 待处理.", new Date(), order.getId());
+            channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
         }
-        channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
     }
 
     private void sendStockSubLockNotifyMessage(String content) {

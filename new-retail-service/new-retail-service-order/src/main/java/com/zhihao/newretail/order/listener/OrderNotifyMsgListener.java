@@ -71,6 +71,7 @@ public class OrderNotifyMsgListener {
                 } catch (Exception e) {
                     channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                     log.info("当前时间:{}, 订单号:{}, 关闭订单失败, 消息回退.", new Date(), order.getId());
+                    throw e;
                 }
             }
         } else {

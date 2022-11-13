@@ -1,4 +1,4 @@
-package com.zhihao.newretail.security.aspect;
+package com.zhihao.newretail.security.aop;
 
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.zhihao.newretail.core.exception.ServiceException;

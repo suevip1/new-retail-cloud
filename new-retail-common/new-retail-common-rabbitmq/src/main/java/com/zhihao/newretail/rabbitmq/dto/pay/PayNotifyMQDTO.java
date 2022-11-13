@@ -1,5 +1,7 @@
 package com.zhihao.newretail.rabbitmq.dto.pay;
 
+import lombok.Data;
+
 import java.math.BigDecimal;
 
 /*
@@ -7,6 +9,7 @@ import java.math.BigDecimal;
  * @Author: Zhihao
  * @Email: cafebabe0508@163.com
  * */
+@Data
 public class PayNotifyMQDTO {
 
     private Long orderNo;
@@ -22,74 +25,5 @@ public class PayNotifyMQDTO {
     private Integer status;
 
     private Integer mqVersion;
-
-    public Long getOrderNo() {
-        return orderNo;
-    }
-
-    public void setOrderNo(Long orderNo) {
-        this.orderNo = orderNo;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getPlatformNumber() {
-        return platformNumber;
-    }
-
-    public void setPlatformNumber(String platformNumber) {
-        this.platformNumber = platformNumber;
-    }
-
-    public BigDecimal getPayAmount() {
-        return payAmount;
-    }
-
-    public void setPayAmount(BigDecimal payAmount) {
-        this.payAmount = payAmount;
-    }
-
-    public Integer getPayPlatform() {
-        return payPlatform;
-    }
-
-    public void setPayPlatform(Integer payPlatform) {
-        this.payPlatform = payPlatform;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Integer getMqVersion() {
-        return mqVersion;
-    }
-
-    public void setMqVersion(Integer mqVersion) {
-        this.mqVersion = mqVersion;
-    }
-
-    @Override
-    public String toString() {
-        return "PayNotifyMQDTO{" +
-                "orderNo=" + orderNo +
-                ", userId=" + userId +
-                ", platformNumber='" + platformNumber + '\'' +
-                ", payAmount=" + payAmount +
-                ", payPlatform=" + payPlatform +
-                ", status=" + status +
-                ", mqVersion=" + mqVersion +
-                '}';
-    }
 
 }

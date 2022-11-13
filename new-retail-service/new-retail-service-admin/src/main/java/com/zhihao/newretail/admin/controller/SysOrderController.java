@@ -9,7 +9,10 @@ import com.zhihao.newretail.admin.context.SysUserTokenContext;
 import com.zhihao.newretail.admin.service.SysOrderService;
 import com.zhihao.newretail.security.annotation.RequiresLogin;
 import com.zhihao.newretail.security.context.UserLoginContext;
+import org.apache.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -32,7 +35,10 @@ public class SysOrderController {
         SysUserTokenContext.setUserToken(userToken);
         OrderApiVO orderApiVO = sysOrderService.getOrderApiVO(orderNo);
         UserLoginContext.sysClean();
-        return R.ok().put("data", orderApiVO);
+        if (!ObjectUtils.isEmpty(orderApiVO.getId())) {
+            return R.ok().put("data", orderApiVO);
+        }
+        return R.error(HttpStatus.SC_NOT_FOUND, "订单不存在").put("data", orderApiVO);
     }
 
     @RequiresLogin
@@ -42,14 +48,19 @@ public class SysOrderController {
                        @RequestParam(required = false) Integer status,
                        @RequestParam(defaultValue = "1") Integer pageNum,
                        @RequestParam(defaultValue = "10") Integer pageSize) {
-        if (pageNum == 0 || pageSize == 0) {
+        if (pageNum != 0 && pageSize != 0) {
+            String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
+            SysUserTokenContext.setUserToken(userToken);
+            PageUtil<OrderApiVO> pageData = sysOrderService.listOrderApiVOSByPage(orderNo, userId, status, pageNum, pageSize);
+            UserLoginContext.sysClean();
+            if (!CollectionUtils.isEmpty(pageData.getList())) {
+                return R.ok().put("data", pageData);
+            }
+            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", pageData);
+        } else {
+            UserLoginContext.sysClean();
             throw new ServiceException("分页参数不能为0");
         }
-        String userToken = UserLoginContext.getSysUserLoginVO().getUserToken();
-        SysUserTokenContext.setUserToken(userToken);
-        PageUtil<OrderApiVO> pageData = sysOrderService.listOrderApiVOSByPage(orderNo, userId, status, pageNum, pageSize);
-        UserLoginContext.sysClean();
-        return R.ok().put("data", pageData);
     }
 
     @RequiresLogin
@@ -59,13 +70,13 @@ public class SysOrderController {
         SysUserTokenContext.setUserToken(userToken);
         Integer updateRow = sysOrderService.deliverGoods(form);
         UserLoginContext.sysClean();
-        if (updateRow == null) {
-            throw new ServiceException("订单服务繁忙");
+        if (updateRow != null) {
+            if (updateRow >= 1) {
+                return R.ok("发货成功");
+            }
+            return R.error("发货失败");
         }
-        if (updateRow <= 0) {
-            throw new ServiceException("订单发货失败");
-        }
-        return R.ok("发货成功");
+        throw new ServiceException("订单服务繁忙");
     }
 
 }

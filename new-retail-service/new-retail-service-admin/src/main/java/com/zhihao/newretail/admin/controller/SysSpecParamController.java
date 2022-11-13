@@ -38,9 +38,8 @@ public class SysSpecParamController {
         UserLoginContext.sysClean();
         if (!CollectionUtils.isEmpty(specParamApiVOList)) {
             return R.ok().put("data", specParamApiVOList);
-        } else {
-            return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", specParamApiVOList);
         }
+        return R.error(HttpStatus.SC_NO_CONTENT, "暂无数据").put("data", specParamApiVOList);
     }
 
     @RequiresLogin
@@ -50,13 +49,13 @@ public class SysSpecParamController {
         SysUserTokenContext.setUserToken(userToken);
         Integer insertRow = specParamService.addSpecParam(specParamAddApiDTO);
         UserLoginContext.sysClean();
-        if (insertRow == null) {
-            throw new ServiceException("商品服务繁忙");
+        if (insertRow != null) {
+            if (insertRow >= 1) {
+                return R.ok("新增商品分类通用参数成功");
+            }
+            return R.error("新增商品分类通用参数失败");
         }
-        if (insertRow <= 0) {
-            throw new ServiceException("新增商品分类通用参数失败");
-        }
-        return R.ok();
+        throw new ServiceException("商品服务繁忙");
     }
 
     @RequiresLogin
@@ -66,13 +65,13 @@ public class SysSpecParamController {
         SysUserTokenContext.setUserToken(userToken);
         Integer updateRow = specParamService.updateSpecParam(specParamId, specParamUpdateApiDTO);
         UserLoginContext.sysClean();
-        if (updateRow == null) {
-            throw new ServiceException("商品服务繁忙");
+        if (updateRow != null) {
+            if (updateRow >= 1) {
+                return R.ok("修改商品分类通用参数成功");
+            }
+            return R.error("修改商品分类通用参数失败");
         }
-        if (updateRow <= 0) {
-            throw new ServiceException("修改商品分类通用参数失败");
-        }
-        return R.ok();
+        throw new ServiceException("商品服务繁忙");
     }
 
     @RequiresLogin
@@ -82,13 +81,13 @@ public class SysSpecParamController {
         SysUserTokenContext.setUserToken(userToken);
         Integer deleteRow = specParamService.deleteSpecParam(specParamId);
         UserLoginContext.sysClean();
-        if (deleteRow == null) {
-            throw new ServiceException("商品服务繁忙");
+        if (deleteRow != null) {
+            if (deleteRow >= 1) {
+                return R.ok("删除商品分类通用参数成功");
+            }
+            return R.error("删除商品分类通用参数失败");
         }
-        if (deleteRow <= 0) {
-            throw new ServiceException("删除商品分类通用参数失败");
-        }
-        return R.ok();
+        throw new ServiceException("商品服务繁忙");
     }
 
 }

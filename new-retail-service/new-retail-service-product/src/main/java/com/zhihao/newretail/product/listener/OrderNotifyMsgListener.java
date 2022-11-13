@@ -50,6 +50,7 @@ public class OrderNotifyMsgListener {
             } catch (Exception e) {
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 log.info("当前时间:{}, 订单号:{}, 解锁库存失败, 消息回退.", new Date(), orderNo);
+                throw e;
             }
         } else {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
@@ -74,6 +75,7 @@ public class OrderNotifyMsgListener {
             } catch (Exception e) {
                 channel.basicReject(message.getMessageProperties().getDeliveryTag(), true);
                 log.info("当前时间:{}, 订单号:{}, 删减库存失败, 消息回退.", new Date(), orderNo);
+                throw e;
             }
         } else {
             channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);

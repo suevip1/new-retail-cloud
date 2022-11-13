@@ -67,6 +67,7 @@ public class StockServiceImpl implements StockService {
                 skuStockBatchLock(skuStockLockApiDTOList);
                 return updateBatchRow;
             }
+            throw new ServiceException("商品库存锁定失败");
         }
         throw new ServiceException("库存锁定信息为空");
     }
@@ -106,8 +107,9 @@ public class StockServiceImpl implements StockService {
             if (deleteSkuStockLockRow <= 0) {
                 throw new ServiceException("解锁或删减库存失败");
             }
+        } else {
+            throw new ServiceException("解锁或删减库存失败");
         }
-        throw new ServiceException("解锁或删减库存失败");
     }
 
     private SkuStockApiVO skuStock2SkuStockApiVO(SkuStock skuStock) {

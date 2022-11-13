@@ -23,9 +23,8 @@ public class TokenController {
         String newToken = tokenService.verifierToken(token, tokenTypeEnum);
         if (!StringUtils.isEmpty(newToken)) {
             return R.ok().put("token", newToken);
-        } else {
-            return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", newToken);
         }
+        return R.error(HttpStatus.SC_UNAUTHORIZED, "凭证已过期，请重新登录").put("token", newToken);
     }
 
 }

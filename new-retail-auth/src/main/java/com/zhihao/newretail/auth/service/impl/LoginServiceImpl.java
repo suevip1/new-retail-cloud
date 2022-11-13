@@ -7,7 +7,6 @@ import com.alipay.api.response.AlipaySystemOauthTokenResponse;
 import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
 import com.zhihao.newretail.api.admin.feign.SysUserFeignService;
@@ -94,30 +93,30 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public String loginAdmin(UserLoginForm form) {
         SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
-        if (ObjectUtils.isEmpty(sysUserApiVO)) {
-            throw new ServiceException("系统服务繁忙");
-        }
-        String username = sysUserApiVO.getUsername();
-        String password = form.getPassword();
-        String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
+        if (!ObjectUtils.isEmpty(sysUserApiVO)) {
+            String username = sysUserApiVO.getUsername();
+            String password = form.getPassword();
+            String secretPassword = MyMD5SecretUtil.getSecretPassword(password, username);
 
-        if (ObjectUtils.isEmpty(sysUserApiVO.getId())) {
-            throw new ServiceException("用户不存在");
-        } else if (!secretPassword.equals(sysUserApiVO.getPassword())) {
-            throw new ServiceException("密码错误");
-        } else {
-            SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
-            sysUserLoginVO.setUserToken(MyUUIDUtil.getUUID());
-            sysUserLoginVO.setId(sysUserApiVO.getId());
-            sysUserLoginVO.setUsername(sysUserApiVO.getUsername());
-            sysUserLoginVO.setName(sysUserApiVO.getName());
+            if (ObjectUtils.isEmpty(sysUserApiVO.getId())) {
+                throw new ServiceException("用户不存在");
+            } else if (!secretPassword.equals(sysUserApiVO.getPassword())) {
+                throw new ServiceException("密码错误");
+            } else {
+                SysUserLoginVO sysUserLoginVO = new SysUserLoginVO();
+                sysUserLoginVO.setUserToken(MyUUIDUtil.getUUID());
+                sysUserLoginVO.setId(sysUserApiVO.getId());
+                sysUserLoginVO.setUsername(sysUserApiVO.getUsername());
+                sysUserLoginVO.setName(sysUserApiVO.getName());
 
-            String token = tokenService.getToken(sysUserLoginVO);
-            if (!StringUtils.isEmpty(token)) {
-                return token;
+                String token = tokenService.getToken(sysUserLoginVO);
+                if (!StringUtils.isEmpty(token)) {
+                    return token;
+                }
+                throw new ServiceException("登录失败");
             }
-            throw new ServiceException("登录失败");
         }
+        throw new ServiceException("系统服务繁忙");
     }
 
     private AlipaySystemOauthTokenResponse oauthToken(String code) throws AlipayApiException {
@@ -141,9 +140,8 @@ public class LoginServiceImpl implements LoginService {
             userApiDTO.setNickName(jsonObject.get("nick_name").getAsString());
             userApiDTO.setPhoto(jsonObject.get("avatar").getAsString());
             return userApiDTO;
-        } else {
-            throw new ServiceException("临时授权已过期");
         }
+        throw new ServiceException("临时授权已过期");
     }
 
     private UserLoginVO userApiVOBuildUserLoginVO(UserApiVO userApiVO) {

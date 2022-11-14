@@ -1,11 +1,10 @@
 package com.zhihao.newretail.admin.feign;
 
-import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
 import com.zhihao.newretail.api.admin.vo.SysUserApiVO;
 import com.zhihao.newretail.admin.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +20,9 @@ public class SysUserFeignClient {
     @Autowired
     private SysUserService sysUserService;
 
-    @PostMapping("/sys/user-info")
-    public SysUserApiVO getSysUserApiVO(@RequestBody SysUserApiDTO userApiDTO) {
-        return sysUserService.getSysUserApiVO(userApiDTO.getUsername());
+    @GetMapping("/sys/user-info/{username}")
+    public SysUserApiVO getSysUserApiVO(@PathVariable String username) {
+        return sysUserService.getSysUserApiVO(username);
     }
 
 }

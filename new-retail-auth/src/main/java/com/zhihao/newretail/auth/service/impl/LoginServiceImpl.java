@@ -8,7 +8,6 @@ import com.alipay.api.response.AlipayUserInfoShareResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.zhihao.newretail.api.admin.dto.SysUserApiDTO;
 import com.zhihao.newretail.api.admin.feign.SysUserFeignService;
 import com.zhihao.newretail.api.admin.vo.SysUserApiVO;
 import com.zhihao.newretail.api.user.dto.UserApiDTO;
@@ -92,7 +91,7 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public String loginAdmin(UserLoginForm form) {
-        SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(new SysUserApiDTO(form.getUsername()));
+        SysUserApiVO sysUserApiVO = sysUserFeignService.getSysUserApiVO(form.getUsername());
         if (!ObjectUtils.isEmpty(sysUserApiVO)) {
             String username = sysUserApiVO.getUsername();
             String password = form.getPassword();

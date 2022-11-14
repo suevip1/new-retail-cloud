@@ -33,11 +33,6 @@ spring:
           predicates:
             - Path=/new-retail-product/**
 
-        - id: new-retail-cart
-          uri: lb://new-retail-cart
-          predicates:
-            - Path=/new-retail-cart/**
-
         - id: new-retail-order
           uri: lb://new-retail-order
           predicates:
@@ -47,11 +42,6 @@ spring:
           uri: lb://new-retail-pay
           predicates:
             - Path=/new-retail-pay/**
-
-        - id: new-retail-coupons
-          uri: lb://new-retail-coupons
-          predicates:
-            - Path=/new-retail-coupons/**
 
         - id: new-retail-admin
           uri: lb://new-retail-admin

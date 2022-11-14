@@ -6,8 +6,13 @@
     <modules>
         <module>new-retail-common</module>
         <module>new-retail-gateway</module>
-        <module>new-retail-service</module>
         <module>new-retail-auth</module>
+        <module>new-retail-user</module>
+        <module>new-retail-product</module>
+        <module>new-retail-order</module>
+        <module>new-retail-pay</module>
+        <module>new-retail-admin</module>
+        <module>new-retail-file</module>
         <module>new-retail-api</module>
     </modules>
     <parent>

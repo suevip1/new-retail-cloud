@@ -14,8 +14,6 @@
     <modules>
         <module>new-retail-api-user</module>
         <module>new-retail-api-product</module>
-        <module>new-retail-api-coupons</module>
-        <module>new-retail-api-cart</module>
         <module>new-retail-api-order</module>
         <module>new-retail-api-admin</module>
         <module>new-retail-api-file</module>

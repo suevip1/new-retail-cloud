@@ -2,11 +2,11 @@ package com.zhihao.newretail.product.service.impl;
 
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.ProductApiVO;
-import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.core.util.GsonUtil;
 import com.zhihao.newretail.core.util.PageUtil;
 import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
+import com.zhihao.newretail.product.pojo.SpuInfo;
 import com.zhihao.newretail.product.vo.GoodsVO;
 import com.zhihao.newretail.product.vo.ProductInfoVO;
 import com.zhihao.newretail.product.vo.ProductVO;
@@ -16,7 +16,6 @@ import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
 import com.zhihao.newretail.redis.util.MyRedisUtil;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.zhihao.newretail.product.consts.ProductCacheKeyConst.*;
@@ -58,38 +58,32 @@ public class ProductServiceImpl implements ProductService {
         try {
             String redisKey = String.format(PRODUCT_DETAIL, spuId);     // 获取缓存key
             String str = (String) redisUtil.getObject(redisKey);
+            if (!StringUtils.isEmpty(str)) {
+                return GsonUtil.json2Obj(str, ProductDetailVO.class);
+            }
             /* 缓存不存在查询数据库 */
-            if (StringUtils.isEmpty(str)) {
-                ProductDetailVO productDetailVO = new ProductDetailVO();
-                CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
-                    Spu spu = spuService.getSpu(spuId);
-                    if (!ObjectUtils.isEmpty(spu)) {
-                        ProductInfoVO productInfoVO = new ProductInfoVO();
-                        BeanUtils.copyProperties(spu, productDetailVO);
-                        BeanUtils.copyProperties(spu.getSpuInfo(), productInfoVO);
-                        productDetailVO.setProductInfoVO(productInfoVO);
-                    }
-                }, executor);
-                CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
-                    List<Sku> skuList = skuService.listSkuS(spuId);
-                    if (!CollectionUtils.isEmpty(skuList)) {
-                        List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
-                        productDetailVO.setGoodsVOList(goodsVOList);
-                    }
-                }, executor);
-                CompletableFuture.allOf(detailFuture, goodsVOListFuture).join();
-                if (ObjectUtils.isEmpty(productDetailVO.getId())) {
-                    redisUtil.setObject(redisKey, PRESENT, 43200L);     // 数据不存在处理缓存穿透
-                } else {
-                    redisUtil.setObject(redisKey, GsonUtil.obj2Json(productDetailVO));
+            AtomicReference<ProductDetailVO> productDetailVOAtomicReference = new AtomicReference<>(new ProductDetailVO());
+            CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
+                Spu spu = spuService.getSpu(spuId);
+                if (!ObjectUtils.isEmpty(spu)) {
+                    productDetailVOAtomicReference.set(spu2ProductDetailVO(spu));
+                    productDetailVOAtomicReference.get().setProductInfoVO(spuInfo2ProductInfoVO(spu.getSpuInfo()));
                 }
-                return productDetailVO;
+            }, executor);
+            CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
+                List<Sku> skuList = skuService.listSkuS(spuId);
+                if (!CollectionUtils.isEmpty(skuList)) {
+                    List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
+                    productDetailVOAtomicReference.get().setGoodsVOList(goodsVOList);
+                }
+            }, executor);
+            CompletableFuture.allOf(detailFuture, goodsVOListFuture).join();
+            if (ObjectUtils.isEmpty(productDetailVOAtomicReference.get().getId())) {
+                redisUtil.setObject(redisKey, PRESENT, 43200L);     // 数据不存在处理缓存穿透
+            } else {
+                redisUtil.setObject(redisKey, GsonUtil.obj2Json(productDetailVOAtomicReference.get()));
             }
-            ProductDetailVO productDetailVO = GsonUtil.json2Obj(str, ProductDetailVO.class);
-            if (!ObjectUtils.isEmpty(productDetailVO)) {
-                return productDetailVO;
-            }
-            throw new ServiceException("商品不存在");
+            return productDetailVOAtomicReference.get();
         } finally {
             lock.unlock();
         }
@@ -161,6 +155,18 @@ public class ProductServiceImpl implements ProductService {
         }, executor);
         CompletableFuture.allOf(totalFuture, listFuture).join();
         return pageUtil;
+    }
+
+    private ProductDetailVO spu2ProductDetailVO(Spu spu) {
+        ProductDetailVO productDetailVO = new ProductDetailVO();
+        BeanUtils.copyProperties(spu, productDetailVO);
+        return productDetailVO;
+    }
+
+    private ProductInfoVO spuInfo2ProductInfoVO(SpuInfo spuInfo) {
+        ProductInfoVO productInfoVO = new ProductInfoVO();
+        BeanUtils.copyProperties(spuInfo, productInfoVO);
+        return productInfoVO;
     }
 
     private GoodsVO sku2GoodsVO(Sku sku) {

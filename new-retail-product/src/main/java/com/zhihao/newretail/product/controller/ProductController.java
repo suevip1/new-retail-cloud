@@ -24,7 +24,7 @@ public class ProductController {
     @GetMapping("/detail/{spuId}")
     public R productDetail(@PathVariable Integer spuId) {
         ProductDetailVO productDetailVO = productService.getProductDetailVO(spuId);
-        if (!ObjectUtils.isEmpty(productDetailVO.getId())) {
+        if (!ObjectUtils.isEmpty(productDetailVO)) {
             return R.ok().put("data", productDetailVO);
         }
         return R.error(HttpStatus.SC_NOT_FOUND, "商品不存在");

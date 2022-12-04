@@ -28,8 +28,13 @@ public interface SkuMapper {
     List<Sku> selectListBySpuId(Integer spuId);
 
     /*
-    * 批量查询
-    * */
+     * 批量查询
+     * */
     List<Sku> selectListByIdSet(@Param("idSet") Set<Integer> idSet);
+
+    /*
+     * 批量查询(spuIdSet)
+     * */
+    List<Sku> selectListBySpuIdSet(@Param("spuIdSet") Set<Integer> spuIdSet);
 
 }

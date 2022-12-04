@@ -45,6 +45,13 @@ public interface SpuMapper {
                                                   @Param("pageSize") Integer pageSize);
 
     /*
+     * spu spuInfo sku连表查询多条数据
+     * */
+    List<Spu> selectSpuListByPage(@Param("categoryId") Integer categoryId,
+                                  @Param("pageNum") Integer pageNum,
+                                  @Param("pageSize") Integer pageSize);
+
+    /*
     * spu spuInfo连表查询单条数据
     * */
     Spu selectSpuSpuInfoByPrimaryKey(Integer id);

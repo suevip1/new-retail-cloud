@@ -167,4 +167,14 @@
       id = #{item}
     </foreach>
   </select>
+
+  <select id="selectListBySpuIdSet" parameterType="java.util.Set" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from tb_sku
+    where is_saleable = 1 and is_delete = 0
+    <foreach collection="spuIdSet" item="item" open="and" separator="or">
+      spu_id = #{item}
+    </foreach>
+  </select>
 </mapper>

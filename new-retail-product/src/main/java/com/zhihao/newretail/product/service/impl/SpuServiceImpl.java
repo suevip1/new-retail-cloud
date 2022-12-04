@@ -7,16 +7,20 @@ import com.zhihao.newretail.api.product.vo.SpuInfoApiVO;
 import com.zhihao.newretail.core.exception.ServiceException;
 import com.zhihao.newretail.product.dao.SpuInfoMapper;
 import com.zhihao.newretail.product.dao.SpuMapper;
+import com.zhihao.newretail.product.pojo.Sku;
 import com.zhihao.newretail.product.pojo.Spu;
 import com.zhihao.newretail.product.pojo.SpuInfo;
+import com.zhihao.newretail.product.service.SkuService;
 import com.zhihao.newretail.product.service.SpuService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SpuServiceImpl implements SpuService {
@@ -26,6 +30,9 @@ public class SpuServiceImpl implements SpuService {
 
     @Autowired
     private SpuInfoMapper spuInfoMapper;
+
+    @Autowired
+    private SkuService skuService;
 
     @Override
     public SpuApiVO getSpuApiVO(Integer spuId) {
@@ -81,7 +88,16 @@ public class SpuServiceImpl implements SpuService {
 
     @Override
     public List<Spu> listSpuS(Integer categoryId, Integer pageNum, Integer pageSize) {
-        return spuMapper.selectSpuSpuInfoSkuListByCategoryId(categoryId, pageNum, pageSize);
+        List<Spu> spuList = spuMapper.selectSpuListByPage(categoryId, pageNum, pageSize);
+        Set<Integer> spuIdSet = spuList.stream().map(Spu::getId).collect(Collectors.toSet());
+        List<Sku> skuList = skuService.listSkuSBySpuIdSet(spuIdSet);
+        List<Spu> spus = new ArrayList<>();
+        for (Spu spu : spuList) {
+            List<Sku> skus = skuList.stream().filter(sku -> spu.getId().equals(sku.getSpuId())).collect(Collectors.toList());
+            spu.setSkuList(skus);
+            spus.add(spu);
+        }
+        return spus;
     }
 
     @Override

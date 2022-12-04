@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static com.zhihao.newretail.product.consts.ProductCacheKeyConst.*;
@@ -62,28 +61,28 @@ public class ProductServiceImpl implements ProductService {
                 return GsonUtil.json2Obj(str, ProductDetailVO.class);
             }
             /* 缓存不存在查询数据库 */
-            AtomicReference<ProductDetailVO> productDetailVOAtomicReference = new AtomicReference<>(new ProductDetailVO());
+            ProductDetailVO productDetailVO = new ProductDetailVO();
             CompletableFuture<Void> detailFuture = CompletableFuture.runAsync(() -> {
                 Spu spu = spuService.getSpu(spuId);
                 if (!ObjectUtils.isEmpty(spu)) {
-                    productDetailVOAtomicReference.set(spu2ProductDetailVO(spu));
-                    productDetailVOAtomicReference.get().setProductInfoVO(spuInfo2ProductInfoVO(spu.getSpuInfo()));
+                    BeanUtils.copyProperties(spu, productDetailVO);
+                    productDetailVO.setProductInfoVO(spuInfo2ProductInfoVO(spu.getSpuInfo()));
                 }
             }, executor);
             CompletableFuture<Void> goodsVOListFuture = CompletableFuture.runAsync(() -> {
                 List<Sku> skuList = skuService.listSkuS(spuId);
                 if (!CollectionUtils.isEmpty(skuList)) {
                     List<GoodsVO> goodsVOList = skuList.stream().map(this::sku2GoodsVO).collect(Collectors.toList());
-                    productDetailVOAtomicReference.get().setGoodsVOList(goodsVOList);
+                    productDetailVO.setGoodsVOList(goodsVOList);
                 }
             }, executor);
             CompletableFuture.allOf(detailFuture, goodsVOListFuture).join();
-            if (ObjectUtils.isEmpty(productDetailVOAtomicReference.get().getId())) {
+            if (ObjectUtils.isEmpty(productDetailVO.getId())) {
                 redisUtil.setObject(redisKey, PRESENT, 43200L);     // 数据不存在处理缓存穿透
             } else {
-                redisUtil.setObject(redisKey, GsonUtil.obj2Json(productDetailVOAtomicReference.get()));
+                redisUtil.setObject(redisKey, GsonUtil.obj2Json(productDetailVO));
             }
-            return productDetailVOAtomicReference.get();
+            return productDetailVO;
         } finally {
             lock.unlock();
         }
@@ -155,12 +154,6 @@ public class ProductServiceImpl implements ProductService {
         }, executor);
         CompletableFuture.allOf(totalFuture, listFuture).join();
         return pageUtil;
-    }
-
-    private ProductDetailVO spu2ProductDetailVO(Spu spu) {
-        ProductDetailVO productDetailVO = new ProductDetailVO();
-        BeanUtils.copyProperties(spu, productDetailVO);
-        return productDetailVO;
     }
 
     private ProductInfoVO spuInfo2ProductInfoVO(SpuInfo spuInfo) {

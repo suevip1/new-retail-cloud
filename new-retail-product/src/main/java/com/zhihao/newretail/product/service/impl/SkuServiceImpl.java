@@ -78,6 +78,11 @@ public class SkuServiceImpl implements SkuService {
         return skuMapper.selectListByIdSet(skuIdSet);
     }
 
+    @Override
+    public List<Sku> listSkuSBySpuIdSet(Set<Integer> spuIdSet) {
+        return skuMapper.selectListBySpuIdSet(spuIdSet);
+    }
+
     /*
      * 保存商品库存
      * */

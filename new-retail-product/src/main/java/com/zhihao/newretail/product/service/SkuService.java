@@ -39,4 +39,9 @@ public interface SkuService {
     * */
     List<Sku> listSkuS(Set<Integer> skuIdSet);
 
+    /*
+     * 批量获取skuList(spuIdSet)
+     * */
+    List<Sku> listSkuSBySpuIdSet(Set<Integer> spuIdSet);
+
 }

@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/feign")
-public class CartFeignClient {
+public class UserCartFeignClient {
 
     @Autowired
     private CartService cartService;

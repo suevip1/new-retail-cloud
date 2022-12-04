@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-public class CartController {
+public class UserCartController {
 
     @Autowired
     private CartService cartService;

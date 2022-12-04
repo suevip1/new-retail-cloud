@@ -15,7 +15,7 @@ import com.zhihao.newretail.api.product.vo.CouponsApiVO;
 import com.zhihao.newretail.api.product.vo.GoodsApiVO;
 import com.zhihao.newretail.api.product.vo.SkuStockApiVO;
 import com.zhihao.newretail.api.user.dto.UserCouponsApiDTO;
-import com.zhihao.newretail.api.user.feign.CartFeignService;
+import com.zhihao.newretail.api.user.feign.UserCartFeignService;
 import com.zhihao.newretail.api.user.feign.UserAddressFeignService;
 import com.zhihao.newretail.api.user.feign.UserCouponsFeignService;
 import com.zhihao.newretail.api.user.feign.UserFeignService;
@@ -83,7 +83,7 @@ import static com.zhihao.newretail.rabbitmq.consts.RabbitMQConst.*;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    private CartFeignService cartFeignService;
+    private UserCartFeignService userCartFeignService;
     @Autowired
     private ProductFeignService productFeignService;
     @Autowired
@@ -122,7 +122,7 @@ public class OrderServiceImpl implements OrderService {
         ThreadLocal<List<CartApiVO>> cartListThreadLocal = new ThreadLocal<>();
         CompletableFuture<Void> orderItemCreateFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
-            List<CartApiVO> cartApiVOList = cartFeignService.listCartApiVOS();
+            List<CartApiVO> cartApiVOList = userCartFeignService.listCartApiVOS();
             cartListThreadLocal.set(cartApiVOList);
             return cartApiVOList;
         }, executor).thenApply((res) -> {
@@ -233,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
         ThreadLocal<Set<Integer>> skuIdSetThreadLocal = new ThreadLocal<>();
         CompletableFuture<Void> buildOrderItemFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(requestAttributes);
-            return cartFeignService.listCartApiVOS();
+            return userCartFeignService.listCartApiVOS();
         }, executor).thenApply((res) -> {
             cartListThreadLocal.set(res);
             Set<Integer> skuIdSet = cartApiVOListGetSkuIdSet(res);
@@ -341,7 +341,7 @@ public class OrderServiceImpl implements OrderService {
         int delay = 900000;     // 15分钟
         String orderCloseMessageContent = buildOrderCloseMessageContent(order);     // 发送内容
         sendMessage(orderCloseMessageContent, delay);
-        cartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
+        userCartFeignService.deleteCartBySelected();    // 下单成功删除购物车商品
         return orderNo;
     }
 

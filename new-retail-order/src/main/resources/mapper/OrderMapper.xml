@@ -294,7 +294,7 @@
       status = #{status,jdbcType=TINYINT} and
     </if>
     is_delete = 0
-    order by o.create_time desc
+    order by create_time desc
     <if test="pageNum != null and pageSize != null">
       <bind name="page_start" value="(pageNum - 1) * pageSize"/>
       limit #{page_start}, #{pageSize,jdbcType=INTEGER}

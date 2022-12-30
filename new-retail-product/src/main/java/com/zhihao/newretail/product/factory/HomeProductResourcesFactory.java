@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class HomeProductResourcesFactory {
 
     @Autowired
-    private final Map<String, HomeProductResourcesService> map = new ConcurrentHashMap<>(3);
+    private final Map<String, HomeProductResourcesService> map = new ConcurrentHashMap<>();
 
     public HomeProductResourcesService getResources(String type) {
         return map.get(type);

@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ProductCacheSyncFactory {
 
     @Autowired
-    private final Map<String, ProductCacheSyncService> map = new ConcurrentHashMap<>(5);
+    private final Map<String, ProductCacheSyncService> map = new ConcurrentHashMap<>();
 
     public ProductCacheSyncService productCacheSyncService(String type) {
         return map.get(type);

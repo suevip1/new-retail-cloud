@@ -38,16 +38,19 @@ public class CanalMsgListener {
                 if (!TableNameConst.TB_CATEGORY.equals(table)) {
                     if (TableNameConst.TB_SPU.equals(table)) {
                         productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonData.get("id").getAsInt());
-                        log.info("商品服务, 当前同步数据处理完成.");
+                        log.info("商品服务, 当前商品同步数据处理完成.");
                         removeOldData(json.get("old"), table, "id");
+                    } else if (TableNameConst.TB_SLIDE.equals(table)) {
+                        productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(null);
+                        log.info("商品服务, 首页轮播图缓存同步数据处理完成.");
                     } else {
                         productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(jsonData.get("spu_id").getAsInt());
-                        log.info("商品服务, 当前同步数据处理完成.");
+                        log.info("商品服务, 当前商品同步数据处理完成.");
                         removeOldData(json.get("old"), table, "spu_id");
                     }
                 } else {
                     productCacheSyncFactory.productCacheSyncService(table).productCacheRemove(null);
-                    log.info("商品服务, 首页缓存同步数据处理完成.");
+                    log.info("商品服务, 首页商品缓存同步数据处理完成.");
                 }
             }
         } else {
